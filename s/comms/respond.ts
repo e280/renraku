@@ -32,11 +32,11 @@ export async function respond<R>({
 		if (tap)
 			tap.rpcError({request, error})
 
-		if (!("id" in request))
+		if (id === null)
 			return null
 
 		return {
-			id: request.id,
+			id,
 			jsonrpc: JsonRpc.version,
 			error: (error instanceof ExposedError)
 				? {

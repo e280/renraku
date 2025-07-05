@@ -31,7 +31,7 @@ export namespace JsonRpc {
 
 	/////////////////////////////////////////////////////////////
 
-	export type Id = number | string | null
+	export type Id = number | string
 	export type Params = Serializable[] | Record<string, Serializable>
 
 	export type Notification<P extends Params> = {
@@ -67,7 +67,7 @@ export namespace JsonRpc {
 
 	/////////////////////////////////////////////////////////////
 
-	export function getId(request: Request): Id {
+	export function getId(request: Request): Id | null {
 		return "id" in request
 			? request.id
 			: null
