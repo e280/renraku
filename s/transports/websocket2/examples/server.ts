@@ -2,7 +2,7 @@
 import {webSocketServer} from "../server.js"
 import {exampleServersideApi} from "./apis.js"
 import {ExampleClientsideFns} from "./types.js"
-import {LoggerTap} from "../../../tools/logger.js"
+import {LoggerTap} from "../../../core/taps/logger.js"
 
 export const logger = new LoggerTap()
 

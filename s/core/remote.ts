@@ -1,5 +1,6 @@
 
 import {RemoteError} from "./errors.js"
+import {defaultTap} from "./taps/default.js"
 import {JsonRpc} from "../comms/json-rpc.js"
 import {remoteProxy} from "./remote-proxy.js"
 import {Endpoint, Fns, Tap} from "./types.js"
@@ -18,7 +19,7 @@ export type RemoteOptions = {
  *  - the endpoint you provide could be making network calls, or doing something else, the remote doesn't care how the endpoint is implemented
  */
 export function remote<F extends Fns>(options: RemoteOptions) {
-	const {endpoint, tap} = options
+	const {endpoint, tap = defaultTap} = options
 	let id = 1
 
 	return remoteProxy<F>(async(
@@ -42,8 +43,7 @@ export function remote<F extends Fns>(options: RemoteOptions) {
 				: {...base, id: id++}
 		)
 
-		if (tap)
-			await tap.request({request})
+		tap.request({request})
 
 		const response = await endpoint(request, {transfer})
 

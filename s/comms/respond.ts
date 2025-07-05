@@ -4,13 +4,13 @@ import {JsonRpc} from "./json-rpc.js"
 import {ExposedError} from "../core/errors.js"
 
 export async function respond<R>({
+		tap,
 		request,
 		action,
-		tap,
 	}: {
+		tap: Tap
 		request: JsonRpc.Request
 		action: () => Promise<R>
-		tap?: Tap
 	}): Promise<JsonRpc.Response<R> | null> {
 
 	const id = JsonRpc.getId(request)
@@ -29,8 +29,7 @@ export async function respond<R>({
 	}
 
 	catch (error) {
-		if (tap)
-			tap.rpcError({request, error})
+		tap.rpcError({request, error})
 
 		if (id === null)
 			return null

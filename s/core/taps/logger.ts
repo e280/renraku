@@ -1,10 +1,10 @@
 
 import {Logger} from "@e280/sten"
-import {Tap, HttpMeta} from "../core/types.js"
-import {RandomUserEmojis} from "./random-user-emojis.js"
+import {Tap, HttpMeta} from "../types.js"
+import {RandomUserEmojis} from "../../tools/random-user-emojis.js"
 
 export class LoggerTap extends Logger implements Tap {
-	static dud() {
+	static dummy() {
 		return new this().setWriter(Logger.writers.void())
 	}
 

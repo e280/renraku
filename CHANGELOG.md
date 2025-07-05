@@ -8,6 +8,8 @@
 
 ## v0.5
 
+### v0.5.0-19
+
 ### v0.5.0-18
 - 🟥 rename `AuthWrap` to `Secure`
 - 🟥 rename `AuthUnwrap` to `Authorize`

@@ -1,6 +1,6 @@
 
 import {Sub} from "@e280/stz"
-import {LoggerTap} from "../../tools/logger.js"
+import {LoggerTap} from "../../core/taps/logger.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {Fns, HttpMeta, Tap} from "../../core/types.js"
 

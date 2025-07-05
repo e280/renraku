@@ -99,29 +99,15 @@ i've been using and sharpening this typescript implementation for many years.
   ```
 
 ### logging
-- you can stick a `LoggerTap` into many things
-  ```ts
-  import {LoggerTap} from "@e280/renraku"
-  ```
-- use it to enable logging on the serverside
-  ```ts
-  await httpServer({
-    port: 8000,
-    expose: () => exampleFns,
-
-    // ✅ logging enabled
-    tap: new LoggerTap(),
-  })
-  ```
-- use it to enable logging on the clientside
-  ```ts
-  const example = httpRemote<typeof exampleFns>({
-    url: "http://localhost:8000/",
-
-    // ✅ logging enabled
-    tap: new LoggerTap(),
-  })
-  ```
+- by default, renraku will log all errors to the console
+- renraku is secure-by-default, and when reporting errors over json-rpc, erorrs will be obscured as `unexposed error`
+  - however, you can throw a renraku `ExposedError` and the error message *will* be sent down the json-rpc wire
+- renraku has this concept of a `Tap`, which allows you to hook into renraku for logging purposes
+  - almost every renraku facility, can accept a `tap` — like `remote`, `endpoint`, `httpServer`, etc
+  - `ErrorTap` *(default)* — logs errors, but not every request
+  - `LoggerTap` — verbose logging, all errors and every request
+  - `DudTap` — silent, doesn't log anything
+- in particular, the `httpServer` and `webSocketServer` use a verbose `LoggerTap`, all other facilities default to the `ErrorTap`
 
 ### request limits
 - `maxRequestBytes` prevents gigantic requests from dumping on you

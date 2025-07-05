@@ -1,5 +1,5 @@
 
-import {Tap} from "../core/types.js"
+import {Tap} from "../types.js"
 
 export class DudTap implements Tap {
 	error: Tap["error"] = async() => {}

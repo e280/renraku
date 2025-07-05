@@ -4,7 +4,7 @@ import {remote} from "../../../core/remote.js"
 import {exampleServersideApi} from "./apis.js"
 import {ExampleClientsideFns} from "./types.js"
 import {endpoint} from "../../../core/endpoint.js"
-import {LoggerTap} from "../../../tools/logger.js"
+import {LoggerTap} from "../../../core/taps/logger.js"
 
 export const logger = new LoggerTap()
 

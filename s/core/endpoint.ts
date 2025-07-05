@@ -1,6 +1,7 @@
 
 import {drill} from "@e280/stz"
 import {respond} from "../comms/respond.js"
+import {defaultTap} from "./taps/default.js"
 import {Endpoint, Fn, Fns, Tap} from "./types.js"
 
 export type EndpointOptions<F extends Fns> = {
@@ -14,19 +15,18 @@ export type EndpointOptions<F extends Fns> = {
  *  - for each request, it calls the appropriate fn
  *  - it then returns the fn's in json rpc response format
  */
-export function endpoint<F extends Fns>({fns, tap}: EndpointOptions<F>): Endpoint {
+export function endpoint<F extends Fns>({fns, tap = defaultTap}: EndpointOptions<F>): Endpoint {
 	return async request => {
 		const path = request.method.split(".")
 		const fn = drill(fns, path) as Fn
 		const action = async() => await fn(...request.params)
 
-		if (tap)
-			await tap.request({request})
+		tap.request({request})
 
 		const response = await respond({
+			tap,
 			request,
 			action,
-			tap,
 		})
 
 		return response
