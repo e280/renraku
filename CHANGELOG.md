@@ -9,6 +9,8 @@
 ## v0.5
 
 ### v0.5.0-19
+- 🔶 renraku primitives now default to `ErrorTap`
+  - note that `httpServer` defaults to the verbose `LoggerTap`
 
 ### v0.5.0-18
 - 🟥 rename `AuthWrap` to `Secure`
