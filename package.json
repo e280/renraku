@@ -7,9 +7,11 @@
 	"type": "module",
 	"main": "./x/index.universal.js",
 	"exports": {
-		".": "./x/index.universal.js",
-		"./node": "./x/index.node.js",
-		"./*": "./*"
+		".": {
+			"node": "./x/index.node.js",
+			"browser": "./x/index.universal.js",
+			"default": "./x/index.universal.js"
+		}
 	},
 	"files": [
 		"x",

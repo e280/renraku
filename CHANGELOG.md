@@ -8,6 +8,14 @@
 
 ## v0.5
 
+### v0.5.0-21
+- 🟥 use package.json "exports" feature to auto-export to node and browser
+  - `import {} from "@e280/renraku/node"` becomes  
+    `import {} from "@e280/renraku"`
+
+### v0.5.0-20
+- 🍏 update dependencies
+
 ### v0.5.0-19
 - 🔶 renraku primitives now default to `ErrorTap`
   - note that `httpServer` defaults to the verbose `LoggerTap`

@@ -53,7 +53,7 @@ i've been using and sharpening this typescript implementation for many years.
 1. `server.ts` — expose 'em via http
     ```ts
     import {exampleFns} from "./example.js"
-    import {httpServer} from "@e280/renraku/node"
+    import {httpServer} from "@e280/renraku"
 
     await httpServer({
       port: 8000,
