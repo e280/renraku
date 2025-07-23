@@ -6,6 +6,7 @@ import {ExampleClientsideFns} from "./types.js"
 import {endpoint} from "../../../core/endpoint.js"
 import {LoggerTap} from "../../../core/taps/logger.js"
 
+export const port = 8001
 export const logger = new LoggerTap()
 
 const server = new WebSocketServer({
@@ -25,5 +26,5 @@ const server = new WebSocketServer({
 	},
 })
 
-server.listen(8000, () => logger.log("example websocket server listening..."))
+server.listen(port, () => logger.log(`renraku websocket api on port ${port}...`))
 

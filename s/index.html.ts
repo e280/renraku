@@ -6,9 +6,9 @@ export default ssg.page(import.meta.url, async orb => ({
 	js: "demo/main.bundle.min.js",
 	css: "demo/main.css",
 	dark: true,
-
 	body: html`
-		<h1>renraku v${orb.packageVersion()}</h1>
+		<h1>renraku</h1>
+		<p>v${orb.packageVersion()}</p>
 		<p>open the js console (F12?)</p>
 	`,
 }))

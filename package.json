@@ -24,7 +24,7 @@
 		"_tsc": "tsc",
 		"_ln": "ln -s '$(realpath s)' x/s",
 		"_scute": "scute -v",
-		"watch": "octo 'scute -vw' 'npm run test-watch -s' 'tsc -w' 'http-server x'",
+		"watch": "octo 'scute -vw' 'npm run api-watch -s' 'npm run ws-watch -s' 'npm run test-watch -s' 'tsc -w' 'http-server x'",
 		"api": "node x/transports/http/examples/server.js",
 		"api-watch": "node --watch x/transports/http/examples/server.js",
 		"api-debug": "node inspect x/transports/http/examples/server.js",
