@@ -1,20 +1,22 @@
 
-import {IdCounter, sub} from "@e280/stz"
+import {deadline, defer, Deferred, IdCounter, nap, sub} from "@e280/stz"
 import {Averager} from "./averager.js"
+import {repeat, repeatly} from "./repeat.js"
+import {appropriateHeartbeat} from "./appropriate-heartbeat.js"
 
 export type Ping = ["ping", number]
 export type Pong = ["pong", number]
 
 type PingId = number
-type Timestamp = number
+type Pend = {time: number, deferred: Deferred<number>}
 
 export class Pingponger {
 	onRtt = sub<[number]>()
 
-	#rtt = 99
 	#id = new IdCounter()
+	#rtt = 99
 	#averager = new Averager(5)
-	#pending = new Map<PingId, Timestamp>()
+	#pends = new Map<PingId, Pend>()
 
 	constructor(public options: {
 		timeout: number
@@ -29,14 +31,16 @@ export class Pingponger {
 		return this.#averager.average
 	}
 
-	// TODO i think we should return a promise
-	// maybe it resolves with rtt on success, and if it times out, resolves to undefined?
-	ping() {
+	async ping() {
 		const pingId = this.#id.next()
-		const timestamp = Date.now()
-		this.#pending.set(pingId, timestamp)
+		const time = Date.now()
+		const deferred = defer<number>()
+
+		this.#pends.set(pingId, {time, deferred})
 		this.options.send(["ping", pingId])
-		this.#prune()
+
+		return deadline(this.options.timeout, "ping timeout", () => deferred.promise)
+			.finally(() => this.#prune())
 	}
 
 	recv([kind, id]: Ping | Pong) {
@@ -50,25 +54,41 @@ export class Pingponger {
 			throw new Error(`unknown pingpong message kind: ${kind}`)
 	}
 
+	/** start an ongoing heartbeat */
+	heartbeat(onTimeout: (error: any) => void = () => {}) {
+		const ms = appropriateHeartbeat(this.options.timeout)
+		return repeat(async stop => {
+			try {
+				await this.ping()
+				await nap(ms)
+			}
+			catch (error) {
+				stop()
+				onTimeout(error)
+			}
+		})
+	}
+
 	#handlePong(pingId: number) {
-		const timestamp = this.#pending.get(pingId)
+		const pend = this.#pends.get(pingId)
+		if (pend === undefined) return
 
-		if (timestamp === undefined)
-			return
-
-		const now = Date.now()
-		this.#rtt = now - timestamp
+		this.#rtt = Date.now() - pend.time
 		this.#averager.add(this.#rtt)
 
-		this.#pending.delete(pingId)
+		this.#pends.delete(pingId)
+		pend.deferred.resolve(this.#rtt)
 		this.onRtt.pub(this.#rtt)
 	}
 
 	#prune() {
 		const now = Date.now()
-		for (const [pingId, timestamp] of this.#pending) {
-			if ((now - timestamp) > this.options.timeout)
-				this.#pending.delete(pingId)
+		for (const [pingId, pend] of this.#pends) {
+			if ((now - pend.time) > this.options.timeout) {
+				this.#pends.delete(pingId)
+				pend.deferred.reject("ping timeout")
+			}
 		}
 	}
 }
+

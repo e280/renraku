@@ -1,6 +1,6 @@
 
 import type * as ws from "ws"
-import {Trash} from "@e280/stz"
+import {sub, Trash} from "@e280/stz"
 import {Conduit} from "./conduit.js"
 import {JsonRpc} from "../../../comms/json-rpc.js"
 import {Ping, Pingponger, Pong} from "../../../tools/pingponger.js"
@@ -12,6 +12,7 @@ type Message = InfraMessage | RpcMessage
 export class WebSocketConduit extends Conduit {
 	socket: WebSocket | ws.WebSocket
 	pingponger: Pingponger
+	onTimeout = sub()
 	#trash = new Trash()
 
 	constructor(public options: {
@@ -43,6 +44,11 @@ export class WebSocketConduit extends Conduit {
 				JSON.stringify(<InfraMessage>["infra", p])
 			),
 		})
+
+		// pingponger heartbeat
+		this.#trash.add(
+			this.pingponger.heartbeat(() => this.onTimeout.pub())
+		)
 	}
 
 	#messageListener = async(e: {data: any, origin?: string}) => {
