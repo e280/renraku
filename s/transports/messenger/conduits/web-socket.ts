@@ -1,7 +1,9 @@
 
 import type * as ws from "ws"
-import {sub, Trash} from "@e280/stz"
+import {Trash} from "@e280/stz"
+
 import {Conduit} from "./conduit.js"
+import {ev} from "../../../tools/ev.js"
 import {JsonRpc} from "../../../comms/json-rpc.js"
 import {Ping, Pingponger, Pong} from "../../../tools/pingponger.js"
 
@@ -12,34 +14,37 @@ type Message = InfraMessage | RpcMessage
 export class WebSocketConduit extends Conduit {
 	socket: WebSocket | ws.WebSocket
 	pingponger: Pingponger
-	onTimeout = sub()
 	#trash = new Trash()
 
-	constructor(public options: {
+	constructor(options: {
 			socket: WebSocket | ws.WebSocket
 			timeout: number
+			onError: (error: any) => void
+			onClose: () => void
 		}) {
 
 		super()
-		this.socket = options.socket
-
-		const outgoingRpc = (json: JsonRpc.Bidirectional) =>
-			this.socket.send(JSON.stringify(json))
+		const {socket, timeout, onClose, onError} = options
+		this.socket = socket
 
 		// sending rpc messages
 		this.#trash.add(
-			this.sendRequest.sub(outgoingRpc),
-			this.sendResponse.sub(outgoingRpc),
+			this.sendRequest.sub(this.#sendRpc),
+			this.sendResponse.sub(this.#sendRpc),
 		)
 
-		// listen for incoming messages
-		this.socket.addEventListener("message", this.#messageListener)
-		this.#trash.add(() =>
-			this.socket.removeEventListener("message", this.#messageListener))
+		// listening to socket events
+		this.#trash.add(
+			ev(this.socket, {
+				error: onError,
+				close: onClose,
+				message: this.#handleMessage,
+			})
+		)
 
 		// establish ping ponger
 		this.pingponger = new Pingponger({
-			timeout: options.timeout,
+			timeout,
 			send: p => this.socket.send(
 				JSON.stringify(<InfraMessage>["infra", p])
 			),
@@ -47,11 +52,18 @@ export class WebSocketConduit extends Conduit {
 
 		// pingponger heartbeat
 		this.#trash.add(
-			this.pingponger.heartbeat(() => this.onTimeout.pub())
+			this.pingponger.heartbeat(() => {
+				this.socket.close()
+				onClose()
+			})
 		)
 	}
 
-	#messageListener = async(e: {data: any, origin?: string}) => {
+	#sendRpc = (json: JsonRpc.Bidirectional) => {
+		this.socket.send(JSON.stringify(json))
+	}
+
+	#handleMessage = async(e: {data: any, origin?: string}) => {
 		const message = JSON.parse(e.data.toString()) as Message
 		switch (message[0]) {
 			case "infra":
@@ -67,6 +79,7 @@ export class WebSocketConduit extends Conduit {
 		}
 	}
 
+	/** clean up this conduit, detaching socket listeners. does not close the socket. */
 	dispose() {
 		this.#trash.dispose()
 	}

@@ -6,7 +6,6 @@ import {sub} from "@e280/stz"
 import {Fns} from "../../core/types.js"
 import {defaults} from "../defaults.js"
 import {Wss, WssOptions} from "./types.js"
-import {keepAlive} from "./utils/keep-alive.js"
 import {endpoint} from "../../core/endpoint.js"
 import {Messenger} from "../messenger/messenger.js"
 import {ipAddress} from "../../tools/ip-address.js"
@@ -33,54 +32,46 @@ export function webSocketServer<ClientFns extends Fns>(
 
 		const ip = ipAddress(req)
 		const headers = simplifyHeaders(req.headers)
-		const onClosed = sub()
 		const taps = options.tap?.webSocket({ip, headers, req})
+		const onClosed = sub<any | void>()
 
-		const stop = keepAlive({
+		const conduit = new WebSocketConduit({
 			socket,
 			timeout,
-			heartbeat: timeout === Infinity
-				? 20_000
-				: (timeout * (2 / 3)),
-			onTimeout: () => {
+			onClose: () => onClosed.pub(),
+			onError: (error) => {
+				taps?.remote?.error(error)
 				onClosed.pub()
-				taps?.remote?.error(new Error("timed out"))
 			},
 		})
-
-		socket.onerror = error => {
-			stop()
-			socket.close()
-			onError(error)
-			onClosed.pub()
-		}
-
-		socket.onclose = () => {
-			stop()
-			onClosed.pub()
-		}
 
 		const messenger = new Messenger<ClientFns>({
+			conduit,
 			timeout,
 			tap: taps?.remote,
-			conduit: new WebSocketConduit({socket, timeout}),
-			getLocalEndpoint: () => endpoint({
-				tap: taps?.local,
-				fns: serversideFns,
-			}),
+			getLocalEndpoint: (clientside, rig) => {
+				const {fns, onDisconnect} = options.accept({
+					ip,
+					req,
+					rig,
+					headers,
+					clientside,
+					close: () => {
+						socket.close()
+						onClosed.pub()
+					},
+				})
+				onClosed.next().then(onDisconnect)
+				return endpoint({
+					tap: taps?.local,
+					fns,
+				})
+			},
 		})
 
-		const serversideFns = await options.accept({
-			ip,
-			req,
-			headers,
-			onClosed,
-			clientside: messenger.remote,
-			ping: () => socket.ping(),
-			close: () => {
-				stop()
-				socket.close()
-			},
+		onClosed(() => {
+			conduit.dispose()
+			messenger.dispose()
 		})
 	}
 

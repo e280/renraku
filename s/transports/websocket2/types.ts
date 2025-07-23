@@ -1,31 +1,36 @@
 
-import {Sub} from "@e280/stz"
-import {LoggerTap} from "../../core/taps/logger.js"
+import type * as ws from "ws"
+
+import {Rig} from "../messenger/parts/helpers.js"
 import {Remote} from "../../core/remote-proxy.js"
+import {LoggerTap} from "../../core/taps/logger.js"
 import {Fns, HttpMeta, Tap} from "../../core/types.js"
 
 export type WscOptions<ServerFns extends Fns> = {
-	url: string | URL
-	accept: (serverside: ServerFns) => Promise<Fns>
+	socket: WebSocket | ws.WebSocket
+	accept: (serverside: Remote<ServerFns>, rig: Rig) => Fns
+	onDisconnect: (error?: any) => void
 	tap?: Tap
 	timeout?: number
 }
 
 export type Connection<ClientFns extends Fns> = {
-	onClosed: Sub
+	rig: Rig
 	clientside: Remote<ClientFns>
-	ping: () => void
 	close: () => void
 } & HttpMeta
 
-export type AcceptFn<ClientFns extends Fns> = (connection: Connection<ClientFns>) => Promise<Fns>
+export type ConnectionReturns = {
+	fns: Fns
+	onDisconnect: (error?: any) => void
+}
 
 export type WssOptions<ClientFns extends Fns> = {
 	port: number
+	accept: (connection: Connection<ClientFns>) => ConnectionReturns
 	tap?: LoggerTap
 	timeout?: number
 	maxRequestBytes?: number
-	accept: AcceptFn<ClientFns>
 }
 
 export type Wss = {

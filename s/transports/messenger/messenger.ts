@@ -1,4 +1,6 @@
 
+import {Trash} from "@e280/stz"
+
 import {defaults} from "../defaults.js"
 import {Fns} from "../../core/types.js"
 import {remote} from "../../core/remote.js"
@@ -17,6 +19,7 @@ import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint, Rig} from
 export class Messenger<xRemoteFns extends Fns> {
 	remote: Remote<xRemoteFns>
 	#waiter: ResponseWaiter
+	#trash = new Trash()
 
 	constructor(public options: MessengerOptions<xRemoteFns>) {
 		const {conduit} = options
@@ -31,7 +34,7 @@ export class Messenger<xRemoteFns extends Fns> {
 			tap: options.tap,
 		})
 
-		conduit.recv.sub(m => this.recv(m))
+		this.#trash.add(conduit.recv.sub(m => this.recv(m)))
 	}
 
 	async recv(incoming: JsonRpc.Bidirectional) {
@@ -44,11 +47,15 @@ export class Messenger<xRemoteFns extends Fns> {
 			this.#waiter.deliverResponse(response)
 
 		if (!getLocalEndpoint)
-			return undefined
+			return
 
 		const outgoing = await handleIncomingRequests(getLocalEndpoint(this.remote, rig), requests)
 		if (outgoing)
 			await conduit.sendResponse(outgoing, rig.transfer)
+	}
+
+	dispose() {
+		this.#trash.dispose()
 	}
 }
 
