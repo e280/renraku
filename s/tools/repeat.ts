@@ -1,4 +1,5 @@
 
+// TODO use repeat fn from stz
 export function repeat(fn: (stop: () => void) => Promise<void>) {
 	let timeout: any
 	let stopped = false

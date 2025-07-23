@@ -1,7 +1,7 @@
 
 import {deadline, defer, Deferred, IdCounter, nap, sub} from "@e280/stz"
+import {repeat} from "./repeat.js"
 import {Averager} from "./averager.js"
-import {repeat, repeatly} from "./repeat.js"
 import {appropriateHeartbeat} from "./appropriate-heartbeat.js"
 
 export type Ping = ["ping", number]
