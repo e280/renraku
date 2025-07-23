@@ -1,10 +1,10 @@
 
 import {defaults} from "../defaults.js"
+import {Fns} from "../../core/types.js"
 import {remote} from "../../core/remote.js"
 import {MessengerOptions} from "./types.js"
 import {JsonRpc} from "../../comms/json-rpc.js"
 import {Remote} from "../../core/remote-proxy.js"
-import {Endpoint, Fns} from "../../core/types.js"
 import {ResponseWaiter} from "../utils/response-waiter.js"
 import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint, Rig} from "./parts/helpers.js"
 
@@ -15,22 +15,19 @@ import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint, Rig} from
  *  - you can use a messenger to respond to incoming requests
  */
 export class Messenger<xRemoteFns extends Fns> {
-	waiter: ResponseWaiter
-	remoteEndpoint: Endpoint
 	remote: Remote<xRemoteFns>
+	#waiter: ResponseWaiter
 
 	constructor(public options: MessengerOptions<xRemoteFns>) {
 		const {conduit} = options
 
-		this.waiter = new ResponseWaiter(options.timeout ?? defaults.timeout)
-
-		this.remoteEndpoint = makeRemoteEndpoint(
-			this.waiter,
-			conduit.sendRequest.pub.bind(conduit.sendRequest),
-		)
+		this.#waiter = new ResponseWaiter(options.timeout ?? defaults.timeout)
 
 		this.remote = remote<xRemoteFns>({
-			endpoint: this.remoteEndpoint,
+			endpoint: makeRemoteEndpoint(
+				this.#waiter,
+				conduit.sendRequest.pub.bind(conduit.sendRequest),
+			),
 			tap: options.tap,
 		})
 
@@ -44,7 +41,7 @@ export class Messenger<xRemoteFns extends Fns> {
 		const {requests, responses} = interpretIncoming(incoming)
 
 		for (const response of responses)
-			this.waiter.deliverResponse(response)
+			this.#waiter.deliverResponse(response)
 
 		if (!getLocalEndpoint)
 			return undefined

@@ -6,10 +6,7 @@ import {Endpoint, Fns, Tap} from "../../core/types.js"
 
 export type MessengerOptions<xRemoteFns extends Fns> = {
 	conduit: Conduit
-	getLocalEndpoint?: (
-		remote: Remote<xRemoteFns>,
-		rig: Rig,
-	) => Endpoint
+	getLocalEndpoint?: (remote: Remote<xRemoteFns>, rig: Rig) => Endpoint
 	timeout?: number
 	tap?: Tap
 }
