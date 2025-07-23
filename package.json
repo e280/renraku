@@ -18,14 +18,13 @@
 		"s"
 	],
 	"scripts": {
-		"build": "run-s _clean && run-p _importmap _tsc",
+		"build": "run-s _clean _ln _tsc _scute",
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +",
-		"_clean": "rimraf x *.pem && mkdirp x",
-		"_importmap": "importly --dev < package-lock.json > x/importmap.json",
+		"_clean": "rm -rf x && mkdir x",
 		"_tsc": "tsc",
-		"_tsc-watch": "tsc -w",
-		"_http": "http-server -p 8080",
-		"watch": "run-p _tsc-watch _http",
+		"_ln": "ln -s '$(realpath s)' x/s",
+		"_scute": "scute -v",
+		"watch": "octo 'scute -vw' 'npm run test-watch -s' 'tsc -w' 'http-server x'",
 		"api": "node x/transports/http/examples/server.js",
 		"api-watch": "node --watch x/transports/http/examples/server.js",
 		"api-debug": "node inspect x/transports/http/examples/server.js",
@@ -33,8 +32,8 @@
 		"ws-watch": "node --watch x/transports/websocket/examples/server.js",
 		"ws-debug": "node inspect x/transports/websocket/examples/server.js",
 		"test": "node x/tests.test.js",
-		"test-inspect": "node inspect x/tests.test.js",
-		"test-watch": "node --watch x/tests.test.js"
+		"test-watch": "node --watch x/tests.test.js",
+		"test-inspect": "node inspect x/tests.test.js"
 	},
 	"dependencies": {
 		"@e280/science": "^0.0.5",
@@ -43,14 +42,11 @@
 		"ws": "^8.18.3"
 	},
 	"devDependencies": {
+		"@e280/scute": "^0.0.0-6",
 		"@types/node": "^24.1.0",
 		"@types/ws": "^8.18.1",
-		"es-module-shims": "^2.6.1",
 		"http-server": "^14.1.1",
-		"importly": "^0.2.3",
-		"mkdirp": "^3.0.1",
 		"npm-run-all": "^4.1.5",
-		"rimraf": "^6.0.1",
 		"typescript": "^5.8.3"
 	},
 	"keywords": [
