@@ -38,7 +38,7 @@
 	"dependencies": {
 		"@e280/science": "^0.0.5",
 		"@e280/sten": "^0.0.0-5",
-		"@e280/stz": "^0.0.0-28",
+		"@e280/stz": "^0.0.0-29",
 		"ws": "^8.18.3"
 	},
 	"devDependencies": {
