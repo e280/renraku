@@ -1,8 +1,9 @@
 
+import {Rig} from "../../messenger/parts/helpers.js"
 import {ExampleClientsideFns, ExampleServersideFns} from "./types.js"
 
 export const exampleServersideApi = (
-	(clientside: ExampleClientsideFns): ExampleServersideFns => ({
+	(clientside: ExampleClientsideFns, _rig: Rig): ExampleServersideFns => ({
 
 	async now() {
 		await clientside.sum(1, 2)
@@ -11,7 +12,7 @@ export const exampleServersideApi = (
 }))
 
 export const exampleClientsideApi = (
-	(_serverside: ExampleServersideFns, rememberCall: () => void) => ({
+	(_serverside: ExampleServersideFns, _rig: Rig, rememberCall: () => void) => ({
 
 	async sum(a: number, b: number) {
 		rememberCall()

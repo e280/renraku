@@ -1,6 +1,6 @@
 
 import {Logger} from "@e280/sten"
-import {Tap, HttpMeta} from "../types.js"
+import {Tap, HttpMeta, WebSocketTaps} from "../types.js"
 import {RandomUserEmojis} from "../../tools/random-user-emojis.js"
 
 export class LoggerTap extends Logger implements Tap {
@@ -42,7 +42,7 @@ export class LoggerTap extends Logger implements Tap {
 		}
 	}
 
-	webSocket(meta: HttpMeta) {
+	webSocket(meta: HttpMeta): WebSocketTaps {
 		const info = this.#requestInfo(meta)
 		const emoji = this.#emojis.pull()
 		const g = this.colors.yellow

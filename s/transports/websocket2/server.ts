@@ -49,29 +49,29 @@ export function webSocketServer<ClientFns extends Fns>(
 			conduit,
 			timeout,
 			tap: taps?.remote,
-			getLocalEndpoint: (clientside, rig) => {
-				const {fns, onDisconnect} = options.accept({
-					ip,
-					req,
-					rig,
-					headers,
-					clientside,
-					close: () => {
-						socket.close()
-						onClosed.pub()
-					},
-				})
-				onClosed.next().then(onDisconnect)
-				return endpoint({
-					tap: taps?.local,
-					fns,
-				})
+			getLocalEndpoint: (clientside, rig) => endpoint({
+				fns: getLocalFns(clientside, rig),
+				tap: taps?.local,
+			}),
+		})
+
+		const {fns: getLocalFns, onDisconnect} = options.accept({
+			ip,
+			req,
+			socket,
+			headers,
+			clientside: messenger.remote,
+			close: () => {
+				if (socket.readyState === 1)
+					socket.close()
+				onClosed.pub()
 			},
 		})
 
 		onClosed(() => {
 			conduit.dispose()
 			messenger.dispose()
+			onDisconnect()
 		})
 	}
 

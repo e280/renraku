@@ -42,7 +42,7 @@ export class WebSocketConduit extends Conduit {
 			})
 		)
 
-		// establish ping ponger
+		// establish pingponger
 		this.pingponger = new Pingponger({
 			timeout,
 			send: p => this.socket.send(
@@ -50,17 +50,20 @@ export class WebSocketConduit extends Conduit {
 			),
 		})
 
-		// pingponger heartbeat
+		// establish pingponger heartbeat
 		this.#trash.add(
 			this.pingponger.heartbeat(() => {
-				this.socket.close()
+				if (this.socket.readyState === 1)
+					this.socket.close()
 				onClose()
 			})
 		)
 	}
 
 	#sendRpc = (json: JsonRpc.Bidirectional) => {
-		this.socket.send(JSON.stringify(json))
+		const message: RpcMessage = ["rpc", json]
+		const text = JSON.stringify(message)
+		this.socket.send(text)
 	}
 
 	#handleMessage = async(e: {data: any, origin?: string}) => {

@@ -33,6 +33,11 @@ export type Tap = {
 	}) => Promise<void>
 }
 
+export type WebSocketTaps = {
+	local?: Tap
+	remote?: Tap
+}
+
 export type EndpointSpecial = {
 	transfer?: Transferable[]
 }

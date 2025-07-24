@@ -4,16 +4,17 @@ import {exampleServersideApi} from "./apis.js"
 import {ExampleClientsideFns} from "./types.js"
 import {LoggerTap} from "../../../core/taps/logger.js"
 
+export const port = 8001
 export const logger = new LoggerTap()
 
 await webSocketServer<ExampleClientsideFns>({
-	port: 8000,
+	port,
 	tap: logger,
-	accept: connection => ({
-		fns: exampleServersideApi(connection.clientside),
-		onDisconnect: () => logger.log("got disconected"),
+	accept: _connection => ({
+		fns: exampleServersideApi,
+		onDisconnect: () => {},
 	}),
 })
 
-await logger.log("example websocket server listening...")
+await logger.log(`websocket :${port}...`)
 

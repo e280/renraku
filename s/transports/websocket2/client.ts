@@ -20,6 +20,8 @@ export async function webSocketRemote<ServerFns extends Fns>(
 		timeout = defaults.timeout,
 	} = options
 
+	await waitForSocketOpen(socket, timeout)
+
 	const disconnect = once(onDisconnect)
 
 	const conduit = new WebSocketConduit({
@@ -39,13 +41,14 @@ export async function webSocketRemote<ServerFns extends Fns>(
 		}),
 	})
 
-	await waitForSocketOpen(socket, timeout)
-
 	const dispose = () => {
 		conduit.dispose()
 		messenger.dispose()
 	}
 
-	return {dispose, remote: messenger.remote}
+	return {
+		dispose,
+		remote: messenger.remote,
+	}
 }
 
