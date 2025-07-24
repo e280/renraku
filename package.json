@@ -29,8 +29,8 @@
 		"api-watch": "node --watch x/transports/http/examples/server.js",
 		"api-debug": "node inspect x/transports/http/examples/server.js",
 		"ws": "node x/transports/websocket/examples/server.js",
-		"ws-watch": "node --watch x/transports/websocket2/examples/server.js",
-		"ws-debug": "node inspect x/transports/websocket2/examples/server.js",
+		"ws-watch": "node --watch x/transports/websocket/examples/server.js",
+		"ws-debug": "node inspect x/transports/websocket/examples/server.js",
 		"test": "node x/tests.test.js",
 		"test-watch": "node --watch x/tests.test.js",
 		"test-inspect": "node inspect x/tests.test.js"
