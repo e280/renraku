@@ -1,5 +1,8 @@
 
 import type * as ws from "ws"
+import type * as http from "node:http"
+import type * as stream from "node:stream"
+import type * as buffer from "node:buffer"
 
 import {Rig} from "../messenger/parts/helpers.js"
 import {Remote} from "../../core/remote-proxy.js"
@@ -8,7 +11,7 @@ import {Fns, HttpMeta, Tap, WebSocketTaps} from "../../core/types.js"
 
 export type WscOptions<ServerFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
-	accept: (serverside: Remote<ServerFns>, rig: Rig) => Fns
+	expose: (serverside: Remote<ServerFns>, rig: Rig) => Fns
 	onDisconnect: (error?: any) => void
 	tap?: Tap
 	timeout?: number
@@ -22,7 +25,7 @@ export type Connection<ClientFns extends Fns> = {
 } & HttpMeta
 
 export type ConnectionReturns<ClientFns extends Fns> = {
-	fns: (serverside: Remote<ClientFns>, rig: Rig) => Fns
+	expose: (serverside: Remote<ClientFns>, rig: Rig) => Fns
 	onDisconnect: (error?: any) => void
 }
 
@@ -35,6 +38,9 @@ export type WssOptions<ClientFns extends Fns> = {
 }
 
 export type Wss = {
-	close: () => void
+	httpServer: http.Server
+	wsServer: ws.WebSocketServer
 }
+
+export type Upgrader = (request: http.IncomingMessage, socket: stream.Duplex, head: buffer.Buffer) => void
 

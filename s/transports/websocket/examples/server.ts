@@ -11,7 +11,7 @@ await webSocketServer<ExampleClientsideFns>({
 	port,
 	tap: logger,
 	accept: _connection => ({
-		fns: exampleServersideApi,
+		expose: exampleServersideApi,
 		onDisconnect: () => {},
 	}),
 })

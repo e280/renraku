@@ -1,7 +1,7 @@
 
-import {RequestListener} from "http"
+import type * as http from "node:http"
 
-export function allowCors(listener: RequestListener): RequestListener {
+export function allowCors(listener: http.RequestListener): http.RequestListener {
 	return async(request, response) => {
 		response.setHeader("Access-Control-Allow-Origin", "*")
 		response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")

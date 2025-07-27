@@ -1,29 +1,52 @@
 
 import * as ws from "ws"
-import * as http from "http"
 import {sub} from "@e280/stz"
+import * as http from "node:http"
 
 import {Fns} from "../../core/types.js"
 import {defaults} from "../defaults.js"
-import {Wss, WssOptions} from "./types.js"
 import {endpoint} from "../../core/endpoint.js"
 import {Messenger} from "../messenger/messenger.js"
 import {ipAddress} from "../../tools/ip-address.js"
+import {Upgrader, Wss, WssOptions} from "./types.js"
 import {WebSocketConduit} from "../messenger/index.js"
 import {simplifyHeaders} from "../../tools/simple-headers.js"
 import {allowCors} from "../http/node-utils/listener-transforms/allow-cors.js"
 import {healthCheck} from "../http/node-utils/listener-transforms/health-check.js"
+import {HttpServer} from "../http/server.js"
 
-export function webSocketServer<ClientFns extends Fns>(
+export async function webSocketServer<ClientFns extends Fns>(
+		options: WssOptions<ClientFns>
+	) {
+
+	const onError = options.tap?.error ?? (() => {})
+	const {wsServer, upgrade} = await webSocketUpgrader(options)
+
+	return new Promise<Wss>((resolve, reject) => {
+		const handleError = (error: Error) => {
+			onError(error)
+			reject(error)
+		}
+
+		wsServer.on("error", handleError)
+
+		const httpServer = http.createServer()
+			.on("error", handleError)
+			.on("request", allowCors(healthCheck("/health")))
+			.on("upgrade", upgrade)
+			.listen(options.port, () => resolve({
+				wsServer,
+				httpServer,
+			}))
+	})
+}
+
+export async function webSocketUpgrader<ClientFns extends Fns>(
 		options: WssOptions<ClientFns>
 	) {
 
 	const timeout = options.timeout ?? defaults.timeout
 	const maxPayload = options.maxRequestBytes ?? defaults.maxRequestBytes
-	const onError = options.tap?.error ?? (() => {})
-
-	const httpServer = http.createServer()
-	const wsServer = new ws.WebSocketServer({noServer: true, maxPayload})
 
 	async function acceptConnection(
 			socket: ws.WebSocket,
@@ -39,7 +62,7 @@ export function webSocketServer<ClientFns extends Fns>(
 			socket,
 			timeout,
 			onClose: () => onClosed.pub(),
-			onError: (error) => {
+			onError: error => {
 				taps?.remote?.error(error)
 				onClosed.pub()
 			},
@@ -50,12 +73,12 @@ export function webSocketServer<ClientFns extends Fns>(
 			timeout,
 			tap: taps?.remote,
 			getLocalEndpoint: (clientside, rig) => endpoint({
-				fns: getLocalFns(clientside, rig),
+				fns: expose(clientside, rig),
 				tap: taps?.local,
 			}),
 		})
 
-		const {fns: getLocalFns, onDisconnect} = options.accept({
+		const {expose, onDisconnect} = options.accept({
 			ip,
 			req,
 			socket,
@@ -75,30 +98,18 @@ export function webSocketServer<ClientFns extends Fns>(
 		})
 	}
 
-	return new Promise<Wss>((resolve, reject) => {
-		const handleError = (error: Error) => {
-			onError(error)
-			reject(error)
-		}
+	const wsServer = new ws.WebSocketServer({noServer: true, maxPayload})
+		.on("connection", acceptConnection)
 
-		wsServer
-			.on("error", handleError)
-			.on("connection", acceptConnection)
+	const upgrade: Upgrader = (request, socket, head) => {
+		wsServer.handleUpgrade(request, socket, head, ws => {
+			wsServer.emit("connection", ws, request)
+		})
+	}
 
-		httpServer
-			.on("error", handleError)
-			.on("request", allowCors(healthCheck("/health")))
-			.on("upgrade", (request, socket, head) => {
-				wsServer.handleUpgrade(request, socket, head, ws => {
-					wsServer.emit("connection", ws, request)
-				})
-			})
-			.listen(options.port, () => resolve({
-				close: () => {
-					wsServer.close()
-					httpServer.close()
-				},
-			}))
-	})
+	return {
+		wsServer,
+		upgrade,
+	}
 }
 

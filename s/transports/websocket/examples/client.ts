@@ -11,7 +11,7 @@ export async function exampleWebsocketClient() {
 
 	const {remote, dispose} = await webSocketRemote<ExampleServersideFns>({
 		socket,
-		accept: (serverside, rig) => exampleClientsideApi(serverside, rig, rememberCall),
+		expose: (serverside, rig) => exampleClientsideApi(serverside, rig, rememberCall),
 		onDisconnect: () => console.error("🟥 websocket disconnected"),
 	})
 

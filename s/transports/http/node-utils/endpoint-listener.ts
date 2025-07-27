@@ -1,5 +1,5 @@
 
-import {RequestListener} from "http"
+import type * as http from "http"
 
 import {defaults} from "../../defaults.js"
 import {readStream} from "./read-stream.js"
@@ -17,7 +17,7 @@ export type EndpointListenerOptions = {
 export function makeEndpointListener(
 		makeEndpoint: (meta: HttpMeta) => Endpoint,
 		options: EndpointListenerOptions = {},
-	): RequestListener {
+	): http.RequestListener {
 
 	const {
 		responders,

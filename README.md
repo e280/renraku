@@ -119,6 +119,18 @@ i've been using and sharpening this typescript implementation for many years.
 <br/>
 
 ## ⛩️ *RENRAKU* websockets
+- `server.ts`
+  ```ts
+  await webSocketServer<ExampleClientsideFns>({
+	  port,
+	  tap: logger,
+	  accept: _connection => ({
+		  expose: exampleServersideApi,
+		  onDisconnect: () => {},
+	  }),
+  })
+  ```
+
 
 <br/>
 

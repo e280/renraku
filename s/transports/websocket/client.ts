@@ -15,7 +15,7 @@ export async function webSocketRemote<ServerFns extends Fns>(
 	const {
 		tap,
 		socket,
-		accept,
+		expose,
 		onDisconnect,
 		timeout = defaults.timeout,
 	} = options
@@ -37,7 +37,7 @@ export async function webSocketRemote<ServerFns extends Fns>(
 		timeout,
 		getLocalEndpoint: (serverside, rig) => endpoint({
 			tap,
-			fns: accept(serverside, rig),
+			fns: expose(serverside, rig),
 		}),
 	})
 

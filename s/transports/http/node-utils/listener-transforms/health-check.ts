@@ -1,10 +1,10 @@
 
-import {RequestListener} from "http"
+import type * as http from "node:http"
 
 export function healthCheck(
 		path: string,
-		listener: RequestListener = () => {},
-	): RequestListener {
+		listener: http.RequestListener = () => {},
+	): http.RequestListener {
 
 	return async(request, response) => {
 		if (request.url === path) {
