@@ -10,9 +10,11 @@ import {Messenger} from "../messenger/messenger.js"
 import {ipAddress} from "../../tools/ip-address.js"
 import {Upgrader, Wss, WssOptions} from "./types.js"
 import {WebSocketConduit} from "../messenger/index.js"
+import {route, router} from "../http/node-utils/routing.js"
 import {simplifyHeaders} from "../../tools/simple-headers.js"
-import {allowCors} from "../http/node-utils/listener-transforms/allow-cors.js"
-import {healthCheck} from "../http/node-utils/listener-transforms/health-check.js"
+import {transmuters} from "../http/node-utils/transmuting.js"
+import {respond, responders} from "../http/node-utils/responding.js"
+import {NiceHttpServer} from "../http/node-utils/nice-http-server.js"
 
 export async function webSocketServer<ClientFns extends Fns>(
 		options: WssOptions<ClientFns>
@@ -29,14 +31,22 @@ export async function webSocketServer<ClientFns extends Fns>(
 
 		wsServer.on("error", handleError)
 
-		const httpServer = http.createServer()
-			.on("error", handleError)
-			.on("request", allowCors(healthCheck("/health")))
-			.on("upgrade", upgrade)
-			.listen(options.port, () => resolve({
+		const niceServer = new NiceHttpServer({
+			timeout: options.timeout,
+			transmuters: [transmuters.allowCors(options.cors)],
+			listener: router(
+				route.get("/health", respond(responders.healthCheck())),
+			),
+		})
+
+		niceServer.stock.on("upgrade", upgrade)
+
+		niceServer.listen(options)
+			.then(() => resolve({
 				wsServer,
-				httpServer,
+				niceServer,
 			}))
+			.catch(reject)
 	})
 }
 

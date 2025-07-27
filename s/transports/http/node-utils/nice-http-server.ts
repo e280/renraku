@@ -1,7 +1,8 @@
 
 import * as http from "node:http"
+import {Transmuter} from "./types.js"
+import {transmute} from "./transmuting.js"
 import {defaults} from "../../defaults.js"
-import {transmute, Transmuter} from "./http-kit.js"
 
 /** ergonomic improvement over node's stock http server */
 export class NiceHttpServer {

@@ -8,6 +8,8 @@ import {Rig} from "../messenger/parts/helpers.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {LoggerTap} from "../../core/taps/logger.js"
 import {Fns, HttpMeta, Tap, WebSocketTaps} from "../../core/types.js"
+import {CorsConfig} from "../http/node-utils/transmuting.js"
+import {NiceHttpServer} from "../http/node-utils/nice-http-server.js"
 
 export type WscOptions<ServerFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
@@ -31,14 +33,19 @@ export type ConnectionReturns<ClientFns extends Fns> = {
 
 export type WssOptions<ClientFns extends Fns> = {
 	port: number
+	host?: string
+} & WsUpgraderOptions<ClientFns>
+
+export type WsUpgraderOptions<ClientFns extends Fns> = {
 	accept: (connection: Connection<ClientFns>) => ConnectionReturns<ClientFns>
 	tap?: LoggerTap
 	timeout?: number
+	cors?: CorsConfig
 	maxRequestBytes?: number
 }
 
 export type Wss = {
-	httpServer: http.Server
+	niceServer: NiceHttpServer
 	wsServer: ws.WebSocketServer
 }
 
