@@ -1,8 +1,6 @@
 
-import {exampleHttpClient} from "../transports/http/examples/client.js"
-import {exampleWebsocketClient} from "../transports/websocket/examples/client.js"
+import {exampleClient} from "../server/examples/client.js"
 
 console.log("renraku")
-await exampleHttpClient()
-await exampleWebsocketClient()
+await exampleClient()
 

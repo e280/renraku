@@ -3,15 +3,14 @@ import type * as http from "http"
 
 import {defaults} from "../../defaults.js"
 import {readStream} from "./read-stream.js"
-import {JsonRpc} from "../../../comms/json-rpc.js"
+import {JsonRpc} from "../../../core/json-rpc.js"
 import {endpoint} from "../../../core/endpoint.js"
 import {HttpMeta, Fns} from "../../../core/types.js"
 import {LoggerTap} from "../../../core/taps/logger.js"
 import {ipAddress} from "../../../tools/ip-address.js"
-import {simplifyHeaders} from "../../../tools/simple-headers.js"
 
 export type EndpointListenerOptions = {
-	expose: (meta: HttpMeta) => Fns
+	rpc: (meta: HttpMeta) => Fns
 	tap?: LoggerTap
 	timeout?: number
 	maxRequestBytes?: number
@@ -25,10 +24,9 @@ export function makeEndpointListener(options: EndpointListenerOptions): http.Req
 			const requestish = JSON.parse(body) as JsonRpc.Requestish
 			const e = endpoint({
 				tap: options.tap,
-				fns: options.expose({
+				fns: options.rpc({
 					request: request,
 					ip: ipAddress(request),
-					headers: simplifyHeaders(request.headers),
 				}),
 			})
 

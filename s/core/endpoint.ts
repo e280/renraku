@@ -1,6 +1,6 @@
 
 import {drill} from "@e280/stz"
-import {respond} from "../comms/respond.js"
+import {execute} from "./execute.js"
 import {defaultTap} from "./taps/default.js"
 import {Endpoint, Fn, Fns, Tap} from "./types.js"
 
@@ -23,7 +23,7 @@ export function endpoint<F extends Fns>({fns, tap = defaultTap}: EndpointOptions
 
 		tap.request({request})
 
-		const response = await respond({
+		const response = await execute({
 			tap,
 			request,
 			action,

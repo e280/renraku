@@ -1,7 +1,7 @@
 
 import {RemoteError} from "./errors.js"
 import {defaultTap} from "./taps/default.js"
-import {JsonRpc} from "../comms/json-rpc.js"
+import {JsonRpc} from "./json-rpc.js"
 import {remoteProxy} from "./remote-proxy.js"
 import {Endpoint, Fns, Tap} from "./types.js"
 

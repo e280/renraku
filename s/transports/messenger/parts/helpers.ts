@@ -1,7 +1,7 @@
 
 import {defer} from "@e280/stz"
 import {Endpoint} from "../../../core/types.js"
-import {JsonRpc} from "../../../comms/json-rpc.js"
+import {JsonRpc} from "../../../core/json-rpc.js"
 import {Channel, ChannelMessage} from "../types.js"
 import {ResponseWaiter} from "./response-waiter.js"
 

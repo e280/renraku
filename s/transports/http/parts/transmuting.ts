@@ -1,6 +1,6 @@
 
 import * as http from "node:http"
-import {Transmuter, asTransmuter} from "./types.js"
+import {Transmuter, asTransmuter} from "../types.js"
 
 export function transmute(listener: http.RequestListener, tms: Transmuter[]) {
 	for (const tm of tms.toReversed())
@@ -9,17 +9,17 @@ export function transmute(listener: http.RequestListener, tms: Transmuter[]) {
 }
 
 export type CorsConfig = {
-	origins?: "*" | string[]
+	origins: "*" | string[]
 	methods?: string[]
 	headers?: string[]
 }
 
 export const transmuters = {
 	allowCors: ({
-			origins = "*",
+			origins,
 			methods = ["GET", "POST", "OPTIONS"],
 			headers = ["Content-Type", "Authorization"],
-		}: CorsConfig = {}) => {
+		}: CorsConfig) => {
 		return asTransmuter(listener => async(request, response) => {
 			response.setHeader("Vary", "Origin")
 			const origin = request.headers.origin?.toLowerCase()

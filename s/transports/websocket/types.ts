@@ -9,7 +9,7 @@ import {Fns, HttpMeta, Tap, WebSocketTaps} from "../../core/types.js"
 
 export type WebSocketRemoteOptions<ServerFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
-	expose: (serverside: Remote<ServerFns>, rig: Rig) => Fns
+	rpc: (serverside: Remote<ServerFns>, rig: Rig) => Fns
 	onDisconnect: (error?: any) => void
 	tap?: Tap
 	timeout?: number
@@ -23,15 +23,19 @@ export type Connection<ClientFns extends Fns> = {
 } & HttpMeta
 
 export type ConnectionReturns<ClientFns extends Fns> = {
-	expose: (clientside: Remote<ClientFns>, rig: Rig) => Fns
-	onDisconnect: (error?: any) => void
+	rpc: (clientside: Remote<ClientFns>, rig: Rig) => Fns
+	disconnected: (error?: any) => void
 }
 
 export type WebSocketServerOptions<ClientFns extends Fns> = {
-	expose?: (meta: HttpMeta) => Fns
+	rpc?: (meta: HttpMeta) => Fns
 } & WsIntegrationOptions<ClientFns>
 
 export type WsAccepter<ClientFns extends Fns> = (connection: Connection<ClientFns>) => ConnectionReturns<ClientFns>
+
+export function websocket<ClientFns extends Fns>(accept: WsAccepter<ClientFns>) {
+	return accept
+}
 
 export type WsIntegrationOptions<ClientFns extends Fns> = {
 	accept: WsAccepter<ClientFns>

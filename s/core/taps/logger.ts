@@ -27,9 +27,10 @@ export class LoggerTap extends Logger implements Tap {
 	#emojis = new RandomUserEmojis()
 
 	#requestInfo(meta: HttpMeta) {
+		const {headers} = meta.request
 		return [
 			this.colors.yellow(`[${meta.ip}]`),
-			this.colors.green(meta.headers.origin ?meta.headers.origin :"(no-origin)"),
+			this.colors.green(headers.origin ?headers.origin :"(no-origin)"),
 		].join(" ")
 	}
 

@@ -1,6 +1,6 @@
 
 import {pub} from "@e280/stz"
-import {JsonRpc} from "../../../comms/json-rpc.js"
+import {JsonRpc} from "../../../core/json-rpc.js"
 
 export class Conduit {
 	recv = pub<[incoming: JsonRpc.Bidirectional, {origin: string}]>()

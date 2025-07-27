@@ -1,14 +1,15 @@
 
 import * as http from "node:http"
-import {transmute} from "./transmuting.js"
-import {defaults} from "../../defaults.js"
-import {ListenHttpOptions, NiceServerOptions} from "./types.js"
+
+import {defaults} from "../defaults.js"
+import {transmute} from "./parts/transmuting.js"
+import {ListenHttpOptions, HttpServerOptions} from "./types.js"
 
 /** ergonomic improvement over node's stock http server */
-export class NiceServer {
+export class HttpServer {
 	stock: http.Server
 
-	constructor(options: NiceServerOptions) {
+	constructor(options: HttpServerOptions) {
 		const listener = transmute(options.listener, options.transmuters ?? [])
 		this.stock = new http.Server(listener)
 		this.stock.timeout = options.timeout ?? defaults.timeout

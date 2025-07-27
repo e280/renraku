@@ -1,9 +1,9 @@
 
-import {Tap} from "../core/types.js"
+import {Tap} from "./types.js"
 import {JsonRpc} from "./json-rpc.js"
-import {ExposedError} from "../core/errors.js"
+import {ExposedError} from "./errors.js"
 
-export async function respond<R>({
+export async function execute<R>({
 		tap,
 		request,
 		action,

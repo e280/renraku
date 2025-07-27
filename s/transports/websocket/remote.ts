@@ -1,7 +1,8 @@
 
+import {once} from "@e280/stz"
+
 import {Fns} from "../../core/types.js"
 import {defaults} from "../defaults.js"
-import {once} from "../../tools/once.js"
 import {endpoint} from "../../core/endpoint.js"
 import {WebSocketRemoteOptions} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
@@ -15,7 +16,7 @@ export async function webSocketRemote<ServerFns extends Fns>(
 	const {
 		tap,
 		socket,
-		expose,
+		rpc,
 		onDisconnect,
 		timeout = defaults.timeout,
 	} = options
@@ -37,7 +38,7 @@ export async function webSocketRemote<ServerFns extends Fns>(
 		timeout,
 		getLocalEndpoint: (serverside, rig) => endpoint({
 			tap,
-			fns: expose(serverside, rig),
+			fns: rpc(serverside, rig),
 		}),
 	})
 

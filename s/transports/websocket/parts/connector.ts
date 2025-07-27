@@ -5,7 +5,6 @@ import {endpoint} from "../../../core/endpoint.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 import {Messenger} from "../../messenger/messenger.js"
 import {WsConnector, WsConnectorOptions} from "../types.js"
-import {simplifyHeaders} from "../../../tools/simple-headers.js"
 import {WebSocketConduit} from "../../messenger/conduits/web-socket.js"
 
 export function webSocketConnector<ClientFns extends Fns>(
@@ -14,8 +13,7 @@ export function webSocketConnector<ClientFns extends Fns>(
 
 	return async(socket, request) => {
 		const ip = ipAddress(request)
-		const headers = simplifyHeaders(request.headers)
-		const taps = tap?.webSocket({ip, headers, request})
+		const taps = tap?.webSocket({ip, request})
 
 		function kill() {
 			if (socket.readyState === 1)
@@ -40,16 +38,15 @@ export function webSocketConnector<ClientFns extends Fns>(
 			timeout,
 			tap: taps?.remote,
 			getLocalEndpoint: (clientside, rig) => endpoint({
-				fns: expose(clientside, rig),
+				fns: rpc(clientside, rig),
 				tap: taps?.local,
 			}),
 		})
 
-		const {expose, onDisconnect} = accept({
+		const {rpc, disconnected: onDisconnect} = accept({
 			ip,
 			socket,
 			request,
-			headers,
 			clientside: messenger.remote,
 			close: kill,
 		})

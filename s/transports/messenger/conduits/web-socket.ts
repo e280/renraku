@@ -1,10 +1,9 @@
 
 import type * as ws from "ws"
-import {Trash} from "@e280/stz"
+import {Trash, ev} from "@e280/stz"
 
 import {Conduit} from "./conduit.js"
-import {ev} from "../../../tools/ev.js"
-import {JsonRpc} from "../../../comms/json-rpc.js"
+import {JsonRpc} from "../../../core/json-rpc.js"
 import {Ping, Pingponger, Pong} from "../../../tools/pingponger.js"
 
 type InfraMessage = ["infra", Ping | Pong]

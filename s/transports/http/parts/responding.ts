@@ -1,5 +1,5 @@
 
-import {Listener, Responder} from "./types.js"
+import {Listener, Responder} from "../types.js"
 
 /** convert a responder into a listener */
 export function respond(responder: Responder): Listener {

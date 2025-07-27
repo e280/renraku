@@ -1,7 +1,6 @@
 
 import type * as http from "node:http"
-import {JsonRpc} from "../comms/json-rpc.js"
-import {SimpleHeaders} from "../tools/simple-headers.js"
+import {JsonRpc} from "./json-rpc.js"
 
 export type Fn = (...p: any[]) => Promise<any>
 export type Fns = {[key: string]: Fn | Fns}
@@ -14,7 +13,6 @@ export function fns<F extends Fns>(f: F) {
 
 export type HttpMeta = {
 	request: http.IncomingMessage
-	headers: SimpleHeaders
 	ip: string
 }
 
@@ -46,6 +44,4 @@ export type Endpoint = (
 	request: JsonRpc.Request,
 	special?: EndpointSpecial,
 ) => Promise<JsonRpc.Response | null>
-
-export {SimpleHeaders}
 

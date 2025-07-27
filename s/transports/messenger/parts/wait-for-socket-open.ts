@@ -1,7 +1,6 @@
 
 import type * as ws from "ws"
-import {deadline} from "@e280/stz"
-import {ev} from "../../../tools/ev.js"
+import {deadline, ev} from "@e280/stz"
 
 export async function waitForSocketOpen<S extends WebSocket | ws.WebSocket>(
 		socket: S,

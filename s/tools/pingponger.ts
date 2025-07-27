@@ -1,6 +1,5 @@
 
-import {deadline, defer, Deferred, IdCounter, nap, sub} from "@e280/stz"
-import {repeat} from "./repeat.js"
+import {deadline, defer, Deferred, IdCounter, nap, sub, repeat} from "@e280/stz"
 import {Averager} from "./averager.js"
 import {appropriateHeartbeat} from "./appropriate-heartbeat.js"
 
