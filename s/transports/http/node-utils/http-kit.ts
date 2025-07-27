@@ -1,5 +1,5 @@
 
-import * as http from "http"
+import * as http from "node:http"
 
 export type Listener = (request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>
 export const asListener = <L extends http.RequestListener>(l: L) => l
@@ -15,50 +15,74 @@ export type ResponseData = {
 
 export type Responder = (request: http.IncomingMessage) => Promise<ResponseData>
 
-export function transmute(listener: http.RequestListener, ...tms: Transmuter[]) {
+/** convert a responder into a listener */
+export function respond(responder: Responder): Listener {
+	return async(request, response) => {
+		const {code, headers, body} = await responder(request)
+		response.writeHead(code, headers)
+		if (body) response.end(body)
+		else response.end()
+	}
+}
+
+export function transmute(listener: http.RequestListener, tms: Transmuter[]) {
 	for (const tm of tms.toReversed())
 		listener = tm(listener)
 	return listener
 }
 
+export type CorsConfig = {
+	origins?: "*" | string[]
+	methods?: string[]
+	headers?: string[]
+}
+
 export const transmuters = {
-	allowCors: () => asTransmuter(listener => async(request, response) => {
-		response.setHeader("Access-Control-Allow-Origin", "*")
-		response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if (request.method?.toUpperCase() === "OPTIONS") {
-			response.statusCode = 200
-			response.end()
-		}
-		else return listener(request, response)
-	}),
+	allowCors: ({
+			origins = "*",
+			methods = ["GET", "POST", "OPTIONS"],
+			headers = ["Content-Type", "Authorization"],
+		}: CorsConfig = {}) => {
+		return asTransmuter(listener => async(request, response) => {
+			response.setHeader("Vary", "Origin")
+			const origin = request.headers.origin?.toLowerCase()
+			if (origin) {
+				const allowedOrigin = origins === "*"
+					? "*"
+					: (origins.some(o => o.toLowerCase() === origin))
+						? origin
+						: false
+				if (allowedOrigin) {
+					response.setHeader("Access-Control-Allow-Origin", allowedOrigin)
+					response.setHeader("Access-Control-Allow-Methods", methods.join(", "))
+					response.setHeader("Access-Control-Allow-Headers", headers.join(", "))
+					if (request.method?.toUpperCase() === "OPTIONS") {
+						response.statusCode = 204
+						response.end()
+						return
+					}
+				}
+			}
+			return listener(request, response)
+		})
+	},
 } satisfies Record<string, (...a: any[]) => Transmuter>
 
 export const responders = {
-	healthCheck: async() => ({
+	text: (body: string) => async() => ({
 		code: 200,
 		headers: {"Content-Type": "text/plain; charset=utf-8"},
-		body: null,
+		body,
 	}),
-	notFound: async() => ({
+	healthCheck: (body = Date.now().toString()): Responder => (
+		responders.text(body)
+	),
+	notFound: (body = "404 not found") => async() => ({
 		code: 404,
 		headers: {"Content-Type": "text/plain; charset=utf-8"},
-		body: "404 not found",
+		body,
 	}),
-} satisfies Record<string, Responder>
-
-export const listeners = {
-	healthCheck: async(_request, response) => {
-		response.setHeader("Content-Type", "text/plain; charset=utf-8")
-		response.statusCode = 200
-		response.end(Date.now().toString())
-	},
-	notFound: async(_request, response) => {
-		response.setHeader("Content-Type", "text/plain; charset=utf-8")
-		response.statusCode = 404
-		response.end("404 not found")
-	},
-} satisfies Record<string, http.RequestListener>
+} satisfies Record<string, (...a: any[]) => Responder>
 
 export function router(...routes: Route[]): http.RequestListener {
 	return async(request, response) => {
@@ -72,12 +96,12 @@ export function router(...routes: Route[]): http.RequestListener {
 				end.call(response)
 				return response
 			}
-			const listener = route?.listener ?? listeners.notFound
+			const listener = route?.listener ?? respond(responders.notFound())
 			return listener(request, response)
 		}
 		else {
 			const route = routes.find(r => r.method.toUpperCase() === method && r.url === url)
-			const listener = route?.listener ?? listeners.notFound
+			const listener = route?.listener ?? respond(responders.notFound())
 			return listener(request, response)
 		}
 	}

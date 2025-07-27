@@ -13,7 +13,6 @@ import {WebSocketConduit} from "../messenger/index.js"
 import {simplifyHeaders} from "../../tools/simple-headers.js"
 import {allowCors} from "../http/node-utils/listener-transforms/allow-cors.js"
 import {healthCheck} from "../http/node-utils/listener-transforms/health-check.js"
-import {HttpServer} from "../http/server.js"
 
 export async function webSocketServer<ClientFns extends Fns>(
 		options: WssOptions<ClientFns>

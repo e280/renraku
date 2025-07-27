@@ -1,21 +1,24 @@
 
 import * as http from "node:http"
 import {defaults} from "../../defaults.js"
+import {transmute, Transmuter} from "./http-kit.js"
 
-/** just an ergonomic improvement over the stock http server */
-export class NiceServer {
+/** ergonomic improvement over node's stock http server */
+export class NiceHttpServer {
 	stock: http.Server
 
 	constructor(options: {
-			fn: http.RequestListener
+			listener: http.RequestListener
 			timeout?: number
+			transmuters?: Transmuter[]
 		}) {
-		this.stock = new http.Server(options.fn)
+		const listener = transmute(options.listener, options.transmuters ?? [])
+		this.stock = new http.Server(listener)
 		this.stock.timeout = options.timeout ?? defaults.timeout
 	}
 
 	async listen({port, host}: {port: number, host?: string}) {
-		return new Promise<NiceServer>((resolve, reject) => {
+		return new Promise<NiceHttpServer>((resolve, reject) => {
 			this.stock.once("error", reject)
 			const r = () => resolve(this)
 			if (host) this.stock.listen(host, port, r)
