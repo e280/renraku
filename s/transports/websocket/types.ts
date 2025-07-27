@@ -29,11 +29,11 @@ export type ConnectionReturns<ClientFns extends Fns> = {
 
 export type WebSocketServerOptions<ClientFns extends Fns> = {
 	expose?: (meta: HttpMeta) => Fns
-} & WsSetupOptions<ClientFns>
+} & WsIntegrationOptions<ClientFns>
 
 export type WsAccepter<ClientFns extends Fns> = (connection: Connection<ClientFns>) => ConnectionReturns<ClientFns>
 
-export type WsSetupOptions<ClientFns extends Fns> = {
+export type WsIntegrationOptions<ClientFns extends Fns> = {
 	accept: WsAccepter<ClientFns>
 	tap?: LoggerTap
 	timeout?: number

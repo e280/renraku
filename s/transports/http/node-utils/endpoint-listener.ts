@@ -4,34 +4,32 @@ import type * as http from "http"
 import {defaults} from "../../defaults.js"
 import {readStream} from "./read-stream.js"
 import {JsonRpc} from "../../../comms/json-rpc.js"
+import {endpoint} from "../../../core/endpoint.js"
+import {HttpMeta, Fns} from "../../../core/types.js"
+import {LoggerTap} from "../../../core/taps/logger.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 import {simplifyHeaders} from "../../../tools/simple-headers.js"
-import {Endpoint, Tap, HttpMeta} from "../../../core/types.js"
 
 export type EndpointListenerOptions = {
+	expose: (meta: HttpMeta) => Fns
+	tap?: LoggerTap
 	timeout?: number
 	maxRequestBytes?: number
-	responders?: Pick<Tap, "error">
 }
 
-export function makeEndpointListener(
-		makeEndpoint: (meta: HttpMeta) => Endpoint,
-		options: EndpointListenerOptions = {},
-	): http.RequestListener {
-
-	const {
-		responders,
-		maxRequestBytes = defaults.maxRequestBytes,
-	} = options
-
+export function makeEndpointListener(options: EndpointListenerOptions): http.RequestListener {
 	return async(request, response) => {
 		try {
+			const {maxRequestBytes = defaults.maxRequestBytes} = options
 			const body = await readStream(request, maxRequestBytes)
 			const requestish = JSON.parse(body) as JsonRpc.Requestish
-			const endpoint = makeEndpoint({
-				request: request,
-				ip: ipAddress(request),
-				headers: simplifyHeaders(request.headers),
+			const e = endpoint({
+				tap: options.tap,
+				fns: options.expose({
+					request: request,
+					ip: ipAddress(request),
+					headers: simplifyHeaders(request.headers),
+				}),
 			})
 
 			const send = (respondish: null | JsonRpc.Respondish) => {
@@ -41,7 +39,7 @@ export function makeEndpointListener(
 			}
 
 			if (Array.isArray(requestish)) {
-				const responses = (await Promise.all(requestish.map(x => endpoint(x))))
+				const responses = (await Promise.all(requestish.map(x => e(x))))
 					.filter(r => !!r)
 				send(
 					(responses.length > 0)
@@ -50,13 +48,12 @@ export function makeEndpointListener(
 				)
 			}
 			else
-				send(await endpoint(requestish))
+				send(await e(requestish))
 		}
 		catch (error) {
 			response.statusCode = 500
 			response.end()
-			if (responders)
-				responders.error(error)
+			options.tap?.error(error)
 		}
 	}
 }

@@ -1,8 +1,8 @@
 
-import {webSocketRemote} from "../client.js"
+import {webSocketRemote} from "../remote.js"
 import {exampleClientsideApi} from "./apis.js"
 import {ExampleServersideFns} from "./types.js"
-import {httpRemote} from "../../http/client.js"
+import {httpRemote} from "../../http/remote.js"
 import {example} from "../../http/examples/api.js"
 
 export async function exampleWebsocketClient() {

@@ -1,6 +1,6 @@
 
 import {fns} from "../../../core/types.js"
-import {secure} from "../../../auth/secure.js"
+import {secure} from "../../../core/auth/secure.js"
 
 export const example = fns({
 

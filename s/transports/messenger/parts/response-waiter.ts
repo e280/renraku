@@ -1,8 +1,8 @@
 
 import {deadline, defer, Deferred} from "@e280/stz"
 
-import {JsonRpc} from "../../comms/json-rpc.js"
-import {RemoteError} from "../../core/errors.js"
+import {JsonRpc} from "../../../comms/json-rpc.js"
+import {RemoteError} from "../../../core/errors.js"
 
 type Pend = {
 	method: string

@@ -3,7 +3,13 @@ import type * as http from "node:http"
 import type * as stream from "node:stream"
 import type * as buffer from "node:buffer"
 
-export type Listener = (request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>
+export type NiceServerOptions = {
+	listener: Listener
+	timeout?: number
+	transmuters?: Transmuter[]
+}
+
+export type Listener = (request: http.IncomingMessage, response: http.ServerResponse) => (void | Promise<void>)
 export const asListener = <L extends http.RequestListener>(l: L) => l
 
 export type Transmuter = (listener: http.RequestListener) => http.RequestListener

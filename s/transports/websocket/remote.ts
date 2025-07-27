@@ -1,9 +1,9 @@
 
-import {WebSocketRemoteOptions} from "./types.js"
 import {Fns} from "../../core/types.js"
 import {defaults} from "../defaults.js"
 import {once} from "../../tools/once.js"
 import {endpoint} from "../../core/endpoint.js"
+import {WebSocketRemoteOptions} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
 import {WebSocketConduit} from "../messenger/conduits/web-socket.js"
 import {waitForSocketOpen} from "../messenger/parts/wait-for-socket-open.js"

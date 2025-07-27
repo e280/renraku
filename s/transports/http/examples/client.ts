@@ -1,7 +1,7 @@
 
 import type {example} from "./api.js"
-import {httpRemote} from "../client.js"
-import {authorize} from "../../../auth/authorize.js"
+import {httpRemote} from "../remote.js"
+import {authorize} from "../../../core/auth/authorize.js"
 
 export async function exampleHttpClient() {
 	const service = httpRemote<typeof example>({

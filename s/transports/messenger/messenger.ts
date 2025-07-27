@@ -7,7 +7,7 @@ import {remote} from "../../core/remote.js"
 import {MessengerOptions} from "./types.js"
 import {JsonRpc} from "../../comms/json-rpc.js"
 import {Remote} from "../../core/remote-proxy.js"
-import {ResponseWaiter} from "../utils/response-waiter.js"
+import {ResponseWaiter} from "./parts/response-waiter.js"
 import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint, Rig} from "./parts/helpers.js"
 
 /**

@@ -1,5 +1,5 @@
 
-import {Fn, Service} from "../core/types.js"
+import {Fn, Service} from "../types.js"
 
 export type AuthFn<A> = (a: A, ...p: any[]) => Promise<any>
 export type AuthFns<A> = Record<string, AuthFn<A>>
