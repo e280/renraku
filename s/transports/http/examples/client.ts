@@ -15,8 +15,8 @@ export async function exampleHttpClient() {
 	const result2 = await locked.now()
 
 	if (result1 === 3 && typeof result2 === "number")
-		console.log("✅ http works", result1, result2)
+		console.log("✅ http good", result1, result2)
 	else
-		console.error("🟥 http failed", result1, result2)
+		console.error("🟥 http bad", result1, result2)
 }
 
