@@ -1,5 +1,5 @@
 
-import {WscOptions} from "./types.js"
+import {WebSocketRemoteOptions} from "./types.js"
 import {Fns} from "../../core/types.js"
 import {defaults} from "../defaults.js"
 import {once} from "../../tools/once.js"
@@ -9,7 +9,7 @@ import {WebSocketConduit} from "../messenger/conduits/web-socket.js"
 import {waitForSocketOpen} from "../messenger/parts/wait-for-socket-open.js"
 
 export async function webSocketRemote<ServerFns extends Fns>(
-		options: WscOptions<ServerFns>
+		options: WebSocketRemoteOptions<ServerFns>
 	) {
 
 	const {

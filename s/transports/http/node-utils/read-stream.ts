@@ -1,5 +1,5 @@
 
-import {Readable} from "stream"
+import {Readable} from "node:stream"
 import {HttpError} from "../../../core/errors.js"
 
 export async function readStream(

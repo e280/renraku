@@ -2,10 +2,10 @@
 import type {IncomingMessage} from "http"
 import {simplifyHeader} from "./simple-headers.js"
 
-export function ipAddress(req: IncomingMessage) {
+export function ipAddress(request: IncomingMessage) {
 	return (
-		simplifyHeader(req.headers["x-forwarded-for"]) ||
-		req.socket.remoteAddress ||
+		simplifyHeader(request.headers["x-forwarded-for"]) ||
+		request.socket.remoteAddress ||
 		""
 	)
 }

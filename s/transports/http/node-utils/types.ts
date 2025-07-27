@@ -1,5 +1,7 @@
 
-import * as http from "node:http"
+import type * as http from "node:http"
+import type * as stream from "node:stream"
+import type * as buffer from "node:buffer"
 
 export type Listener = (request: http.IncomingMessage, response: http.ServerResponse) => Promise<void>
 export const asListener = <L extends http.RequestListener>(l: L) => l
@@ -14,4 +16,11 @@ export type ResponseData = {
 }
 
 export type Responder = (request: http.IncomingMessage) => Promise<ResponseData>
+
+export type Upgrader = (request: http.IncomingMessage, socket: stream.Duplex, head: buffer.Buffer) => void
+
+export type ListenHttpOptions = {
+	port: number
+	host?: string
+}
 

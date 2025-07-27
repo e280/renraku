@@ -1,5 +1,5 @@
 
-import {webSocketServer} from "../server.js"
+import {WebSocketServer} from "../server.js"
 import {exampleServersideApi} from "./apis.js"
 import {ExampleClientsideFns} from "./types.js"
 import {LoggerTap} from "../../../core/taps/logger.js"
@@ -7,8 +7,7 @@ import {LoggerTap} from "../../../core/taps/logger.js"
 export const port = 8001
 export const logger = new LoggerTap()
 
-await webSocketServer<ExampleClientsideFns>({
-	port,
+const server = new WebSocketServer<ExampleClientsideFns>({
 	tap: logger,
 	accept: _connection => ({
 		expose: exampleServersideApi,
@@ -16,5 +15,6 @@ await webSocketServer<ExampleClientsideFns>({
 	}),
 })
 
-await logger.log(`websocket :${port}...`)
+await server.listen({port})
+await logger.log(`ws :${port}...`)
 

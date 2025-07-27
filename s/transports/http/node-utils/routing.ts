@@ -1,6 +1,6 @@
 
 import * as http from "node:http"
-import {respond, responders} from "./responding.js"
+import {respond} from "./responding.js"
 
 export function router(...routes: Route[]): http.RequestListener {
 	return async(request, response) => {
@@ -14,12 +14,12 @@ export function router(...routes: Route[]): http.RequestListener {
 				end.call(response)
 				return response
 			}
-			const listener = route?.listener ?? respond(responders.notFound())
+			const listener = route?.listener ?? respond.notFound()
 			return listener(request, response)
 		}
 		else {
 			const route = routes.find(r => r.method.toUpperCase() === method && r.url === url)
-			const listener = route?.listener ?? respond(responders.notFound())
+			const listener = route?.listener ?? respond.notFound()
 			return listener(request, response)
 		}
 	}

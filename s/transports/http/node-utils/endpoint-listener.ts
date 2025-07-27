@@ -24,20 +24,20 @@ export function makeEndpointListener(
 		maxRequestBytes = defaults.maxRequestBytes,
 	} = options
 
-	return async(req, res) => {
+	return async(request, response) => {
 		try {
-			const body = await readStream(req, maxRequestBytes)
+			const body = await readStream(request, maxRequestBytes)
 			const requestish = JSON.parse(body) as JsonRpc.Requestish
 			const endpoint = makeEndpoint({
-				req,
-				ip: ipAddress(req),
-				headers: simplifyHeaders(req.headers),
+				request: request,
+				ip: ipAddress(request),
+				headers: simplifyHeaders(request.headers),
 			})
 
 			const send = (respondish: null | JsonRpc.Respondish) => {
-				res.statusCode = 200
-				res.setHeader("Content-Type", "application/json")
-				res.end(JSON.stringify(respondish))
+				response.statusCode = 200
+				response.setHeader("Content-Type", "application/json")
+				response.end(JSON.stringify(respondish))
 			}
 
 			if (Array.isArray(requestish)) {
@@ -53,8 +53,8 @@ export function makeEndpointListener(
 				send(await endpoint(requestish))
 		}
 		catch (error) {
-			res.statusCode = 500
-			res.end()
+			response.statusCode = 500
+			response.end()
 			if (responders)
 				responders.error(error)
 		}

@@ -1,5 +1,5 @@
 
-import type {IncomingMessage} from "http"
+import type * as http from "node:http"
 import {JsonRpc} from "../comms/json-rpc.js"
 import {SimpleHeaders} from "../tools/simple-headers.js"
 
@@ -13,7 +13,7 @@ export function fns<F extends Fns>(f: F) {
 }
 
 export type HttpMeta = {
-	req: IncomingMessage
+	request: http.IncomingMessage
 	headers: SimpleHeaders
 	ip: string
 }
