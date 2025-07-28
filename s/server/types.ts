@@ -6,16 +6,19 @@ import {Route} from "../transports/http/parts/routing.js"
 import {WsAccepter} from "../transports/websocket/types.js"
 import {CorsConfig} from "../transports/http/parts/transmuting.js"
 
+export type HttpRpc<F extends Fns = any> = (meta: HttpMeta) => F
+export const asHttpRpc = <F extends Fns = any>(rpc: HttpRpc<F>) => rpc
+
 export type RenrakuServerOptions<ClientFns extends Fns = any> = {
-	rpc?: (meta: HttpMeta) => Fns
+	rpc?: HttpRpc
 	websocket?: WsAccepter<ClientFns>
 	tap?: LoggerTap
-	timeout?: number
 	cors?: CorsConfig
+	timeout?: number
 	maxRequestBytes?: number
-	routes?: Route[]
 	rpcRoute?: string
 	healthRoute?: string
 	transmuters?: Transmuter[]
+	routes?: Route[]
 }
 

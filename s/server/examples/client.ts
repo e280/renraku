@@ -1,34 +1,33 @@
 
 import {ExServerside} from "./types.js"
-import {exampleHttpFns, exampleWsClientside} from "./apis.js"
-import {httpRemote} from "../../transports/http/remote.js"
-import {webSocketRemote} from "../../transports/websocket/remote.js"
 import {authorize} from "../../core/auth/authorize.js"
+import {httpRemote} from "../../transports/http/remote.js"
+import {wsClient} from "../../transports/websocket/client.js"
+import {exampleHttpRpc, exampleWsClientsideRpc} from "./rpcs.js"
 
 export async function exampleClient() {
 	let calls = 0
 	let rememberCall = () => calls++
-	const url = "http://localhost:8001"
+	const httpUrl = "http://localhost:8000/"
+	const wsUrl = "ws://localhost:8000/"
 
 	//
 	// web socket api
 	//
 	try {
-		const socket = new WebSocket(url)
-		const {remote, dispose} = await webSocketRemote<ExServerside>({
-			socket,
-			rpc: (serverside, rig) => exampleWsClientside(serverside, rig, rememberCall),
-			onDisconnect: () => console.error("🟥 websocket disconnected"),
+		const client = await wsClient<ExServerside>({
+			socket: new WebSocket(wsUrl),
+			rpc: exampleWsClientsideRpc(rememberCall),
+			disconnected: () => console.error("🟥 websocket disconnected"),
 		})
 
-		const result = await remote.now()
+		const result = await client.remote.now()
 		if (typeof result === "number" && calls === 1)
 			console.log("✅ websocket good", result, calls)
 		else
 			console.error("🟥 websocket bad", result, calls)
 
-		dispose()
-		socket.close()
+		client.close()
 	}
 	catch (error) {
 		console.error(error)
@@ -38,7 +37,7 @@ export async function exampleClient() {
 	// http json rpc api
 	//
 	try {
-		const service = httpRemote<typeof exampleHttpFns>({url})
+		const service = httpRemote<ReturnType<typeof exampleHttpRpc>>({url: httpUrl})
 		const unlocked = service.unlocked
 		const locked = authorize(service.locked, async() => "hello")
 

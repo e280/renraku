@@ -9,7 +9,7 @@ export default ssg.page(import.meta.url, async orb => ({
 	body: html`
 		<h1>renraku</h1>
 		<p>v${orb.packageVersion()}</p>
-		<p>open the js console (F12?)</p>
+		<p>see test results in js console</p>
 	`,
 }))
 

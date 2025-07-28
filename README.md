@@ -1,9 +1,10 @@
 
 # 連絡 <br/> ***R·E·N·R·A·K·U***
 
-> ***"an api should just be a bunch of async functions, damn it"***  
+> ***"an api should just be a bunch of async functions, damn it!"***  
 > &nbsp; &nbsp; — *Chase Moskal, many years ago*
 
+📦 `npm install @e280/renraku`
 💡 elegantly expose async functions as an api  
 🔌 http, websockets, postmessage, and more  
 🏛️ json-rpc 2.0  
@@ -14,241 +15,202 @@
 
 i've been using and sharpening this typescript implementation for many years.
 
-> ⚠️ ***IMPORTANT***  
-> renraku is in the middle of an ongoing fat refactor!  
-> [`renraku@0.5.0-11`](https://www.npmjs.com/package/renraku/v/0.5.0-11) is the most recent *stable* version, which has more features.  
-> `@e280/renraku@0.5.0-14` is the first of an *unstable* new line of wip development.  
-
 <br/>
 
 ## ⛩️ *RENRAKU* http
 
-1. install renraku into your project
-    ```sh
-    npm i @e280/renraku
-    ```
-1. `example.ts` — so you've got some async functions
-    ```ts
-    export const exampleFns = {
+1. `rpc.ts` — **your api is just async functions**
+	```ts
+	import {asHttpRpc} from "@e280/renraku"
 
-      async now() {
-        return Date.now()
-      },
+	export const rpc = asHttpRpc(({request, ip}) => ({
+		async now() {
+			return Date.now()
+		},
 
-      async add(a: number, b: number) {
-        return a + b
-      },
+		async add(a: number, b: number) {
+			return a + b
+		},
 
-      nesty: {
-        is: {
-          besty: {
-            async mul(a: number, b: number) {
-              return a * b
-            },
-          },
-        },
-      },
-    }
-    ```
-1. `server.ts` — expose 'em via http
-    ```ts
-    import {exampleFns} from "./example.js"
-    import {httpServer} from "@e280/renraku"
+		nesty: {
+			is: {
+				besty: {
+					async mul(a: number, b: number) {
+						return a * b
+					},
+				},
+			},
+		},
+	}))
+	```
+	- for input validation, you should use [zod](https://github.com/colinhacks/zod) or something
+1. `server.ts` — **make an http server**
+	```ts
+	import {RenrakuServer, LoggerTap} from "@e280/renraku"
+	import {rpc} from "./rpc.js"
 
-    await httpServer({
-      port: 8000,
-      expose: () => exampleFns,
-    })
-    ```
-1. `client.ts` — make a clientside remote
-    ```ts
-    import {httpRemote} from "@e280/renraku"
-    import type {exampleFns} from "./example.js"
-      //    ↑
-      // we actually only need the *type* here
+	await new RenrakuServer({rpc})
+		.listen({port: 8000})
+	```
+	- your functions are served on a `POST /` json-rpc 2.0 endpoint
+	- `GET /health` route that returns the current js timestamp
+1. `client.ts` — **make a clientside remote**
+	```ts
+	import {httpRemote} from "@e280/renraku"
+	import type {rpc} from "./rpc.js"
+		//		↑
+		// we actually only need the *type* here
 
-    const example = httpRemote<typeof exampleFns>({
-      url: "http://localhost:8000/",
-    })
-    ```
-    🪄 now you can magically call the functions on the clientside
-    ```ts
-    await example.now()
-      // 1723701145176
+	type RpcFns = ReturnType<typeof rpc>
+	const url = "http://localhost:8000/"
 
-    await example.add(2, 2)
-      // 4
+	const remote = httpRemote<RpcFns>({url})
+	```
+	🪄 now you can magically call the functions on the clientside
+	```ts
+	await remote.now()
+		// 1723701145176
 
-    await example.nesty.is.besty.mul(2, 3)
-      // 6
-    ```
+	await remote.add(2, 2)
+		// 4
 
-> [!NOTE]
-> for input validation, you should use [zod](https://github.com/colinhacks/zod) or something.
+	await remote.nesty.is.besty.mul(2, 3)
+		// 6
+	```
 
-### http headers etc
-- renraku provides the http stuff you need
-  ```ts
-  await httpServer({
-    port: 8000,
+### more RenrakuServer options
 
-      //       🆒   🆒   🆒
-      //       ↓    ↓    ↓
-    expose: ({req, ip, headers}) => exampleFns,
-  })
-  ```
+```ts
+import {LoggerTap, route, respond} from "@e280/renraku"
 
-### logging
-- by default, renraku will log all errors to the console
-- renraku is secure-by-default, and when reporting errors over json-rpc, erorrs will be obscured as `unexposed error`
-  - however, you can throw a renraku `ExposedError` and the error message *will* be sent down the json-rpc wire
-- renraku has this concept of a `Tap`, which allows you to hook into renraku for logging purposes
-  - almost every renraku facility, can accept a `tap` — like `remote`, `endpoint`, `httpServer`, etc
-  - `ErrorTap` *(default)* — logs errors, but not every request
-  - `LoggerTap` — verbose logging, all errors and every request
-  - `DudTap` — silent, doesn't log anything
-- in particular, the `httpServer` and `webSocketServer` use a verbose `LoggerTap`, all other facilities default to the `ErrorTap`
+const server = new RenrakuServer({
 
-### request limits
-- `maxRequestBytes` prevents gigantic requests from dumping on you
-  - `10_000_000` (10 megabytes) is the default
-- `timeout` kills a request if it goes stale
-  - `60_000` (60 seconds) is the default
-- you could set these to `Infinity` if you've *lost your mind*
+	// expose functionality as json-rpc api
+	rpc: ({request, ip}) => ({
+		hello: async() => "world",
+	}),
+
+	// setup a websocket api (documented later in readme)
+	websocket: undefined,
+
+	// supply a logger to get verbose console output (only logs errors by default)
+	tap: new LoggerTap(),
+
+	// allow cross-origin requests (cors is disabled by default)
+	cors: {origins: "*"},
+	
+	// request timeout in milliseconds (defaults to 60_000)
+	timeout: 60_000,
+
+	// requests with bodies bigger than this number are rejected (10 MB default)
+	maxRequestBytes: 10_000_000,
+
+	// specify the url of the rpc endpoint (defaults to `/`)
+	rpcRoute: "/",
+
+	// specify the url of the health endpoint (defaults to `/health`)
+	healthRoute: "/health",
+
+	// provide a trasmuter that modifies incoming requests before routing
+	transmuters: [],
+
+	// you can provide custom listeners for additional http routes..
+	routes: [
+		route.get("/hello", respond.text("hello world")),
+	],
+})
+```
 
 <br/>
 
 ## ⛩️ *RENRAKU* websockets
-- `server.ts`
-  ```ts
-  await webSocketServer<ExampleClientsideFns>({
-	  port,
-	  tap: logger,
-	  accept: _connection => ({
-		  expose: exampleServersideApi,
-		  onDisconnect: () => {},
-	  }),
-  })
-  ```
 
+renraku websocket apis are *bidirectional,* meaning the serverside and clientside can call each other.
 
-<br/>
+just be careful not to create a circular loop, lol.
 
-## ⛩️ *RENRAKU* postmessage (popups, iframes, workers, etc)
+and yes — a single RenrakuServer can support an http rpc endpoint *and* a websocket api simultaneously.
 
-<br/>
+1. `types.ts` — **formalize your serverside and clientside api types**  
+	(these explicit types are needed so typescript doesn't get confused about circularities)
+	```ts
+	export type Serverside = {
+		now(): Promise<number>
+	}
 
-## ⛩️ *RENRAKU* core primitives
+	export type Clientside = {
+		sum(a: number, b: number): Promise<number>
+	}
+	```
+1. `rpcs.ts` — **implement your serverside and clientside fns** (they can call each other!)
+	```ts
+	import {asWsRpc} from "@e280/renraku"
+	import type {Clientside, Serverside} from "./types.js"
 
-<br/>
+	export const serversideRpc = asWsRpc<Serverside, Clientside>(clientside => ({
+		async now() {
+			await clientside.sum(1, 2)
+			return Date.now()
+		},
+	}))
 
-## ⛩️ *RENRAKU* magic `tune` symbol
+	export const clientsideRpc = asWsRpc<Clientside, Serverside>(_serverside => ({
+		async sum(a: number, b: number) {
+			return a + b
+		},
+	}))
+	```
+1. `server.ts` — **make a websocket server**
+	```ts
+	import {RenrakuServer} from "@e280/renraku"
+	import {serversideRpc} from "./rpcs.js"
+	import type {Clientside} from "./types.js"
 
-<br/>
+	await new RenrakuServer({
+		websocket: RenrakuServer.websocket<Clientside>(_connection => ({
+			rpc: exampleWsServersideRpc,
+			disconnected: () => {},
+		})),
+	}).listen({port: 8000})
+	```
+	- the `connection` object has a bunch of good stuff
+		```ts
+		connection.ip // ip address of the client
+		connection.request // http request with headers and such
+		connection.socket // raw websocket instance
 
-## ⛩ *RENRAKU* — auth via `secure` and `authorize`
-- `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
-- use the `secure` function to section off parts of your api that require auth
-  ```ts
-  import {secure} from "renraku"
+		connection.rtt.latest // latest known ping time in milliseconds
+		connection.rtt.average // average of a handful of latest ping results
+		connection.rtt.on(rtt => {}) // subscribe to individual ping results
 
-  export const exampleFns = {
+		// remote for calling clientside fns
+		connection.remote.sum(1, 2)
+			.then(result => console.log(result))
 
-      // declaring this area requires auth
-      //    |
-      //    |   auth can be any type you want
-      //    ↓                  ↓
-    math: secure(async(auth: string) => {
+		// kill this connection
+		connection.close()
+		```
+1. `client.ts` — **connect as a client**
+	```ts
+	import {wsClient} from "@e280/renraku"
+	import {serversideRpc} from "./rpcs.js"
+	import type {Serverside} from "./types.js"
 
-      // here you can do any auth work you need
-      if (auth !== "hello")
-        throw new Error("auth error: did not receive warm greeting")
+	const client = await wsClient<Serverside>({
+		rpc: clientsideRpc,
+		socket: new WebSocket("ws://localhost:8000/"),
+		disconnected: () => console.error("disconnected"),
+	})
 
-      return {
-        async sum(a: number, b: number) {
-          return a + b
-        },
-      }
-    }),
-  }
-  ```
-  - you see, `secure` merely adds your initial auth parameter as a required argument to each function
-    ```ts
-      //                  auth param
-      //                      ↓
-    await example.math.sum("hello", 1, 2)
-    ```
-- use the `authorize` function on the clientside to provide the auth param upfront
-  ```ts
-  import {authorize} from "renraku"
+	// call the serverside functionality
+	const result = await client.remote.now()
+		// 1753738662615
 
-    //             (the secured area)  (async getter for auth param)
-    //                          ↓              ↓
-  const math = authorize(example.math, async() => "hello")
-    // it's an async function so you could refresh
-    // tokens or whatever
+	// get the average ping time
+	client.rtt.average
+		// 99
 
-  // now the auth is magically provided for each call
-  await math.sum(1, 2)
-  ```
-  - but why an async getter function?  
-    ah, well that's because it's a perfect opportunity for you to refresh your tokens or what-have-you.  
-    the getter is called for each api call.  
-
-<br/>
-
-## ⛩️ *RENRAKU* custom transports
-- do you need renraku to operate over another medium, like carrier pigeons?
-- well, you're in luck, because it's easy to setup your own transport medium
-- so let's assume you have a group of async functions called `myFunctions`
-- first, let's do your "serverside":
-  ```ts
-  import {endpoint} from "@e280/renraku"
-  import {myFunctions} from "./my-functions.js"
-
-  // create a renraku endpoint for your functions
-  const myEndpoint = endpoint({fns: myFunctions})
-
-  // create your wacky carrier pigeon server
-  const pigeons = new CarrierPigeonServer({
-    handleIncomingPigeon: async incoming => {
-
-      // you parse your incoming string as json
-      const request = JSON.parse(incoming)
-
-      // execute the api call on your renraku endpoint
-      const response = await myEndpoint(request)
-
-      // you send back the json response as a string
-      pigeons.send(JSON.stringify(response))
-    },
-  })
-  ```
-- second, let's do your "clientside":
-  ```ts
-  import {remote} from "@e280/renraku"
-  import type {myFunctions} from "./my-functions.js"
-
-  // create your wacky carrier pigeon client
-  const pigeons = new CarrierPigeonClient()
-
-  // create a remote with the type of your async functions
-  const myRemote = remote<typeof myFunctions>({
-
-    // your carrier pigeon implementation needs only to
-    // transmit the json request object, and return then json response object
-    endpoint: async request => await carrierPigeon.send(request)
-  })
-
-  // usage
-  await myRemote.math.sum(1, 2) // 3
-  ```
-
-<br/>
-
-## ⛩️ *RENRAKU* means *contact*
-
-💖 free and open source just for you  
-🌟 reward us with github stars  
-💻 join us at [e280](https://e280.org/) if you're a real one  
+	// kill the connection
+	client.close()
+	```
 

@@ -2,34 +2,34 @@
 import type * as ws from "ws"
 import type * as http from "node:http"
 
-import {Rig} from "../messenger/parts/helpers.js"
+import {Rtt} from "../../tools/pingponger.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {LoggerTap} from "../../core/taps/logger.js"
 import {Fns, HttpMeta, Tap, WebSocketTaps} from "../../core/types.js"
 
-export type WebSocketRemoteOptions<ServerFns extends Fns> = {
+export type WsRpc<LocalFns extends Fns, RemoteFns extends Fns> = (remote: Remote<RemoteFns>) => LocalFns
+export const asWsRpc = <LocalFns extends Fns, RemoteFns extends Fns>(rpc: WsRpc<LocalFns, RemoteFns>) => rpc
+
+export type WsRemoteOptions<ServerFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
-	rpc: (serverside: Remote<ServerFns>, rig: Rig) => Fns
-	onDisconnect: (error?: any) => void
+	rpc: WsRpc<any, ServerFns>
+	disconnected: (error?: any) => void
 	tap?: Tap
 	timeout?: number
 }
 
 export type Connection<ClientFns extends Fns> = {
+	rtt: Rtt
 	socket: ws.WebSocket
-	clientside: Remote<ClientFns>
+	remote: Remote<ClientFns>
 	close: () => void
 	taps?: WebSocketTaps
 } & HttpMeta
 
 export type ConnectionReturns<ClientFns extends Fns> = {
-	rpc: (clientside: Remote<ClientFns>, rig: Rig) => Fns
+	rpc: WsRpc<any, ClientFns>
 	disconnected: (error?: any) => void
 }
-
-export type WebSocketServerOptions<ClientFns extends Fns> = {
-	rpc?: (meta: HttpMeta) => Fns
-} & WsIntegrationOptions<ClientFns>
 
 export type WsAccepter<ClientFns extends Fns> = (connection: Connection<ClientFns>) => ConnectionReturns<ClientFns>
 

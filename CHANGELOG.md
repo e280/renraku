@@ -9,6 +9,8 @@
 ## v0.5
 
 ### v0.5.0-21
+- 🟥 http server and web sockets completely rewritten, see readme
+- 🟥 core fn `respond` renamed to `execute`
 - 🟥 use package.json "exports" feature to auto-export to node and browser
   - `import {} from "@e280/renraku/node"` becomes  
     `import {} from "@e280/renraku"`

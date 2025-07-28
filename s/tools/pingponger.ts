@@ -9,6 +9,13 @@ export type Pong = ["pong", number]
 type PingId = number
 type Pend = {time: number, deferred: Deferred<number>}
 
+export class Rtt {
+	constructor(private pingponger: Pingponger) {}
+	get on() { return this.pingponger.onRtt }
+	get latest() { return this.pingponger.latestRtt }
+	get average() { return this.pingponger.averageRtt }
+}
+
 export class Pingponger {
 	onRtt = sub<[number]>()
 

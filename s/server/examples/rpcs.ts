@@ -1,11 +1,11 @@
 
+import {asHttpRpc} from "../types.js"
 import {secure} from "../../core/auth/secure.js"
-import {fns} from "../../core/types.js"
-import {Rig} from "../../transports/messenger/parts/helpers.js"
 import {ExClientside, ExServerside} from "./types.js"
+import {asWsRpc} from "../../transports/websocket/types.js"
 
 /** example http json-rpc server fns */
-export const exampleHttpFns = fns({
+export const exampleHttpRpc = asHttpRpc(_meta => ({
 
 	// unauthenticated service
 	unlocked: {
@@ -26,12 +26,10 @@ export const exampleHttpFns = fns({
 			},
 		}
 	}),
-})
+}))
 
 /** example websocket serverside fns */
-export const exampleWsServerside = (
-	(clientside: ExClientside, _rig: Rig): ExServerside => ({
-
+export const exampleWsServersideRpc = asWsRpc<ExServerside, ExClientside>(clientside => ({
 	async now() {
 		await clientside.sum(1, 2)
 		return Date.now()
@@ -39,12 +37,12 @@ export const exampleWsServerside = (
 }))
 
 /** example websocket clientside fns */
-export const exampleWsClientside = (
-	(_serverside: ExServerside, _rig: Rig, rememberCall: () => void) => ({
-
-	async sum(a: number, b: number) {
-		rememberCall()
-		return a + b
-	},
-}))
+export const exampleWsClientsideRpc = (rememberCall: () => void) => (
+	asWsRpc<ExClientside, ExServerside>(_serverside => ({
+		async sum(a: number, b: number) {
+			rememberCall()
+			return a + b
+		},
+	}))
+)
 

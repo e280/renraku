@@ -6,8 +6,9 @@ import {ipAddress} from "../../../tools/ip-address.js"
 import {Messenger} from "../../messenger/messenger.js"
 import {WsConnector, WsConnectorOptions} from "../types.js"
 import {WebSocketConduit} from "../../messenger/conduits/web-socket.js"
+import {Rtt} from "../../../tools/pingponger.js"
 
-export function webSocketConnector<ClientFns extends Fns>(
+export function wsConnector<ClientFns extends Fns>(
 		{tap, accept, timeout = defaults.timeout}: WsConnectorOptions<ClientFns>
 	): WsConnector {
 
@@ -20,7 +21,7 @@ export function webSocketConnector<ClientFns extends Fns>(
 				socket.close()
 			conduit.dispose()
 			messenger.dispose()
-			onDisconnect()
+			disconnected()
 		}
 
 		const conduit = new WebSocketConduit({
@@ -37,17 +38,21 @@ export function webSocketConnector<ClientFns extends Fns>(
 			conduit,
 			timeout,
 			tap: taps?.remote,
-			getLocalEndpoint: (clientside, rig) => endpoint({
-				fns: rpc(clientside, rig),
+			getLocalEndpoint: remote => endpoint({
+				fns: rpc(remote),
 				tap: taps?.local,
 			}),
 		})
 
-		const {rpc, disconnected: onDisconnect} = accept({
+		// wait for first ping result
+		await conduit.pingponger.onRtt.next()
+
+		const {rpc, disconnected} = accept({
 			ip,
 			socket,
 			request,
-			clientside: messenger.remote,
+			remote: messenger.remote,
+			rtt: new Rtt(conduit.pingponger),
 			close: kill,
 		})
 	}

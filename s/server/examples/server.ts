@@ -3,18 +3,18 @@ import {ExClientside} from "./types.js"
 import {RenrakuServer} from "../renraku-server.js"
 import {LoggerTap} from "../../core/taps/logger.js"
 import {route} from "../../transports/http/parts/routing.js"
-import {exampleHttpFns, exampleWsServerside} from "./apis.js"
+import {exampleHttpRpc, exampleWsServersideRpc} from "./rpcs.js"
 import {respond} from "../../transports/http/parts/responding.js"
 
-export const port = 8001
+export const port = 8000
 export const logger = new LoggerTap()
 
 const server = new RenrakuServer({
 	tap: logger,
 	cors: {origins: "*"},
-	rpc: () => exampleHttpFns,
+	rpc: exampleHttpRpc,
 	websocket: RenrakuServer.websocket<ExClientside>(_connection => ({
-		rpc: exampleWsServerside,
+		rpc: exampleWsServersideRpc,
 		disconnected: () => {},
 	})),
 	routes: [
