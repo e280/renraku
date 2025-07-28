@@ -4,7 +4,7 @@ import type * as http from "http"
 import {defaults} from "../../defaults.js"
 import {readStream} from "./read-stream.js"
 import {JsonRpc} from "../../../core/json-rpc.js"
-import {endpoint} from "../../../core/endpoint.js"
+import {makeEndpoint} from "../../../core/endpoint.js"
 import {HttpMeta, Fns} from "../../../core/types.js"
 import {LoggerTap} from "../../../core/taps/logger.js"
 import {ipAddress} from "../../../tools/ip-address.js"
@@ -22,7 +22,7 @@ export function makeEndpointListener(options: EndpointListenerOptions): http.Req
 			const {maxRequestBytes = defaults.maxRequestBytes} = options
 			const body = await readStream(request, maxRequestBytes)
 			const requestish = JSON.parse(body) as JsonRpc.Requestish
-			const e = endpoint({
+			const e = makeEndpoint({
 				tap: options.tap,
 				fns: options.rpc({
 					request: request,

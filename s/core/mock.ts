@@ -1,8 +1,8 @@
 
 import {Fns} from "./types.js"
-import {remote} from "./remote.js"
+import {makeRemote} from "./remote.js"
 import {Remote} from "./remote-proxy.js"
-import {endpoint, EndpointOptions} from "./endpoint.js"
+import {makeEndpoint, EndpointOptions} from "./endpoint.js"
 
 /**
  * Wrap your fns in an endpoint and remote.
@@ -10,6 +10,6 @@ import {endpoint, EndpointOptions} from "./endpoint.js"
  *  - this is useful for when you have special logic that relies on that special renraku functionality
  */
 export function mock<F extends Fns>(options: EndpointOptions<F>): Remote<F> {
-	return remote<F>({endpoint: endpoint(options), tap: options.tap})
+	return makeRemote<F>({endpoint: makeEndpoint(options), tap: options.tap})
 }
 

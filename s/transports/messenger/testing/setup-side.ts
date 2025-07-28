@@ -1,7 +1,7 @@
 
 import {Messenger} from "../messenger.js"
 import {Conduit} from "../conduits/conduit.js"
-import {endpoint} from "../../../core/endpoint.js"
+import {makeEndpoint} from "../../../core/endpoint.js"
 import {MathFns, setupMathSpy} from "../../../core/testing/setup-math-spy.js"
 
 export function setupSide(conduit: Conduit) {
@@ -10,7 +10,7 @@ export function setupSide(conduit: Conduit) {
 		...math,
 		messenger: new Messenger<MathFns>({
 			conduit,
-			getLocalEndpoint: () => endpoint({fns: math.fns}),
+			getLocalEndpoint: () => makeEndpoint({fns: math.fns}),
 		}),
 	}
 }

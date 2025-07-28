@@ -1,7 +1,7 @@
 
 import {Fns} from "../../../core/types.js"
 import {defaults} from "../../defaults.js"
-import {endpoint} from "../../../core/endpoint.js"
+import {makeEndpoint} from "../../../core/endpoint.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 import {Messenger} from "../../messenger/messenger.js"
 import {WsConnector, WsConnectorOptions} from "../types.js"
@@ -38,7 +38,7 @@ export function wsConnector<ClientFns extends Fns>(
 			conduit,
 			timeout,
 			tap: taps?.remote,
-			getLocalEndpoint: remote => endpoint({
+			getLocalEndpoint: remote => makeEndpoint({
 				fns: rpc(remote),
 				tap: taps?.local,
 			}),

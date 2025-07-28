@@ -3,7 +3,7 @@ import {Trash} from "@e280/stz"
 
 import {defaults} from "../defaults.js"
 import {Fns} from "../../core/types.js"
-import {remote} from "../../core/remote.js"
+import {makeRemote} from "../../core/remote.js"
 import {MessengerOptions} from "./types.js"
 import {JsonRpc} from "../../core/json-rpc.js"
 import {Remote} from "../../core/remote-proxy.js"
@@ -26,7 +26,7 @@ export class Messenger<xRemoteFns extends Fns> {
 
 		this.#waiter = new ResponseWaiter(options.timeout ?? defaults.timeout)
 
-		this.remote = remote<xRemoteFns>({
+		this.remote = makeRemote<xRemoteFns>({
 			endpoint: makeRemoteEndpoint(
 				this.#waiter,
 				conduit.sendRequest.pub.bind(conduit.sendRequest),

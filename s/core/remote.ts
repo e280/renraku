@@ -18,7 +18,7 @@ export type RemoteOptions = {
  *  - so when you make async calls on the remote, it will convert those into json rpc requests that are actuated on the given endpoint
  *  - the endpoint you provide could be making network calls, or doing something else, the remote doesn't care how the endpoint is implemented
  */
-export function remote<F extends Fns>(options: RemoteOptions) {
+export function makeRemote<F extends Fns>(options: RemoteOptions) {
 	const {endpoint, tap = defaultTap} = options
 	let id = 1
 
