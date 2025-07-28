@@ -9,7 +9,7 @@ import {makeEndpoint, EndpointOptions} from "./endpoint.js"
  *  - this gives you a real renraku remote where you can use the `tune` symbol and such
  *  - this is useful for when you have special logic that relies on that special renraku functionality
  */
-export function mock<F extends Fns>(options: EndpointOptions<F>): Remote<F> {
+export function makeMock<F extends Fns>(options: EndpointOptions<F>): Remote<F> {
 	return makeRemote<F>({endpoint: makeEndpoint(options), tap: options.tap})
 }
 

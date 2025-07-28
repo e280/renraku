@@ -12,6 +12,7 @@
 - 🟥 core renames
 	- 🟥 `remote` => `makeRemote`
 	- 🟥 `endpoint` => `makeEndpoint`
+	- 🟥 `mock` => `makeMock`
 	- 🟥 `respond` => `execute`
 - 🟥 http server and web sockets completely rewritten, see readme
 - 🟥 use package.json "exports" feature to auto-export to node and browser
