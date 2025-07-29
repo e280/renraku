@@ -4,6 +4,8 @@
 > ***"an api should just be a bunch of async functions, damn it!"***  
 > &nbsp; &nbsp; — *Chase Moskal, many years ago*
 
+**renraku** is a magic typescript json-rpc library that seamlessly turns groups of async functions into apis.
+
 📦 `npm install @e280/renraku`  
 💡 elegantly expose async functions as an api  
 🔌 http, websockets, postmessage, and more  
@@ -54,20 +56,18 @@
 		.listen(8000)
 	```
 	- your functions are served on a `POST /` json-rpc 2.0 endpoint
-	- `GET /health` route that returns the current js timestamp
+	- you get a free `GET /health` route that returns the current js timestamp
 1. 🍏 **make a clientside remote** — `client.ts`
 	```ts
 	import Renraku from "@e280/renraku"
 	import type {MyFns} from "./rpc.js"
 
-	const remote = Renraku.httpRemote<MyFns>({
-		url: "http://localhost:8000/",
-	})
+	const remote = Renraku.httpRemote<MyFns>({url: "http://localhost:8000/"})
 	```
 	🪄 now you can magically call the functions on the clientside
 	```ts
 	await remote.now()
-		// 1723701145176
+		// 1753780093703
 
 	await remote.add(2, 2)
 		// 4
@@ -103,6 +103,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
 	export const serversideRpc = (
 		Renraku.asWsRpc<Serverside, Clientside>(clientside => ({
 			async now() {
+				// 🫨 omg we're calling the clientside from the serverside!
 				await clientside.sum(1, 2)
 				return Date.now()
 			},
@@ -124,7 +125,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
 	import type {Clientside} from "./types.js"
 
 	await new Renraku.Server({
-		websocket: Renraku.websocket<Clientside>(_connection => ({
+		websocket: Renraku.websocket<Clientside>(connection => ({
 			rpc: serversideRpc,
 			disconnected: () => {},
 		})),
@@ -282,13 +283,12 @@ const server = new Renraku.Server({
 	import Renraku from "@e280/renraku"
 
 	const authorized = Renraku.authorize(secured, async() => "hello")
-		// it's an async function so you could refresh tokens or whatever
 
 	// now the auth is magically provided for each call
 	await authorized.sum(1, 2)
 	```
 	- but why an async getter function?  
-		ah, well that's because it's a perfect opportunity for you to refresh your tokens or what-have-you.  
+		because it's a perfect opportunity for you to refresh tokens or what-have-you.  
 		the getter is called for each api call.  
 - `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
 
@@ -310,15 +310,15 @@ const server = new Renraku.Server({
 	await remote.sum[tune]({notify: true})(1, 2)
 		// undefined
 	```
-	- this is how we do a json-rpc protocol 'notification' request, which do not generate any response
-	- sometimes responses are not needed, thus this can be a nice little optimization
+	- this is how we do a json-rpc protocol 'notification' request, which won't return a result (for fire-and-forget actions)
+	- sometimes responses are not needed, so this can be a nice little optimization
 - `tune` a call with `transfer`
 	```ts
 	const buffer = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF])
 
 	await remote.deliver[tune]({transfer: [buffer]})(buffer)
 	```
-	- this is how we specify [tranferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) for fast zero-copy transfers between worker threads and such
+	- this is how we specify [transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) for fast zero-copy transfers between worker threads and such
 	- important in sister project [comrade](https://github.com/e280/comrade) for threading workloads
 
 #### `settings` symbol
@@ -344,10 +344,10 @@ const server = new Renraku.Server({
 `Messenger` is a bidirectional-capable api mediator, though it can also be used in a one-way capacity.
 
 `Conduit` subclasses facilitate communications over various mediums:
-- `BroadcastConduit` — for broadcast channel
-- `PostableConduit` — for post message channels like web workers
-- `WindowConduit` — for window post message channels
-- `WebSocketConduit` — for low-level websockets (you should use `wsClient` helper instead)
+- [`BroadcastConduit`](./s/transports/messenger/conduits/broadcast.ts) — for broadcast channel
+- [`PostableConduit`](./s/transports/messenger/conduits/postable.ts) — for post message channels like web workers
+- [`WindowConduit`](./s/transports/messenger/conduits/window.ts) — for window post message channels
+- [`WebSocketConduit`](./s/transports/messenger/conduits/web-socket.ts) — for low-level websockets (you should use `wsClient` helper instead)
 
 the following examples will demonstrate using Messengers with WindowConduits for a common popup api example.
 
@@ -443,11 +443,14 @@ the following examples will demonstrate using Messengers with WindowConduits for
 
 ## ⛩️ *RENRAKU core primitives*
 - *TODO* we should write more in depth docs about the core tools here
-- [`fns(~)`](./s/core/types.ts) — typescript identity helper for a group of async fns
 - [`makeEndpoint(~)`](./s/core/endpoint.ts) — make a json-rpc endpoint fn for a group of async fns
 - [`makeRemote(~)`](./s/core/remote.ts) — make a nested proxy tree of invokable fns, given an endpoint
 - [`makeMock(~)`](./s/core/mock.ts) — sugar for making an endpoint and then a remote for the given fns
 - [`JsonRpc`](./s/core/json-rpc.ts) — namespace of json rpc types and helpers
+- [`fns(~)`](./s/core/types.ts) — typescript identity helper for a group of async fns
+- [`types.ts`](./s/core/types.ts) — typescript identity helper for a group of async fns
+	- `AsFns<X>` — ensures `X` is a group of valid async functions
+	- `Remote<MyFns>` — adds the magic `tune` stuff to the provided `MyFns` types
 
 <br/>
 
