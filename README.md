@@ -10,7 +10,8 @@
 🚚 transport agnostic core  
 🌐 node and browser  
 🏛️ json-rpc 2.0  
-🛡️ handy little auth helpers  
+🛡️ simple auth model  
+🤖 foundation of web worker library [comrade](https://github.com/e280/comrade)  
 💻 *an https://e280.org/ project*  
 
 <br/>
@@ -79,11 +80,9 @@
 
 ## ⛩️ *RENRAKU websockets api*
 
-renraku websocket apis are *bidirectional,* meaning the serverside and clientside can call each other.
+renraku websocket apis are *bidirectional,* meaning the serverside and clientside can call each other.. just be careful not to create a circular loop, lol.
 
-just be careful not to create a circular loop, lol.
-
-and yes — a single Renraku.Server can support an http rpc endpoint *and* a websocket api simultaneously.
+and yes — a single renraku server can support an http rpc endpoint *and* a websocket api simultaneously.
 
 1. 🍏 **formalize your serverside and clientside api types** — `types.ts`  
 	(these explicit types are needed so typescript doesn't get confused about circularities)
@@ -224,18 +223,39 @@ const server = new Renraku.Server({
 ```
 
 ### logging and error handling
-- by default, renraku will log all errors to the console
-- renraku is secure-by-default, and when reporting errors over json-rpc, erorrs will be obscured as `unexposed error`
-	- however, you can throw a renraku `ExposedError` and the error message *will* be sent down the json-rpc wire
 - renraku has this concept of a `Tap`, which allows you to hook into renraku for logging purposes
-	- almost every renraku facility, can accept a `tap` — like `remote`, `endpoint`, `httpServer`, etc
+- almost every renraku facility, can accept a `tap` — like `makeRemote`, `makeEndpoint`, etc
 	- `ErrorTap` *(default)* — logs errors, but not every request
-	- `LoggerTap` — verbose logging, all errors and every request
+	- `LoggerTap` — *(default for `Server`)* verbose logging, all errors and every request
 	- `DudTap` — silent, doesn't log anything
-- in particular, the `httpServer` and `webSocketServer` use a verbose `LoggerTap`, all other facilities default to the `ErrorTap`
+
+### error handling
+- for security-by-default, when renraku encounters an error, it reports `unexposed error` to the client
+	```ts
+	const timingApi = {
+		async now() {
+			throw new Error("not enough minerals")
+				//                   ☝️
+				// secret message is hidden from remote clients
+		},
+	}
+	```
+- but you can throw an `ExposedError` when you want the error message sent to the client
+	```ts
+	import {ExposedError} from "@e280/renraku"
+
+	const timingApi = {
+		async now() {
+			throw new ExposedError("insufficient vespene gas")
+				//                        ☝️
+				//             publicly visible message
+		},
+	}
+	```
+- any other kind of error will NOT send the message to the client
+- the intention here is security-by-default, because error messages could potentially include sensitive information
 
 ### `secure` and `authorize` auth helpers
-- `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
 - use the `secure` function to section off parts of your api that require auth
 	```ts
 	import Renraku from "@e280/renraku"
@@ -270,14 +290,154 @@ const server = new Renraku.Server({
 	- but why an async getter function?  
 		ah, well that's because it's a perfect opportunity for you to refresh your tokens or what-have-you.  
 		the getter is called for each api call.  
+- `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
+
+### optimize fn calls
+
+#### `tune` symbol
+- all the functions on a renraku `Remote` can be 'tuned'
+- import the symbol
+	```ts
+	import {tune} from "@e280/renraku"
+	```
+- imagine we have some renraku remote
+	```ts
+	await remote.sum(1, 2)
+		// 3
+	```
+- `tune` a call with `notify`
+	```ts
+	await remote.sum[tune]({notify: true})(1, 2)
+		// undefined
+	```
+	- this is how we do a json-rpc protocol 'notification' request, which do not generate any response
+	- sometimes responses are not needed, thus this can be a nice little optimization
+- `tune` a call with `transfer`
+	```ts
+	const buffer = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF])
+
+	await remote.deliver[tune]({transfer: [buffer]})(buffer)
+	```
+	- this is how we specify [tranferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) for fast zero-copy transfers between worker threads and such
+	- important in sister project [comrade](https://github.com/e280/comrade) for threading workloads
+
+#### `settings` symbol
+- it's a set-and-forget way to pre-configure the default behavior for a remote fn
+- import the symbol
+	```ts
+	import {settings} from "@e280/renraku"
+	```
+- `settings` to configure `notify` permanently on a fn
+	```ts
+	await remote.sum[settings].notify = true
+	```
+	now future calls will use `notify: true` (unless `tune` overrides)
+	```ts
+	await remote.sum(1, 2)
+		// undefined
+	```
 
 <br/>
 
-## ⛩️ *RENRAKU bidirectional messenger conduits*
+## ⛩️ *RENRAKU messenger and conduits*
 
-> [!NOTE]  
-> TODO docs on this.  
-> the `Messenger` and `conduits` are how to setup various apis across mediums like iframe postMessages, broadcast channels, web workers, etc...  
+`Messenger` is a bidirectional-capable api mediator, though it can also be used in a one-way capacity.
+
+`Conduit` subclasses facilitate communications over various mediums:
+- `BroadcastConduit` — for broadcast channel
+- `PostableConduit` — for post message channels like web workers
+- `WindowConduit` — for window post message channels
+- `WebSocketConduit` — for low-level websockets (you should use `wsClient` helper instead)
+
+the following examples will demonstrate using Messengers with WindowConduits for a common popup api example.
+
+### one-way messenger, for calling fns on a popup
+- we'll presume you make a `myPopup` via `window.open`
+- create a messenger on the parent window (it sends requests)
+	```ts
+		//                               remote fns type
+		//                                       👇
+	const messenger = new Renraku.Messenger<MyPopupFns>({
+		conduit: new Renraku.conduits.WindowConduit({
+			localWindow: window,
+
+			// who we're talking to (a popup we made via window.open)
+			targetWindow: myPopup,
+
+			targetOrigin: "https://example.e280.org",
+			allow: e => e.origin === "https://example.e280.org",
+		}),
+	})
+
+	// calling a popup fn
+	await messenger.remote.sum(2, 3) // 5
+	```
+- create a messenger on the popup window (it sends responses)
+	```ts
+		//                             no remote fns
+		//                                    👇
+	const messenger = new Renraku.Messenger<{}>({
+		conduit: new Renraku.conduits.WindowConduit({
+			localWindow: window,
+
+			// who we're talking to (the opener)
+			targetWindow: window.opener,
+
+			targetOrigin: "https://example.e280.org",
+			allow: e => e.origin === "https://example.e280.org",
+		}),
+
+		getLocalEndpoint: (remote, rig) => (
+			Renraku.makeEndpoint(myPopupFns)
+				//                    ☝️
+				//          exposed popup fns
+		),
+	})
+	```
+
+### two-way messenger, between a main window and a popup
+- create a messenger on the opener window
+	```ts
+		//                          remote-side fns type
+		//                                       👇
+	const messenger = new Renraku.Messenger<MyPopupFns>({
+		conduit: new Renraku.conduits.WindowConduit({
+			localWindow: window,
+			targetWindow: myPopup,
+			targetOrigin: "https://example.e280.org",
+			allow: e => e.origin === "https://example.e280.org",
+		}),
+
+			//                                   local-side fns
+			//                                           👇
+		getLocalEndpoint: (remote, rig) => endpoint(myOpenerFns),
+	})
+
+	// calling a popup fn
+	await messenger.remote.sum(2, 3) // 5
+	```
+- create a messenger on the popup side, which will respond
+	```ts
+		//                               local-side fns type
+		//                                           👇
+	const messenger = new Renraku.Messenger<MyOpenerFns>({
+		conduit: new Renraku.conduits.WindowConduit({
+			localWindow: window,
+			targetWindow: window.opener,
+			targetOrigin: "https://example.e280.org",
+			allow: e => e.origin === "https://example.e280.org",
+		}),
+
+		getLocalEndpoint: (remote, rig) => (
+			Renraku.makeEndpoint(myPopupFns)
+				//                    ☝️
+				//            remote-side fns
+		),
+	})
+
+	// calling an opener fn
+	await messenger.remote.mul(2, 3) // 6
+	```
 
 <br/>
 
@@ -285,7 +445,7 @@ const server = new Renraku.Server({
 
 > [!NOTE]  
 > TODO docs on this.  
-> renraku provide a core toolkit of primitives like `makeEndpoint`, `makeRemote`, `makeMock`, `secute`, `authorize`...  
+> renraku provides a core toolkit of primitives like `makeEndpoint`, `makeRemote`, `makeMock`, `secute`, `authorize`...  
 > these low-level functions help you implement new transport mediums, etc...  
 
 <br/>

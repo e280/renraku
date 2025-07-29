@@ -1,5 +1,6 @@
 
 import {ServerOptions} from "./types.js"
+import {LoggerTap} from "../core/taps/logger.js"
 import {websocket} from "../transports/websocket/types.js"
 import {HttpServer} from "../transports/http/http-server.js"
 import {respond} from "../transports/http/parts/responding.js"
@@ -13,10 +14,13 @@ export class Server extends HttpServer {
 	#ws: WsIntegration<any> | undefined
 
 	constructor(options: ServerOptions) {
+		const tap = options.tap ?? new LoggerTap()
 		const rpc = makeEndpointListener({
 			...options,
+			tap,
 			rpc: options.rpc ?? (() => ({})),
 		})
+
 		super({
 			...options,
 			transmuters: [
@@ -31,7 +35,7 @@ export class Server extends HttpServer {
 		})
 
 		if (options.websocket) {
-			this.#ws = new WsIntegration({...options, accept: options.websocket})
+			this.#ws = new WsIntegration({...options, tap, accept: options.websocket})
 			this.stock.on("upgrade", this.#ws.upgrader)
 		}
 	}

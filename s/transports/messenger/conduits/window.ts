@@ -7,21 +7,22 @@ import {onMessage} from "../parts/helpers.js"
 export class WindowConduit extends Conduit {
 	#trash = new Trash()
 
-	constructor(
-			localWindow: Window,
-			targetWindow: WindowProxy,
-			public targetOrigin: string,
-			allow: (e: ChannelMessage) => boolean,
-		) {
+	constructor(options: {
+			localWindow: Window
+			targetWindow: WindowProxy
+			targetOrigin: string
+			allow: (e: ChannelMessage) => boolean
+		}) {
 
 		super()
+		const {localWindow, targetWindow, targetOrigin, allow} = options
 
 		this.#trash.add(
 			this.sendRequest.sub((m, transfer) =>
-				targetWindow.postMessage(m, this.targetOrigin, transfer)),
+				targetWindow.postMessage(m, targetOrigin, transfer)),
 
 			this.sendResponse.sub((m, transfer) =>
-				targetWindow.postMessage(m, this.targetOrigin, transfer)),
+				targetWindow.postMessage(m, targetOrigin, transfer)),
 
 			onMessage(localWindow, e => {
 				if (allow(e))

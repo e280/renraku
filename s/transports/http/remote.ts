@@ -1,6 +1,6 @@
 
-import {defaults} from "../../defaults.js"
 import {makeRemote} from "../../core/remote.js"
+import {ErrorTap} from "../../core/taps/error.js"
 import {Endpoint, Fns, Tap} from "../../core/types.js"
 
 export type HttpEndpointOptions = {
@@ -15,7 +15,7 @@ export function httpRemote<F extends Fns>(options: HttpEndpointOptions) {
 
 export function httpEndpoint({
 		url,
-		tap = defaults.tap,
+		tap = new ErrorTap(),
 		headers = {},
 	}: HttpEndpointOptions): Endpoint {
 

@@ -1,11 +1,12 @@
 
 import type * as http from "http"
 
-import {defaults} from "../../../defaults.js"
 import {readStream} from "./read-stream.js"
+import {defaults} from "../../../defaults.js"
 import {JsonRpc} from "../../../core/json-rpc.js"
-import {makeEndpoint} from "../../../core/endpoint.js"
 import {HttpMeta, Fns} from "../../../core/types.js"
+import {ErrorTap} from "../../../core/taps/error.js"
+import {makeEndpoint} from "../../../core/endpoint.js"
 import {LoggerTap} from "../../../core/taps/logger.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 
@@ -17,7 +18,7 @@ export type EndpointListenerOptions = {
 }
 
 export function makeEndpointListener(options: EndpointListenerOptions): http.RequestListener {
-	const tap = options.tap ?? defaults.tap
+	const tap = options.tap ?? new ErrorTap()
 	const maxRequestBytes = options.maxRequestBytes ?? defaults.maxRequestBytes
 
 	return async(request, response) => {

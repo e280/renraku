@@ -1,11 +1,11 @@
 
 import {Trash} from "@e280/stz"
 
-import {defaults} from "../../defaults.js"
 import {Fns} from "../../core/types.js"
-import {makeRemote} from "../../core/remote.js"
+import {defaults} from "../../defaults.js"
 import {MessengerOptions} from "./types.js"
 import {JsonRpc} from "../../core/json-rpc.js"
+import {makeRemote} from "../../core/remote.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {ResponseWaiter} from "./parts/response-waiter.js"
 import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint, Rig} from "./parts/helpers.js"
