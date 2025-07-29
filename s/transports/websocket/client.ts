@@ -7,7 +7,7 @@ import {WsRemoteOptions} from "./types.js"
 import {Rtt} from "../../tools/pingponger.js"
 import {makeEndpoint} from "../../core/endpoint.js"
 import {Messenger} from "../messenger/messenger.js"
-import {WebSocketConduit} from "../messenger/conduits/web-socket.js"
+import {WebsocketConduit} from "../messenger/conduits/websocket.js"
 import {waitForSocketOpen} from "../messenger/parts/wait-for-socket-open.js"
 
 export async function wsClient<ServerFns extends Fns>(
@@ -26,7 +26,7 @@ export async function wsClient<ServerFns extends Fns>(
 
 	const disconnect = once(disconnected)
 
-	const conduit = new WebSocketConduit({
+	const conduit = new WebsocketConduit({
 		socket,
 		timeout,
 		onClose: disconnect,

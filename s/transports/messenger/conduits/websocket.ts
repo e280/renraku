@@ -10,7 +10,7 @@ type InfraMessage = ["infra", Ping | Pong]
 type RpcMessage = ["rpc", JsonRpc.Bidirectional]
 type Message = InfraMessage | RpcMessage
 
-export class WebSocketConduit extends Conduit {
+export class WebsocketConduit extends Conduit {
 	socket: WebSocket | ws.WebSocket
 	pingponger: Pingponger
 	#trash = new Trash()

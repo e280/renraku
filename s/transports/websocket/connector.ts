@@ -6,7 +6,7 @@ import {makeEndpoint} from "../../core/endpoint.js"
 import {ipAddress} from "../../tools/ip-address.js"
 import {Messenger} from "../messenger/messenger.js"
 import {WsConnector, WsConnectorOptions} from "./types.js"
-import {WebSocketConduit} from "../messenger/conduits/web-socket.js"
+import {WebsocketConduit} from "../messenger/conduits/websocket.js"
 
 export function wsConnector<ClientFns extends Fns>(
 		{tap, accept, timeout = defaults.timeout}: WsConnectorOptions<ClientFns>
@@ -24,7 +24,7 @@ export function wsConnector<ClientFns extends Fns>(
 			disconnected()
 		}
 
-		const conduit = new WebSocketConduit({
+		const conduit = new WebsocketConduit({
 			socket,
 			timeout,
 			onClose: kill,

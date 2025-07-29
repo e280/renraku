@@ -347,7 +347,7 @@ const server = new Renraku.Server({
 - [`BroadcastConduit`](./s/transports/messenger/conduits/broadcast.ts) — for broadcast channel
 - [`PostableConduit`](./s/transports/messenger/conduits/postable.ts) — for post message channels like web workers
 - [`WindowConduit`](./s/transports/messenger/conduits/window.ts) — for window post message channels
-- [`WebSocketConduit`](./s/transports/messenger/conduits/web-socket.ts) — for low-level websockets (you should use `wsClient` helper instead)
+- [`WebsocketConduit`](./s/transports/messenger/conduits/websocket.ts) — for low-level websockets (you should use `wsClient` helper instead)
 
 the following examples will demonstrate using Messengers with WindowConduits for a common popup api example.
 
