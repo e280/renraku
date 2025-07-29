@@ -150,7 +150,7 @@ i've been using and sharpening this typescript implementation for many years.
 - `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
 - use the `secure` function to section off parts of your api that require auth
   ```ts
-  import {secure} from "renraku"
+  import {secure} from "@e280/renraku"
 
   export const exampleFns = {
 
@@ -180,7 +180,7 @@ i've been using and sharpening this typescript implementation for many years.
     ```
 - use the `authorize` function on the clientside to provide the auth param upfront
   ```ts
-  import {authorize} from "renraku"
+  import {authorize} from "@e280/renraku"
 
     //             (the secured area)  (async getter for auth param)
     //                          ↓              ↓
