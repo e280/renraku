@@ -1,9 +1,9 @@
 
 import * as http from "node:http"
 
-import {defaults} from "../defaults.js"
+import {defaults} from "../../defaults.js"
+import {HttpServerOptions} from "./types.js"
 import {transmute} from "./parts/transmuting.js"
-import {ListenHttpOptions, HttpServerOptions} from "./types.js"
 
 /** ergonomic improvement over node's stock http server */
 export class HttpServer {
@@ -15,7 +15,7 @@ export class HttpServer {
 		this.stock.timeout = options.timeout ?? defaults.timeout
 	}
 
-	async listen({port, host}: ListenHttpOptions) {
+	async listen(port: number, host?: string) {
 		await new Promise<void>((resolve, reject) => {
 			this.stock.once("error", reject)
 			const r = () => resolve()

@@ -1,25 +1,6 @@
 
-export * from "./core/auth/authorize.js"
-export * from "./core/auth/secure.js"
-export * from "./core/auth/types.js"
-export * from "./core/taps/dud.js"
-export * from "./core/taps/error.js"
-export * from "./core/taps/logger.js"
-export * from "./core/endpoint.js"
-export * from "./core/errors.js"
-export * from "./core/execute.js"
-export * from "./core/json-rpc.js"
-export * from "./core/mock.js"
-export * from "./core/remote-proxy.js"
-export * from "./core/remote.js"
-export * from "./core/types.js"
+export * from "./exports/universal.js"
 
-export * from "./tools/ip-address.js"
-export * from "./tools/random-user-emojis.js"
-export * from "./tools/simple-headers.js"
-
-export * from "./transports/http/remote.js"
-export * from "./transports/messenger/index.js"
-export * from "./transports/websocket/client.js"
-export * from "./transports/websocket/types.js"
+import * as Renraku from "./exports/universal.js"
+export default Renraku
 

@@ -21,11 +21,11 @@ i've been using and sharpening this typescript implementation for many years.
 
 1. 🍏 **your api is just async functions** — `rpc.ts`
 	```ts
-	import {asHttpRpc} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 
 	export type MyFns = ReturnType<typeof rpc>
 
-	export const rpc = asHttpRpc(({request, ip}) => ({
+	export const rpc = Renraku.asHttpRpc(({request, ip}) => ({
 		async now() {
 			return Date.now()
 		},
@@ -48,20 +48,20 @@ i've been using and sharpening this typescript implementation for many years.
 	- for input validation, you should use [zod](https://github.com/colinhacks/zod) or something
 1. 🍏 **make an http server** — `server.ts`
 	```ts
-	import {RenrakuServer, LoggerTap} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 	import {rpc} from "./rpc.js"
 
-	await new RenrakuServer({rpc})
-		.listen({port: 8000})
+	await new Renraku.Server({rpc})
+		.listen(8000)
 	```
 	- your functions are served on a `POST /` json-rpc 2.0 endpoint
 	- `GET /health` route that returns the current js timestamp
 1. 🍏 **make a clientside remote** — `client.ts`
 	```ts
-	import {httpRemote} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 	import type {MyFns} from "./rpc.js"
 
-	const remote = httpRemote<MyFns>({
+	const remote = Renraku.httpRemote<MyFns>({
 		url: "http://localhost:8000/",
 	})
 	```
@@ -85,7 +85,7 @@ renraku websocket apis are *bidirectional,* meaning the serverside and clientsid
 
 just be careful not to create a circular loop, lol.
 
-and yes — a single RenrakuServer can support an http rpc endpoint *and* a websocket api simultaneously.
+and yes — a single Renraku.Server can support an http rpc endpoint *and* a websocket api simultaneously.
 
 1. 🍏 **formalize your serverside and clientside api types** — `types.ts`  
 	(these explicit types are needed so typescript doesn't get confused about circularities)
@@ -100,34 +100,38 @@ and yes — a single RenrakuServer can support an http rpc endpoint *and* a webs
 	```
 1. 🍏 **implement your serverside and clientside fns** (they can call each other!) — `rpcs.ts`
 	```ts
-	import {asWsRpc} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 	import type {Clientside, Serverside} from "./types.js"
 
-	export const serversideRpc = asWsRpc<Serverside, Clientside>(clientside => ({
-		async now() {
-			await clientside.sum(1, 2)
-			return Date.now()
-		},
-	}))
+	export const serversideRpc = (
+		Renraku.asWsRpc<Serverside, Clientside>(clientside => ({
+			async now() {
+				await clientside.sum(1, 2)
+				return Date.now()
+			},
+		}))
+	)
 
-	export const clientsideRpc = asWsRpc<Clientside, Serverside>(_serverside => ({
-		async sum(a: number, b: number) {
-			return a + b
-		},
-	}))
+	export const clientsideRpc = (
+		Renraku.asWsRpc<Clientside, Serverside>(serverside => ({
+			async sum(a: number, b: number) {
+				return a + b
+			},
+		}))
+	)
 	```
 1. 🍏 **make a websocket server** — `server.ts`
 	```ts
-	import {RenrakuServer} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 	import {serversideRpc} from "./rpcs.js"
 	import type {Clientside} from "./types.js"
 
-	await new RenrakuServer({
-		websocket: RenrakuServer.websocket<Clientside>(_connection => ({
+	await new Renraku.Server({
+		websocket: Renraku.websocket<Clientside>(_connection => ({
 			rpc: serversideRpc,
 			disconnected: () => {},
 		})),
-	}).listen({port: 8000})
+	}).listen(8000)
 	```
 	- the `connection` object has a bunch of good stuff
 		```ts
@@ -148,11 +152,11 @@ and yes — a single RenrakuServer can support an http rpc endpoint *and* a webs
 		```
 1. 🍏 **connect as a client** — `client.ts`
 	```ts
-	import {wsClient} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 	import {clientsideRpc} from "./rpcs.js"
 	import type {Serverside} from "./types.js"
 
-	const client = await wsClient<Serverside>({
+	const client = await Renraku.wsClient<Serverside>({
 		rpc: clientsideRpc,
 		socket: new WebSocket("ws://localhost:8000/"),
 		disconnected: () => console.error("disconnected"),
@@ -174,11 +178,11 @@ and yes — a single RenrakuServer can support an http rpc endpoint *and* a webs
 
 ## ⛩️ *RENRAKU more details*
 
-### all `RenrakuServer` options
+### all `Renraku.Server` options
 ```ts
-import {LoggerTap, route, respond} from "@e280/renraku"
+import Renraku from "@e280/renraku"
 
-const server = new RenrakuServer({
+const server = new Renraku.Server({
 
 	// expose http json-rpc api
 	rpc: ({request, ip}) => ({
@@ -186,7 +190,7 @@ const server = new RenrakuServer({
 	}),
 
 	// expose websocket json-rpc api
-	websocket: RenrakuServer.websocket<Clientside>(connection => ({
+	websocket: Renraku.websocket<Clientside>(connection => ({
 		rpc: clientside => ({
 			hello: async() => "world",
 		}),
@@ -194,7 +198,7 @@ const server = new RenrakuServer({
 	})),
 
 	// supply a logger to get verbose console output (only logs errors by default)
-	tap: new LoggerTap(),
+	tap: new Renraku.LoggerTap(),
 
 	// allow cross-origin requests (cors is disabled by default)
 	cors: {origins: "*"},
@@ -216,7 +220,7 @@ const server = new RenrakuServer({
 
 	// you can provide custom listeners for additional http routes..
 	routes: [
-		route.get("/hello", respond.text("hello world")),
+		Renraku.route.get("/hello", Renraku.respond.text("hello world")),
 	],
 })
 ```
@@ -236,11 +240,10 @@ const server = new RenrakuServer({
 - `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
 - use the `secure` function to section off parts of your api that require auth
 	```ts
-	import {secure} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 
-	//           auth can be any type you want
-	//                            ↓
-	const secured = secure(async(auth: string) => {
+	// auth param can be any type you want
+	const secured = Renraku.secure(async(auth: string) => {
 
 		// here you can do any auth work you need
 		if (auth !== "hello")
@@ -254,18 +257,13 @@ const server = new RenrakuServer({
 	})
 
 	// 'secure' augments the functons to require the 'auth' param first
-	//
-	//                auth param
-	//                  ↓
 	await secured.sum("hello", 1, 2)
 	```
 - use the `authorize` function on the clientside to provide the auth param upfront
 	```ts
-	import {authorize} from "@e280/renraku"
+	import Renraku from "@e280/renraku"
 
-	//                 (the secured area)  (async getter for auth param)
-	//                             ↓                   ↓
-	const authorized = authorize(secured, async() => "hello")
+	const authorized = Renraku.authorize(secured, async() => "hello")
 		// it's an async function so you could refresh tokens or whatever
 
 	// now the auth is magically provided for each call

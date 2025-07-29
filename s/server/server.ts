@@ -1,19 +1,18 @@
 
-import {RenrakuServerOptions} from "./types.js"
+import {ServerOptions} from "./types.js"
 import {websocket} from "../transports/websocket/types.js"
 import {HttpServer} from "../transports/http/http-server.js"
-import {ListenHttpOptions} from "../transports/http/types.js"
 import {respond} from "../transports/http/parts/responding.js"
 import {route, router} from "../transports/http/parts/routing.js"
 import {transmuters} from "../transports/http/parts/transmuting.js"
 import {WsIntegration} from "../transports/websocket/parts/integration.js"
 import {makeEndpointListener} from "../transports/http/parts/endpoint-listener.js"
 
-export class RenrakuServer extends HttpServer {
+export class Server extends HttpServer {
 	static websocket = websocket
 	#ws: WsIntegration<any> | undefined
 
-	constructor(options: RenrakuServerOptions) {
+	constructor(options: ServerOptions) {
 		const rpc = makeEndpointListener({
 			...options,
 			rpc: options.rpc ?? (() => ({})),
@@ -37,8 +36,8 @@ export class RenrakuServer extends HttpServer {
 		}
 	}
 
-	async listen(options: ListenHttpOptions) {
-		await super.listen(options)
+	async listen(port: number, host?: string) {
+		await super.listen(port, host)
 
 		const error = this.#ws?.error
 		if (error) throw error

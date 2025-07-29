@@ -1,7 +1,7 @@
 
 import {Trash} from "@e280/stz"
 
-import {defaults} from "../defaults.js"
+import {defaults} from "../../defaults.js"
 import {Fns} from "../../core/types.js"
 import {makeRemote} from "../../core/remote.js"
 import {MessengerOptions} from "./types.js"

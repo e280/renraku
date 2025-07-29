@@ -1,6 +1,6 @@
 
 import {Fns} from "../../../core/types.js"
-import {defaults} from "../../defaults.js"
+import {defaults} from "../../../defaults.js"
 import {makeEndpoint} from "../../../core/endpoint.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 import {Messenger} from "../../messenger/messenger.js"

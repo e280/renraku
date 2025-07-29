@@ -9,7 +9,7 @@ import {CorsConfig} from "../transports/http/parts/transmuting.js"
 export type HttpRpc<F extends Fns = any> = (meta: HttpMeta) => F
 export const asHttpRpc = <F extends Fns = any>(rpc: HttpRpc<F>) => rpc
 
-export type RenrakuServerOptions<ClientFns extends Fns = any> = {
+export type ServerOptions<ClientFns extends Fns = any> = {
 	rpc?: HttpRpc
 	websocket?: WsAccepter<ClientFns>
 	tap?: LoggerTap

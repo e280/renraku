@@ -1,7 +1,7 @@
 
-import {RemoteError} from "./errors.js"
-import {defaultTap} from "./taps/default.js"
 import {JsonRpc} from "./json-rpc.js"
+import {defaults} from "../defaults.js"
+import {RemoteError} from "./errors.js"
 import {remoteProxy} from "./remote-proxy.js"
 import {Endpoint, Fns, Tap} from "./types.js"
 
@@ -19,7 +19,7 @@ export type RemoteOptions = {
  *  - the endpoint you provide could be making network calls, or doing something else, the remote doesn't care how the endpoint is implemented
  */
 export function makeRemote<F extends Fns>(options: RemoteOptions) {
-	const {endpoint, tap = defaultTap} = options
+	const {endpoint, tap = defaults.tap} = options
 	let id = 1
 
 	return remoteProxy<F>(async(

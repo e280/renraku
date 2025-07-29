@@ -1,19 +1,6 @@
 
-export * from "./index.universal.js"
+export * from "./exports/node.js"
 
-export * from "./server/renraku-server.js"
-export * from "./server/types.js"
-
-export * from "./transports/http/parts/endpoint-listener.js"
-export * from "./transports/http/parts/read-stream.js"
-export * from "./transports/http/parts/responding.js"
-export * from "./transports/http/parts/routing.js"
-export * from "./transports/http/parts/transmuting.js"
-export * from "./transports/http/http-server.js"
-export * from "./transports/http/types.js"
-
-export * from "./transports/websocket/parts/connector.js"
-export * from "./transports/websocket/parts/integration.js"
-export * from "./transports/websocket/client.js"
-export * from "./transports/websocket/types.js"
+import * as Renraku from "./exports/node.js"
+export default Renraku
 

@@ -1,7 +1,7 @@
 
 import type * as http from "http"
 
-import {defaults} from "../../defaults.js"
+import {defaults} from "../../../defaults.js"
 import {readStream} from "./read-stream.js"
 import {JsonRpc} from "../../../core/json-rpc.js"
 import {makeEndpoint} from "../../../core/endpoint.js"
@@ -17,13 +17,15 @@ export type EndpointListenerOptions = {
 }
 
 export function makeEndpointListener(options: EndpointListenerOptions): http.RequestListener {
+	const tap = options.tap ?? defaults.tap
+	const maxRequestBytes = options.maxRequestBytes ?? defaults.maxRequestBytes
+
 	return async(request, response) => {
 		try {
-			const {maxRequestBytes = defaults.maxRequestBytes} = options
 			const body = await readStream(request, maxRequestBytes)
 			const requestish = JSON.parse(body) as JsonRpc.Requestish
 			const e = makeEndpoint({
-				tap: options.tap,
+				tap,
 				fns: options.rpc({
 					request: request,
 					ip: ipAddress(request),
@@ -51,7 +53,7 @@ export function makeEndpointListener(options: EndpointListenerOptions): http.Req
 		catch (error) {
 			response.statusCode = 500
 			response.end()
-			options.tap?.error(error)
+			tap.error(error)
 		}
 	}
 }

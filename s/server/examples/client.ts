@@ -12,28 +12,6 @@ export async function exampleClient() {
 	const wsUrl = "ws://localhost:8000/"
 
 	//
-	// web socket api
-	//
-	try {
-		const client = await wsClient<ExServerside>({
-			socket: new WebSocket(wsUrl),
-			rpc: exampleWsClientsideRpc(rememberCall),
-			disconnected: () => console.error("🟥 websocket disconnected"),
-		})
-
-		const result = await client.remote.now()
-		if (typeof result === "number" && calls === 1)
-			console.log("✅ websocket good", result, calls)
-		else
-			console.error("🟥 websocket bad", result, calls)
-
-		client.close()
-	}
-	catch (error) {
-		console.error(error)
-	}
-
-	//
 	// http json rpc api
 	//
 	try {
@@ -48,6 +26,30 @@ export async function exampleClient() {
 			console.log("✅ http good", result1, result2)
 		else
 			console.error("🟥 http bad", result1, result2)
+	}
+	catch (error) {
+		console.error(error)
+	}
+
+	//
+	// web socket api
+	//
+	try {
+		const client = await wsClient<ExServerside>({
+			socket: new WebSocket(wsUrl),
+			rpc: exampleWsClientsideRpc(rememberCall),
+			disconnected: () => console.error("🟥 websocket disconnected"),
+		})
+
+		const result = await client.remote.now()
+		if (typeof result === "number" && calls === 1) {
+			console.log("✅ websocket good", result, calls)
+			console.log(`   ${client.rtt.latest.toFixed(0)} ms`)
+		}
+		else
+			console.error("🟥 websocket bad", result, calls)
+
+		client.close()
 	}
 	catch (error) {
 		console.error(error)

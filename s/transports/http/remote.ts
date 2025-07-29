@@ -1,6 +1,6 @@
 
+import {defaults} from "../../defaults.js"
 import {makeRemote} from "../../core/remote.js"
-import {defaultTap} from "../../core/taps/default.js"
 import {Endpoint, Fns, Tap} from "../../core/types.js"
 
 export type HttpEndpointOptions = {
@@ -12,7 +12,7 @@ export function httpRemote<F extends Fns>(options: HttpEndpointOptions) {
 	return makeRemote<F>({endpoint: httpEndpoint(options)})
 }
 
-export function httpEndpoint({url, tap = defaultTap}: HttpEndpointOptions): Endpoint {
+export function httpEndpoint({url, tap = defaults.tap}: HttpEndpointOptions): Endpoint {
 	return async request => {
 		tap.request({request})
 

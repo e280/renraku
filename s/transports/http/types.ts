@@ -25,8 +25,3 @@ export type Responder = (request: http.IncomingMessage) => Promise<ResponseData>
 
 export type Upgrader = (request: http.IncomingMessage, socket: stream.Duplex, head: buffer.Buffer) => void
 
-export type ListenHttpOptions = {
-	port: number
-	host?: string
-}
-

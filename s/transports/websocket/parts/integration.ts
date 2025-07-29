@@ -2,7 +2,7 @@
 import * as ws from "ws"
 
 import {Fns} from "../../../core/types.js"
-import {defaults} from "../../defaults.js"
+import {defaults} from "../../../defaults.js"
 import {WsIntegrationOptions} from "../types.js"
 import {wsConnector} from "./connector.js"
 import {Upgrader} from "../../http/types.js"

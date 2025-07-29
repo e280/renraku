@@ -2,7 +2,7 @@
 import {once} from "@e280/stz"
 
 import {Fns} from "../../core/types.js"
-import {defaults} from "../defaults.js"
+import {defaults} from "../../defaults.js"
 import {WsRemoteOptions} from "./types.js"
 import {makeEndpoint} from "../../core/endpoint.js"
 import {Messenger} from "../messenger/messenger.js"
