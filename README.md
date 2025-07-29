@@ -4,16 +4,14 @@
 > ***"an api should just be a bunch of async functions, damn it!"***  
 > &nbsp; &nbsp; — *Chase Moskal, many years ago*
 
-**renraku** is a magic typescript json-rpc library that seamlessly turns groups of async functions into apis.
+**renraku** is a magic typescript json-rpc library.  
 
 📦 `npm install @e280/renraku`  
-💡 elegantly expose async functions as an api  
-🔌 http, websockets, postmessage, and more  
-🚚 transport agnostic core  
+💡 async fns as api  
+🔌 http, websockets, postmessage, anything  
 🌐 node and browser  
 🏛️ json-rpc 2.0  
-🛡️ simple auth model  
-🤖 foundation of web worker library [comrade](https://github.com/e280/comrade)  
+🤖 foundation of our worker library [comrade](https://github.com/e280/comrade)  
 💻 *an https://e280.org/ project*  
 
 <br/>
