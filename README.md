@@ -173,7 +173,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
 
 <br/>
 
-## ⛩️ *RENRAKU more details*
+## ⛩️ *RENRAKU gnarly details*
 
 ### all `Renraku.Server` options
 ```ts
@@ -442,11 +442,12 @@ the following examples will demonstrate using Messengers with WindowConduits for
 <br/>
 
 ## ⛩️ *RENRAKU core primitives*
-
-> [!NOTE]  
-> TODO docs on this.  
-> renraku provides a core toolkit of primitives like `makeEndpoint`, `makeRemote`, `makeMock`, `secute`, `authorize`...  
-> these low-level functions help you implement new transport mediums, etc...  
+- *TODO* we should write more in depth docs about the core tools here
+- [`fns(~)`](./s/core/types.ts) — typescript identity helper for a group of async fns
+- [`makeEndpoint(~)`](./s/core/endpoint.ts) — make a json-rpc endpoint fn for a group of async fns
+- [`makeRemote(~)`](./s/core/remote.ts) — make a nested proxy tree of invokable fns, given an endpoint
+- [`makeMock(~)`](./s/core/mock.ts) — sugar for making an endpoint and then a remote for the given fns
+- [`JsonRpc`](./s/core/json-rpc.ts) — namespace of json rpc types and helpers
 
 <br/>
 

@@ -9,6 +9,7 @@
 ## v0.5
 
 ### v0.5.0-21
+- 🟥 rework `WindowConduit` to take options instead of positional args
 - 🟥 core renames
 	- 🟥 `remote` => `makeRemote`
 	- 🟥 `endpoint` => `makeEndpoint`

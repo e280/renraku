@@ -33,12 +33,12 @@
 		"test-inspect": "node inspect x/tests.test.js"
 	},
 	"dependencies": {
-		"@e280/science": "^0.0.5",
 		"@e280/sten": "^0.0.0-5",
 		"@e280/stz": "^0.0.0-29",
 		"ws": "^8.18.3"
 	},
 	"devDependencies": {
+		"@e280/science": "^0.0.5",
 		"@e280/scute": "^0.0.0-6",
 		"@types/node": "^24.1.0",
 		"@types/ws": "^8.18.1",
