@@ -1,11 +1,11 @@
 
 import * as ws from "ws"
 
-import {Fns} from "../../../core/types.js"
-import {defaults} from "../../../defaults.js"
-import {WsIntegrationOptions} from "../types.js"
+import {Fns} from "../../core/types.js"
+import {Upgrader} from "../http/types.js"
+import {defaults} from "../../defaults.js"
 import {wsConnector} from "./connector.js"
-import {Upgrader} from "../../http/types.js"
+import {WsIntegrationOptions} from "./types.js"
 
 export class WsIntegration<ClientFns extends Fns> {
 	wss: ws.WebSocketServer

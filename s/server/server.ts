@@ -5,7 +5,7 @@ import {HttpServer} from "../transports/http/http-server.js"
 import {respond} from "../transports/http/parts/responding.js"
 import {route, router} from "../transports/http/parts/routing.js"
 import {transmuters} from "../transports/http/parts/transmuting.js"
-import {WsIntegration} from "../transports/websocket/parts/integration.js"
+import {WsIntegration} from "../transports/websocket/integration.js"
 import {makeEndpointListener} from "../transports/http/parts/endpoint-listener.js"
 
 export class Server extends HttpServer {

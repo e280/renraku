@@ -13,8 +13,6 @@
 🛡️ handy little auth helpers  
 💻 *an https://e280.org/ project*  
 
-i've been using and sharpening this typescript implementation for many years.
-
 <br/>
 
 ## ⛩️ *RENRAKU http api*

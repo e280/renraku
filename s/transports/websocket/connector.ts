@@ -1,12 +1,12 @@
 
-import {Fns} from "../../../core/types.js"
-import {defaults} from "../../../defaults.js"
-import {makeEndpoint} from "../../../core/endpoint.js"
-import {ipAddress} from "../../../tools/ip-address.js"
-import {Messenger} from "../../messenger/messenger.js"
-import {WsConnector, WsConnectorOptions} from "../types.js"
-import {WebSocketConduit} from "../../messenger/conduits/web-socket.js"
-import {Rtt} from "../../../tools/pingponger.js"
+import {Fns} from "../../core/types.js"
+import {defaults} from "../../defaults.js"
+import {Rtt} from "../../tools/pingponger.js"
+import {makeEndpoint} from "../../core/endpoint.js"
+import {ipAddress} from "../../tools/ip-address.js"
+import {Messenger} from "../messenger/messenger.js"
+import {WsConnector, WsConnectorOptions} from "./types.js"
+import {WebSocketConduit} from "../messenger/conduits/web-socket.js"
 
 export function wsConnector<ClientFns extends Fns>(
 		{tap, accept, timeout = defaults.timeout}: WsConnectorOptions<ClientFns>
