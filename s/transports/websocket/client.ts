@@ -17,9 +17,9 @@ export async function wsClient<ServerFns extends Fns>(
 	const {
 		tap,
 		socket,
+		timeout = defaults.timeout,
 		rpc,
 		disconnected,
-		timeout = defaults.timeout,
 	} = options
 
 	await waitForSocketOpen(socket, timeout)
