@@ -13,7 +13,7 @@ await new Server({
 	tap: logger,
 	cors: {origins: "*"},
 	rpc: exampleHttpRpc,
-	websocket: Server.websocket<ExClientside>(_connection => ({
+	websocket: Server.websocket<ExClientside>(async _connection => ({
 		rpc: exampleWsServersideRpc,
 		disconnected: () => {},
 	})),

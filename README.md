@@ -123,7 +123,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
     import type {Clientside} from "./types.js"
 
     await new Renraku.Server({
-      websocket: Renraku.websocket<Clientside>(connection => ({
+      websocket: Renraku.websocket<Clientside>(async connection => ({
         rpc: serversideRpc,
         disconnected: () => {},
       })),
@@ -140,8 +140,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
         connection.rtt.on(rtt => {}) // subscribe to individual ping results
 
         // remote for calling clientside fns
-        connection.remote.sum(1, 2)
-          .then(result => console.log(result))
+        await connection.remote.sum(1, 2)
 
         // kill this connection
         connection.close()
@@ -186,7 +185,7 @@ const server = new Renraku.Server({
   }),
 
   // expose websocket json-rpc api
-  websocket: Renraku.websocket<Clientside>(connection => ({
+  websocket: Renraku.websocket<Clientside>(async connection => ({
     rpc: clientside => ({
       hello: async() => "world",
     }),

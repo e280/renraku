@@ -47,7 +47,7 @@ export function wsConnector<ClientFns extends Fns>(
 		// wait for first ping result
 		await conduit.pingponger.onRtt.next()
 
-		const {rpc, disconnected} = accept({
+		const {rpc, disconnected} = await accept({
 			ip,
 			socket,
 			request,

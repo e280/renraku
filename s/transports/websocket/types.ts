@@ -31,7 +31,7 @@ export type ConnectionReturns<ClientFns extends Fns> = {
 	disconnected: (error?: any) => void
 }
 
-export type WsAccepter<ClientFns extends Fns> = (connection: Connection<ClientFns>) => ConnectionReturns<ClientFns>
+export type WsAccepter<ClientFns extends Fns> = (connection: Connection<ClientFns>) => Promise<ConnectionReturns<ClientFns>>
 
 export function websocket<ClientFns extends Fns>(accept: WsAccepter<ClientFns>) {
 	return accept

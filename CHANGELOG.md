@@ -8,6 +8,12 @@
 
 ## v0.5
 
+### v0.5.0-23
+- 🟥 websocket accepter fn is now **async**
+
+### v0.5.0-22
+- 🍏 add `messenger.remoteEndpoint`
+
 ### v0.5.0-21
 - 🟥 rework `WindowConduit` to take options instead of positional args
 - 🟥 core renames
