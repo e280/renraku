@@ -7,7 +7,7 @@
 **renraku** is a magic typescript json-rpc library.  
 
 📦 `npm install @e280/renraku`  
-💡 async fns as api  
+💡 async functions as api  
 🔌 http, websockets, postmessage, anything  
 🌐 node and browser  
 🏛️ json-rpc 2.0  
