@@ -200,11 +200,7 @@ new Renraku.Server({
   // expose websocket json-rpc api
   websocket: Renraku.asAccepter<Serverside, Clientside>(
     async connection => ({
-      fns: {
-        async hello() {
-          return "hi"
-        },
-      },
+      fns: {async hello() { return "hi" }},
       disconnected() {},
     })
   ),
@@ -396,7 +392,6 @@ the following examples will demonstrate using Messengers with WindowConduits for
       targetOrigin: "https://example.e280.org",
       allow: e => e.origin === "https://example.e280.org",
     }),
-
     getLocalEndpoint: async(remote, rig) => (
       Renraku.makeEndpoint(myPopupFns)
         //                    ☝️
@@ -417,10 +412,11 @@ the following examples will demonstrate using Messengers with WindowConduits for
       targetOrigin: "https://example.e280.org",
       allow: e => e.origin === "https://example.e280.org",
     }),
-
-      //                                      local-side fns
-      //                                              👇
-    getLocalEndpoint: async(remote, rig) => endpoint(myOpenerFns),
+    getLocalEndpoint: async(remote, rig) => (
+      Renraku.makeEndpoint(myOpenerFns)
+        //                    ☝️
+        //            local-side fns
+    ),
   })
 
   // calling a popup fn
@@ -437,7 +433,6 @@ the following examples will demonstrate using Messengers with WindowConduits for
       targetOrigin: "https://example.e280.org",
       allow: e => e.origin === "https://example.e280.org",
     }),
-
     getLocalEndpoint: async(remote, rig) => (
       Renraku.makeEndpoint(myPopupFns)
         //                    ☝️
