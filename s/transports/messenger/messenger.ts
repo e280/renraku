@@ -53,7 +53,8 @@ export class Messenger<xRemoteFns extends Fns> {
 		if (!getLocalEndpoint)
 			return
 
-		const outgoing = await handleIncomingRequests(getLocalEndpoint(this.remote, rig), requests)
+		const endpoint = await getLocalEndpoint(this.remote, rig)
+		const outgoing = await handleIncomingRequests(endpoint, requests)
 		if (outgoing)
 			await conduit.sendResponse(outgoing, rig.transfer)
 	}

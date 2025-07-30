@@ -1,7 +1,6 @@
 
 import {ServerOptions} from "./types.js"
 import {LoggerTap} from "../core/taps/logger.js"
-import {websocket} from "../transports/websocket/types.js"
 import {HttpServer} from "../transports/http/http-server.js"
 import {respond} from "../transports/http/parts/responding.js"
 import {route, router} from "../transports/http/parts/routing.js"
@@ -10,12 +9,11 @@ import {WsIntegration} from "../transports/websocket/integration.js"
 import {makeEndpointListener} from "../transports/http/parts/endpoint-listener.js"
 
 export class Server extends HttpServer {
-	static websocket = websocket
 	#ws: WsIntegration<any> | undefined
 
 	constructor(options: ServerOptions) {
 		const tap = options.tap ?? new LoggerTap()
-		const rpc = makeEndpointListener({
+		const rpcListener = makeEndpointListener({
 			...options,
 			tap,
 			rpc: options.rpc ?? (() => ({})),
@@ -29,13 +27,13 @@ export class Server extends HttpServer {
 			],
 			listener: router(
 				route.get(options.healthRoute ?? "/health", respond.health()),
-				route.post(options.rpcRoute ?? "/", rpc),
+				route.post(options.rpcRoute ?? "/", rpcListener),
 				...(options.routes ?? []),
 			),
 		})
 
 		if (options.websocket) {
-			this.#ws = new WsIntegration({...options, tap, accept: options.websocket})
+			this.#ws = new WsIntegration({...options, tap, accepter: options.websocket})
 			this.stock.on("upgrade", this.#ws.upgrader)
 		}
 	}

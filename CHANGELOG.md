@@ -9,7 +9,12 @@
 ## v0.5
 
 ### v0.5.0-23
-- 🟥 websocket accepter fn is now **async**
+- 🟥 lots of renames
+  - websocket stuff heavily affected
+  - `HttpRpc` -> `Rpc`
+  - `asHttpRpc` -> `asRpc`
+- 🟥 Messenger's getLocalEndpoint is now async
+- 🍏 fixed issue with websocket initialization timings
 
 ### v0.5.0-22
 - 🍏 add `messenger.remoteEndpoint`

@@ -1,10 +1,10 @@
 
 import * as ws from "ws"
 
+import {wsHandler} from "./handler.js"
 import {Fns} from "../../core/types.js"
 import {Upgrader} from "../http/types.js"
 import {defaults} from "../../defaults.js"
-import {wsConnector} from "./connector.js"
 import {WsIntegrationOptions} from "./types.js"
 
 export class WsIntegration<ClientFns extends Fns> {
@@ -14,7 +14,7 @@ export class WsIntegration<ClientFns extends Fns> {
 	constructor(options: WsIntegrationOptions<ClientFns>) {
 		const maxPayload = options.maxRequestBytes ?? defaults.maxRequestBytes
 		this.wss = new ws.WebSocketServer({noServer: true, maxPayload})
-		this.wss.on("connection", wsConnector(options))
+		this.wss.on("connection", wsHandler(options))
 		this.wss.on("error", e => {
 			this.error = e
 		})

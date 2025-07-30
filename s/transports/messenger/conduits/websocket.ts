@@ -23,8 +23,7 @@ export class WebsocketConduit extends Conduit {
 		}) {
 
 		super()
-		const {socket, timeout, onClose, onError} = options
-		this.socket = socket
+		this.socket = options.socket
 
 		// sending rpc messages
 		this.#trash.add(
@@ -35,15 +34,21 @@ export class WebsocketConduit extends Conduit {
 		// listening to socket events
 		this.#trash.add(
 			ev(this.socket, {
-				error: onError,
-				close: onClose,
+				error: error => {
+					this.dispose()
+					options.onError(error)
+				},
+				close: () => {
+					this.dispose()
+					options.onClose()
+				},
 				message: this.#handleMessage,
 			})
 		)
 
 		// establish pingponger
 		this.pingponger = new Pingponger({
-			timeout,
+			timeout: options.timeout,
 			send: p => this.socket.send(
 				JSON.stringify(<InfraMessage>["infra", p])
 			),
@@ -54,7 +59,8 @@ export class WebsocketConduit extends Conduit {
 			this.pingponger.heartbeat(() => {
 				if (this.socket.readyState === 1)
 					this.socket.close()
-				onClose()
+				this.dispose()
+				options.onClose()
 			})
 		)
 	}

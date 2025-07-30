@@ -10,7 +10,7 @@ export function setupSide(conduit: Conduit) {
 		...math,
 		messenger: new Messenger<MathFns>({
 			conduit,
-			getLocalEndpoint: () => makeEndpoint({fns: math.fns}),
+			getLocalEndpoint: async() => makeEndpoint({fns: math.fns}),
 		}),
 	}
 }

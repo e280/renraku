@@ -22,9 +22,9 @@
     ```ts
     import Renraku from "@e280/renraku"
 
-    export type MyFns = ReturnType<typeof rpc>
+    export type MyFns = ReturnType<typeof myRpc>
 
-    export const rpc = Renraku.asHttpRpc(({request, ip}) => ({
+    export const myRpc = Renraku.asRpc(({request, ip}) => ({
       async now() {
         return Date.now()
       },
@@ -48,9 +48,9 @@
 1. 🍏 **make an http server** — `server.ts`
     ```ts
     import Renraku from "@e280/renraku"
-    import {rpc} from "./rpc.js"
+    import {myRpc} from "./rpc.js"
 
-    await new Renraku.Server({rpc})
+    await new Renraku.Server({rpc: myRpc})
       .listen(8000)
     ```
     - your functions are served on a `POST /` json-rpc 2.0 endpoint
@@ -82,92 +82,105 @@ renraku websocket apis are *bidirectional,* meaning the serverside and clientsid
 
 and yes — a single renraku server can support an http rpc endpoint *and* a websocket api simultaneously.
 
-1. 🍏 **formalize your serverside and clientside api types** — `types.ts`  
-    (these explicit types are needed so typescript doesn't get confused about circularities)
+1. 🍏 **make your serverside** — `serverside.ts`
     ```ts
+    import Renraku from "@e280/renraku"
+    import type {Clientside} from "./clientside.js"
+
     export type Serverside = {
       now(): Promise<number>
     }
 
+    export const serverside = (
+      Renraku.asAccepter<Serverside, Clientside>(async connection => {
+        console.log("connected", connection.ip)
+        return {
+          fns: {
+            async now() {
+              // 🫨 omg we're calling the clientside from the serverside!
+              await connection.remote.sum(1, 2)
+              return Date.now()
+            },
+          },
+          disconnected: () => {
+            console.log("disconnected", connection.ip)
+          },
+        }
+      })
+    )
+    ```
+1. 🍏 **make your clientside** — `clientside.ts`
+    ```ts
+    import Renraku from "@e280/renraku"
+    import type {Serverside} from "./serverside.js"
+
     export type Clientside = {
       sum(a: number, b: number): Promise<number>
     }
-    ```
-1. 🍏 **implement your serverside and clientside fns** (they can call each other!) — `rpcs.ts`
-    ```ts
-    import Renraku from "@e280/renraku"
-    import type {Clientside, Serverside} from "./types.js"
 
-    export const serversideRpc = (
-      Renraku.asWsRpc<Serverside, Clientside>(clientside => ({
-        async now() {
-          // 🫨 omg we're calling the clientside from the serverside!
-          await clientside.sum(1, 2)
-          return Date.now()
-        },
-      }))
-    )
-
-    export const clientsideRpc = (
-      Renraku.asWsRpc<Clientside, Serverside>(serverside => ({
-        async sum(a: number, b: number) {
-          return a + b
-        },
-      }))
+    export const clientside = (
+      Renraku.asConnector<Clientside, Serverside>(async connection => {
+        console.log("connected")
+        return {
+          fns: {
+            async sum(a: number, b: number) {
+              return a + b
+            },
+          },
+          disconnected: () => console.log("disconnected"),
+        }
+      })
     )
     ```
-1. 🍏 **make a websocket server** — `server.ts`
+1. 🍏 **run the websocket server** — `server.ts`
     ```ts
     import Renraku from "@e280/renraku"
-    import {serversideRpc} from "./rpcs.js"
-    import type {Clientside} from "./types.js"
+    import {serverside} from "./serverside.js"
 
-    await new Renraku.Server({
-      websocket: Renraku.websocket<Clientside>(async connection => ({
-        rpc: serversideRpc,
-        disconnected: () => {},
-      })),
-    }).listen(8000)
+    await new Renraku.Server({websocket: serverside})
+      .listen(8000)
     ```
-    - the `connection` object has a bunch of good stuff
-        ```ts
-        connection.ip // ip address of the client
-        connection.request // http request with headers and such
-        connection.socket // raw websocket instance
-
-        connection.rtt.latest // latest known ping time in milliseconds
-        connection.rtt.average // average of a handful of latest ping results
-        connection.rtt.on(rtt => {}) // subscribe to individual ping results
-
-        // remote for calling clientside fns
-        await connection.remote.sum(1, 2)
-
-        // kill this connection
-        connection.close()
-        ```
 1. 🍏 **connect as a client** — `client.ts`
     ```ts
     import Renraku from "@e280/renraku"
-    import {clientsideRpc} from "./rpcs.js"
-    import type {Serverside} from "./types.js"
+    import {clientside} from "./clientside.js"
 
-    const client = await Renraku.wsClient<Serverside>({
-      rpc: clientsideRpc,
+    const connection = await Renraku.wsConnect({
+      connector: clientside,
       socket: new WebSocket("ws://localhost:8000/"),
-      disconnected: () => console.error("disconnected"),
     })
 
     // call the serverside functionality
-    const result = await client.remote.now()
+    const result = await connection.remote.now()
       // 1753738662615
 
     // get the average ping time
-    client.rtt.average
+    connection.rtt.average
       // 99
 
     // kill the connection
-    client.close()
+    connection.close()
     ```
+1. 🍏 **the `connection` object has a bunch of good stuff**
+    - all connection objects have this stuff:
+      ```ts
+      connection.socket // raw websocket instance
+
+      connection.rtt.latest // latest known ping time in milliseconds
+      connection.rtt.average // average of a handful of latest ping results
+      connection.rtt.on(rtt => {}) // subscribe to individual ping results
+
+      // remote for calling clientside fns
+      await connection.remote.sum(1, 2)
+
+      // kill this connection
+      connection.close()
+      ```
+    - serverside connections also have HttpMeta stuff:
+      ```ts
+      connection.ip // ip address of the client
+      connection.request // http request with headers and such
+      ```
 
 <br/>
 
@@ -186,9 +199,7 @@ const server = new Renraku.Server({
 
   // expose websocket json-rpc api
   websocket: Renraku.websocket<Clientside>(async connection => ({
-    rpc: clientside => ({
-      hello: async() => "world",
-    }),
+    fns: {hello: async() => "hi"},
     disconnected: () => {},
   })),
 
@@ -384,7 +395,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
       allow: e => e.origin === "https://example.e280.org",
     }),
 
-    getLocalEndpoint: (remote, rig) => (
+    getLocalEndpoint: async(remote, rig) => (
       Renraku.makeEndpoint(myPopupFns)
         //                    ☝️
         //          exposed popup fns
@@ -405,9 +416,9 @@ the following examples will demonstrate using Messengers with WindowConduits for
       allow: e => e.origin === "https://example.e280.org",
     }),
 
-      //                                   local-side fns
-      //                                           👇
-    getLocalEndpoint: (remote, rig) => endpoint(myOpenerFns),
+      //                                      local-side fns
+      //                                              👇
+    getLocalEndpoint: async(remote, rig) => endpoint(myOpenerFns),
   })
 
   // calling a popup fn
@@ -425,7 +436,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
       allow: e => e.origin === "https://example.e280.org",
     }),
 
-    getLocalEndpoint: (remote, rig) => (
+    getLocalEndpoint: async(remote, rig) => (
       Renraku.makeEndpoint(myPopupFns)
         //                    ☝️
         //            remote-side fns

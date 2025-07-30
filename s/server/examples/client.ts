@@ -1,9 +1,8 @@
 
-import {ExServerside} from "./types.js"
+import {exampleRpc, exampleConnector, ExServerside} from "./logic.js"
 import {authorize} from "../../core/auth/authorize.js"
 import {httpRemote} from "../../transports/http/remote.js"
-import {wsClient} from "../../transports/websocket/client.js"
-import {exampleHttpRpc, exampleWsClientsideRpc} from "./rpcs.js"
+import {wsConnect} from "../../transports/websocket/connect.js"
 
 export async function exampleClient() {
 	let calls = 0
@@ -15,7 +14,7 @@ export async function exampleClient() {
 	// http json rpc api
 	//
 	try {
-		const service = httpRemote<ReturnType<typeof exampleHttpRpc>>({url: httpUrl})
+		const service = httpRemote<ReturnType<typeof exampleRpc>>({url: httpUrl})
 		const unlocked = service.unlocked
 		const locked = authorize(service.locked, async() => "hello")
 
@@ -35,9 +34,9 @@ export async function exampleClient() {
 	// web socket api
 	//
 	try {
-		const client = await wsClient<ExServerside>({
+		const client = await wsConnect({
 			socket: new WebSocket(wsUrl),
-			rpc: exampleWsClientsideRpc(rememberCall),
+			connector: exampleConnector(rememberCall),
 			disconnected: () => console.error("🟥 websocket disconnected"),
 		})
 

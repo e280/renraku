@@ -7,48 +7,56 @@ import {Remote} from "../../core/remote-proxy.js"
 import {LoggerTap} from "../../core/taps/logger.js"
 import {Fns, HttpMeta, Tap, WebSocketTaps} from "../../core/types.js"
 
-export type WsRpc<LocalFns extends Fns, RemoteFns extends Fns> = (remote: Remote<RemoteFns>) => LocalFns
-export const asWsRpc = <LocalFns extends Fns, RemoteFns extends Fns>(rpc: WsRpc<LocalFns, RemoteFns>) => rpc
+export type Connector<LocalFns extends Fns, RemoteFns extends Fns> = (
+	(connection: Connection<RemoteFns>) => Promise<Connret<LocalFns>>
+)
 
-export type WsRemoteOptions<ServerFns extends Fns> = {
+export const asConnector = <LocalFns extends Fns, RemoteFns extends Fns>(
+	connector: Connector<LocalFns, RemoteFns>
+) => connector
+
+export type Accepter<LocalFns extends Fns, RemoteFns extends Fns> = (
+	(connection: Connection<RemoteFns> & HttpMeta) => Promise<Connret<LocalFns>>
+)
+
+export const asAccepter = <LocalFns extends Fns, RemoteFns extends Fns>(
+	accepter: Accepter<LocalFns, RemoteFns>
+) => accepter
+
+export type WsConnectOptions<RemoteFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
-	rpc: WsRpc<any, ServerFns>
+	connector: Connector<any, RemoteFns>
 	disconnected: (error?: any) => void
 	tap?: Tap
 	timeout?: number
 }
 
-export type Connection<ClientFns extends Fns> = {
+export type Connection<RemoteFns extends Fns> = {
 	rtt: Rtt
-	socket: ws.WebSocket
-	remote: Remote<ClientFns>
-	close: () => void
+	socket: WebSocket | ws.WebSocket
+	remote: Remote<RemoteFns>
 	taps?: WebSocketTaps
-} & HttpMeta
+	detach: () => void
+	close: () => void
+}
 
-export type ConnectionReturns<ClientFns extends Fns> = {
-	rpc: WsRpc<any, ClientFns>
+export type Connret<LocalFns extends Fns> = {
+	fns: LocalFns
 	disconnected: (error?: any) => void
 }
 
-export type WsAccepter<ClientFns extends Fns> = (connection: Connection<ClientFns>) => Promise<ConnectionReturns<ClientFns>>
-
-export function websocket<ClientFns extends Fns>(accept: WsAccepter<ClientFns>) {
-	return accept
-}
-
-export type WsIntegrationOptions<ClientFns extends Fns> = {
-	accept: WsAccepter<ClientFns>
+export type WsIntegrationOptions<RemoteFns extends Fns> = {
+	accepter: Accepter<any, RemoteFns>
 	tap?: LoggerTap
 	timeout?: number
 	maxRequestBytes?: number
 }
 
-export type WsConnectorOptions<ClientFns extends Fns> = {
-	accept: WsAccepter<ClientFns>
+export type WsHandlerOptions<ClientFns extends Fns> = {
+	accepter: Accepter<any, ClientFns>
 	timeout?: number
 	tap?: LoggerTap
 }
 
-export type WsConnector = (socket: ws.WebSocket, request: http.IncomingMessage) => void
+export type WsHandler = (socket: ws.WebSocket, request: http.IncomingMessage) => void
 

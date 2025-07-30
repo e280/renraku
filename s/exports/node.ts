@@ -12,8 +12,8 @@ export * from "../transports/http/parts/transmuting.js"
 export * from "../transports/http/http-server.js"
 export * from "../transports/http/types.js"
 
-export * from "../transports/websocket/connector.js"
+export * from "../transports/websocket/handler.js"
 export * from "../transports/websocket/integration.js"
-export * from "../transports/websocket/client.js"
+export * from "../transports/websocket/connect.js"
 export * from "../transports/websocket/types.js"
 

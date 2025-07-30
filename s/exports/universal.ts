@@ -20,6 +20,6 @@ export * from "../tools/simple-headers.js"
 
 export * from "../transports/http/remote.js"
 export * from "../transports/messenger/index.js"
-export * from "../transports/websocket/client.js"
+export * from "../transports/websocket/connect.js"
 export * from "../transports/websocket/types.js"
 
