@@ -102,7 +102,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
               return Date.now()
             },
           },
-          disconnected: () => {
+          disconnected() {
             console.log("disconnected", connection.ip)
           },
         }
@@ -127,7 +127,9 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
               return a + b
             },
           },
-          disconnected: () => console.log("disconnected"),
+          disconnected() {
+            console.log("disconnected")
+          },
         }
       })
     )
@@ -154,7 +156,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
     const result = await connection.remote.now()
       // 1753738662615
 
-    // get the average ping time
+    // get the average ping time in milliseconds
     connection.rtt.average
       // 99
 
@@ -170,7 +172,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
       connection.rtt.average // average of a handful of latest ping results
       connection.rtt.on(rtt => {}) // subscribe to individual ping results
 
-      // remote for calling clientside fns
+      // remote for calling fns on the other side
       await connection.remote.sum(1, 2)
 
       // kill this connection
@@ -188,9 +190,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
 
 ### all `Renraku.Server` options
 ```ts
-import Renraku from "@e280/renraku"
-
-const server = new Renraku.Server({
+new Renraku.Server({
 
   // expose http json-rpc api
   rpc: ({request, ip}) => ({
@@ -200,8 +200,12 @@ const server = new Renraku.Server({
   // expose websocket json-rpc api
   websocket: Renraku.asAccepter<Serverside, Clientside>(
     async connection => ({
-      fns: {hello: async() => "hi"},
-      disconnected: () => {},
+      fns: {
+        async hello() {
+          return "hi"
+        },
+      },
+      disconnected() {},
     })
   ),
 
@@ -269,8 +273,6 @@ const server = new Renraku.Server({
 ### `secure` and `authorize` auth helpers
 - use the `secure` function to section off parts of your api that require auth
   ```ts
-  import Renraku from "@e280/renraku"
-
   // auth param can be any type you want
   const secured = Renraku.secure(async(auth: string) => {
 
@@ -290,8 +292,6 @@ const server = new Renraku.Server({
   ```
 - use the `authorize` function on the clientside to provide the auth param upfront
   ```ts
-  import Renraku from "@e280/renraku"
-
   const authorized = Renraku.authorize(secured, async() => "hello")
 
   // now the auth is magically provided for each call
