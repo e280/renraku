@@ -198,10 +198,12 @@ const server = new Renraku.Server({
   }),
 
   // expose websocket json-rpc api
-  websocket: Renraku.websocket<Clientside>(async connection => ({
-    fns: {hello: async() => "hi"},
-    disconnected: () => {},
-  })),
+  websocket: Renraku.asAccepter<Serverside, Clientside>(
+    async connection => ({
+      fns: {hello: async() => "hi"},
+      disconnected: () => {},
+    })
+  ),
 
   // supply a logger to get verbose console output (only logs errors by default)
   tap: new Renraku.LoggerTap(),
@@ -283,7 +285,7 @@ const server = new Renraku.Server({
     }
   })
 
-  // 'secure' augments the functons to require the 'auth' param first
+  // 'secure' augments the functions to require the 'auth' param first
   await secured.sum("hello", 1, 2)
   ```
 - use the `authorize` function on the clientside to provide the auth param upfront
@@ -318,7 +320,7 @@ const server = new Renraku.Server({
   await remote.sum[tune]({notify: true})(1, 2)
     // undefined
   ```
-  - this is how we do a json-rpc protocol 'notification' request, which won't return a result (for fire-and-forget actions)
+  - this is how we do a json-rpc protocol 'notification' request, which skips the response (for fire-and-forget actions)
   - sometimes responses are not needed, so this can be a nice little optimization
 - `tune` a call with `transfer`
   ```ts
