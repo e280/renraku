@@ -16,7 +16,7 @@ export class Server extends HttpServer {
 		const rpcListener = makeEndpointListener({
 			...options,
 			tap,
-			rpc: options.rpc ?? (() => ({})),
+			rpc: options.rpc ?? (async() => ({})),
 		})
 
 		super({

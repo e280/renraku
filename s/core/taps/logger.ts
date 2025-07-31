@@ -1,6 +1,6 @@
 
 import {Logger} from "@e280/sten"
-import {Tap, HttpMeta, WebSocketTaps} from "../types.js"
+import {Tap, HttpMeta, DoubleTap} from "../types.js"
 import {RandomUserEmojis} from "../../tools/random-user-emojis.js"
 
 export class LoggerTap extends Logger implements Tap {
@@ -43,7 +43,28 @@ export class LoggerTap extends Logger implements Tap {
 		}
 	}
 
-	webSocket(meta: HttpMeta): WebSocketTaps {
+	double(n: string): DoubleTap {
+		const info = this.colors.yellow(n)
+		const g = this.colors.yellow
+		const prep = (isRemote: boolean): Tap => {
+			const label = info + " " + (
+				isRemote
+					? g(" <-")
+					: g(" ->")
+			)
+			return {
+				error: this.error.bind(this),
+				request: o => this.request({...o, label}),
+				rpcError: o => this.rpcError({...o, label}),
+			}
+		}
+		return {
+			remote: prep(true),
+			local: prep(false),
+		}
+	}
+
+	websocket(meta: HttpMeta): DoubleTap {
 		const info = this.#requestInfo(meta)
 		const emoji = this.#emojis.pull()
 		const g = this.colors.yellow

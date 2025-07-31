@@ -3,7 +3,6 @@ import {defer} from "@e280/stz"
 import {Fns} from "../../core/types.js"
 import {defaults} from "../../defaults.js"
 import {Rtt} from "../../tools/pingponger.js"
-import {makeEndpoint} from "../../core/endpoint.js"
 import {ipAddress} from "../../tools/ip-address.js"
 import {Messenger} from "../messenger/messenger.js"
 import {WsHandler, WsHandlerOptions} from "./types.js"
@@ -15,7 +14,7 @@ export function wsHandler<ClientFns extends Fns>(
 
 	return async(socket, request) => {
 		const ip = ipAddress(request)
-		const taps = tap?.webSocket({ip, request})
+		const taps = tap?.websocket({ip, request})
 
 		function detach() {
 			conduit.dispose()
@@ -48,11 +47,8 @@ export function wsHandler<ClientFns extends Fns>(
 		const messenger = new Messenger<ClientFns>({
 			conduit,
 			timeout,
-			tap: taps?.remote,
-			getLocalEndpoint: async() => makeEndpoint({
-				fns: (await deferred.promise).fns,
-				tap: taps?.local,
-			}),
+			taps,
+			rpc: async() => (await deferred.promise).fns,
 		})
 
 		await conduit.pingponger.onRtt.next()

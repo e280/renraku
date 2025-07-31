@@ -5,10 +5,6 @@ import {JsonRpc} from "../../../core/json-rpc.js"
 import {Channel, ChannelMessage} from "../types.js"
 import {ResponseWaiter} from "./response-waiter.js"
 
-export class Rig {
-	transfer: Transferable[] | undefined = undefined
-}
-
 export function onMessage(channel: Channel, fn: (e: ChannelMessage) => void) {
 	channel.addEventListener("message", fn)
 	return () => channel.removeEventListener("message", fn)

@@ -5,7 +5,7 @@ import type * as http from "node:http"
 import {Rtt} from "../../tools/pingponger.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {LoggerTap} from "../../core/taps/logger.js"
-import {Fns, HttpMeta, Tap, WebSocketTaps} from "../../core/types.js"
+import {Fns, HttpMeta, Tap, DoubleTap} from "../../core/types.js"
 
 export type Connector<LocalFns extends Fns, RemoteFns extends Fns> = (
 	(connection: Connection<RemoteFns>) => Promise<Connret<LocalFns>>
@@ -35,7 +35,7 @@ export type Connection<RemoteFns extends Fns> = {
 	rtt: Rtt
 	socket: WebSocket | ws.WebSocket
 	remote: Remote<RemoteFns>
-	taps?: WebSocketTaps
+	taps?: DoubleTap
 	detach: () => void
 	close: () => void
 }

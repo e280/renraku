@@ -6,12 +6,12 @@ import {Route} from "../transports/http/parts/routing.js"
 import {Accepter} from "../transports/websocket/types.js"
 import {CorsConfig} from "../transports/http/parts/transmuting.js"
 
-export type Rpc<F extends Fns = any> = (meta: HttpMeta) => F
-export const asRpc = <F extends Fns = any>(rpc: Rpc<F>) => rpc
+export type Rpc<F extends Fns> = (meta: HttpMeta) => Promise<F>
+export const asRpc = <F extends Fns>(rpc: Rpc<F>) => rpc
 
-export type ServerOptions<ClientFns extends Fns = any> = {
-	rpc?: Rpc
-	websocket?: Accepter<any, ClientFns>
+export type ServerOptions = {
+	rpc?: Rpc<any>
+	websocket?: Accepter<any, any>
 	tap?: LoggerTap
 	cors?: CorsConfig
 	timeout?: number

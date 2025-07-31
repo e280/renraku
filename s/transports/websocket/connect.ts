@@ -2,7 +2,6 @@
 import {Fns} from "../../core/types.js"
 import {defaults} from "../../defaults.js"
 import {Rtt} from "../../tools/pingponger.js"
-import {makeEndpoint} from "../../core/endpoint.js"
 import {Messenger} from "../messenger/messenger.js"
 import {Connection, WsConnectOptions} from "./types.js"
 import {WebsocketConduit} from "../messenger/conduits/websocket.js"
@@ -41,13 +40,11 @@ export async function wsConnect<RemoteFns extends Fns>(
 	const rtt = new Rtt(conduit.pingponger)
 
 	const messenger = new Messenger<RemoteFns>({
-		tap,
+		// TODO taps
+		taps: {remote: tap, local: tap},
 		conduit,
 		timeout,
-		getLocalEndpoint: async() => makeEndpoint({
-			tap,
-			fns: connret.fns,
-		}),
+		rpc: async() => connret.fns,
 	})
 
 	const connection: Connection<RemoteFns> = {

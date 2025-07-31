@@ -1,14 +1,16 @@
 
 import {Trash} from "@e280/stz"
 
+import {MessengerMeta} from "./parts/meta.js"
 import {defaults} from "../../defaults.js"
 import {MessengerOptions} from "./types.js"
 import {JsonRpc} from "../../core/json-rpc.js"
 import {makeRemote} from "../../core/remote.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {Endpoint, Fns} from "../../core/types.js"
+import {makeEndpoint} from "../../core/endpoint.js"
 import {ResponseWaiter} from "./parts/response-waiter.js"
-import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint, Rig} from "./parts/helpers.js"
+import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint} from "./parts/helpers.js"
 
 /**
  * Establish a renraku remote that communicates over the given conduit.
@@ -23,7 +25,7 @@ export class Messenger<xRemoteFns extends Fns> {
 	#waiter: ResponseWaiter
 	#trash = new Trash()
 
-	constructor(public options: MessengerOptions<xRemoteFns>) {
+	constructor(private options: MessengerOptions<xRemoteFns>) {
 		const {conduit} = options
 
 		this.#waiter = new ResponseWaiter(options.timeout ?? defaults.timeout)
@@ -35,15 +37,15 @@ export class Messenger<xRemoteFns extends Fns> {
 
 		this.remote = makeRemote<xRemoteFns>({
 			endpoint: this.remoteEndpoint,
-			tap: options.tap,
+			tap: options.taps?.remote,
 		})
 
 		this.#trash.add(conduit.recv.sub(m => this.recv(m)))
 	}
 
 	async recv(incoming: JsonRpc.Bidirectional) {
-		const rig = new Rig()
-		const {conduit, getLocalEndpoint} = this.options
+		const rig = new MessengerMeta<xRemoteFns>(this.remote)
+		const {conduit, rpc: getLocalEndpoint} = this.options
 
 		const {requests, responses} = interpretIncoming(incoming)
 
@@ -53,7 +55,8 @@ export class Messenger<xRemoteFns extends Fns> {
 		if (!getLocalEndpoint)
 			return
 
-		const endpoint = await getLocalEndpoint(this.remote, rig)
+		const fns = await getLocalEndpoint(rig)
+		const endpoint = makeEndpoint({fns, tap: this.options.taps?.local})
 		const outgoing = await handleIncomingRequests(endpoint, requests)
 		if (outgoing)
 			await conduit.sendResponse(outgoing, rig.transfer)

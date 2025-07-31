@@ -1,14 +1,19 @@
 
-import {Rig} from "./parts/helpers.js"
+import {MessengerMeta} from "./parts/meta.js"
 import {Conduit} from "./conduits/conduit.js"
-import {Remote} from "../../core/remote-proxy.js"
-import {Endpoint, Fns, Tap} from "../../core/types.js"
+import {DoubleTap, Fns} from "../../core/types.js"
+
+export type MessengerRpc<F extends Fns> = (meta: MessengerMeta<F>) => Promise<Fns>
+
+export function asMessengerRpc<F extends Fns>(mrpc: MessengerRpc<F>) {
+	return mrpc
+}
 
 export type MessengerOptions<xRemoteFns extends Fns> = {
 	conduit: Conduit
-	tap?: Tap
+	taps?: DoubleTap
 	timeout?: number
-	getLocalEndpoint?: (remote: Remote<xRemoteFns>, rig: Rig) => Promise<Endpoint>
+	rpc?: MessengerRpc<xRemoteFns>
 }
 
 export type ChannelMessage<D = any> = {data: D, origin: string}

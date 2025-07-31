@@ -10,6 +10,12 @@
 
 ### v0.5.0-24
 - 🟥 rename `fns` helper to `asFns`
+- 🟥 make `Rpc` and `asRpc` async
+- 🟥 replace `Messenger`'s `getLocalEndpoint` with `rpc` of type `MessengerRpc`
+- 🟥 `Rig` replaced by `MessengerMeta`
+- 🟥 obscure renames:
+  - `WebSocketTaps` renamed to `DoubleTap`
+  - `tap.webSocket` renamed to `tap.websocket`
 
 ### v0.5.0-23
 - 🟥 lots of renames

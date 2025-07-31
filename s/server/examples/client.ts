@@ -1,5 +1,5 @@
 
-import {exampleRpc, exampleConnector, ExServerside} from "./logic.js"
+import {exampleConnector, ExampleRpc} from "./logic.js"
 import {authorize} from "../../core/auth/authorize.js"
 import {httpRemote} from "../../transports/http/remote.js"
 import {wsConnect} from "../../transports/websocket/connect.js"
@@ -14,7 +14,7 @@ export async function exampleClient() {
 	// http json rpc api
 	//
 	try {
-		const service = httpRemote<ReturnType<typeof exampleRpc>>({url: httpUrl})
+		const service = httpRemote<ExampleRpc>({url: httpUrl})
 		const unlocked = service.unlocked
 		const locked = authorize(service.locked, async() => "hello")
 

@@ -31,7 +31,7 @@ export type Tap = {
 	}) => Promise<void>
 }
 
-export type WebSocketTaps = {
+export type DoubleTap = {
 	local?: Tap
 	remote?: Tap
 }

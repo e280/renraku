@@ -14,8 +14,10 @@ export type ExClientside = AsFns<{
 	sum(a: number, b: number): Promise<number>
 }>
 
+export type ExampleRpc = Awaited<ReturnType<typeof exampleRpc>>
+
 /** example http json-rpc server fns */
-export const exampleRpc = asRpc(_meta => ({
+export const exampleRpc = asRpc(async _meta => ({
 
 	// unauthenticated service
 	unlocked: {
