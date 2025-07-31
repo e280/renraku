@@ -7,7 +7,7 @@ export type Fns = {[key: string]: Fn | Fns}
 export type Service = Record<string, Fn>
 export type AsFns<F extends Fns> = F
 
-export function fns<F extends Fns>(f: F) {
+export function asFns<F extends Fns>(f: F) {
 	return f
 }
 

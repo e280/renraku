@@ -28,7 +28,7 @@ export function makeEndpointListener(options: EndpointListenerOptions): http.Req
 			const e = makeEndpoint({
 				tap,
 				fns: options.rpc({
-					request: request,
+					request,
 					ip: ipAddress(request),
 				}),
 			})

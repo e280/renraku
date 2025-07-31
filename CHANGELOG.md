@@ -8,6 +8,9 @@
 
 ## v0.5
 
+### v0.5.0-24
+- 🟥 rename `fns` helper to `asFns`
+
 ### v0.5.0-23
 - 🟥 lots of renames
   - websocket stuff heavily affected

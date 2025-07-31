@@ -9,7 +9,7 @@
 📦 `npm install @e280/renraku`  
 💡 async functions as api  
 🔌 http, websockets, postmessage, anything  
-↔️ supports bidirectionality  
+↔️ ready for bidirectionality  
 🏛️ json-rpc 2.0  
 🌐 node + browser  
 🤖 for web workers, see [comrade](https://github.com/e280/comrade)  
@@ -74,6 +74,19 @@
     await remote.nesty.is.besty.mul(2, 3)
       // 6
     ```
+
+> ### 👹 *roll your own: node http integration*
+> you can produce an ordinary node http `RequestListener` that calls your rpc functions:
+> ```ts
+> import Renraku from "@e280/renraku"
+> import * as http from "node:http"
+> import {myRpc} from "./rpc.js"
+>
+> const requestListener = Renraku.makeEndpointListener({rpc: myRpc})
+>
+> new http.Server(requestListener)
+>   .listen(8000)
+> ```
 
 <br/>
 
@@ -184,6 +197,18 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
       connection.ip // ip address of the client
       connection.request // http request with headers and such
       ```
+
+> ### 👹 *roll your own: node http integration*
+> the `WsIntegration` that provides an `upgrader` that you can plug into a stock node http server:
+> ```ts
+> import Renraku from "@e280/renraku"
+> import * as http from "node:http"
+> import {serverside} from "./serverside.js"
+>
+> const server = new http.Server()
+> const websockets = new Renraku.WsIntegration({accepter: serverside})
+> server.on("upgrade", websockets.upgrader)
+> ```
 
 <br/>
 
@@ -354,95 +379,158 @@ new Renraku.Server({
 - [`BroadcastConduit`](./s/transports/messenger/conduits/broadcast.ts) — for broadcast channel
 - [`PostableConduit`](./s/transports/messenger/conduits/postable.ts) — for post message channels like web workers
 - [`WindowConduit`](./s/transports/messenger/conduits/window.ts) — for window post message channels
-- [`WebsocketConduit`](./s/transports/messenger/conduits/websocket.ts) — for low-level websockets (you should use `wsClient` helper instead)
+- [`WebsocketConduit`](./s/transports/messenger/conduits/websocket.ts) — used under the hood for websockets (but you should use `wsConnect` helper instead)
 
 the following examples will demonstrate using Messengers with WindowConduits for a common popup api example.
 
-### one-way messenger, for calling fns on a popup
-- we'll presume you make a `myPopup` via `window.open`
-- create a messenger on the parent window (it sends requests)
+### incredible high-effort diagram
+```
++----ALPHA----+      +----BRAVO----+
+|             |      |             |
+|  [Conduit]<---------->[Conduit]  |
+|      |      |      |      |      |
+| [Messenger] |      | [Messenger] |
+|             |      |             |
++-------------+      +-------------+
+```
+- "alpha and bravo" could be a "clientside and serverside" or "window and popup" or whatever
+- the point is, each side gets its own conduit and its own messenger
+- the conduits are literally talking to each other
+- the messenger's job is to deal with json-rpc and provide you with a callable `remote` and execute your local rpc endpoint
+
+### example — calling fns on a popup — one-way messenger
+- `api.ts` — make a popup api
   ```ts
-    //                               remote fns type
-    //                                       👇
-  const messenger = new Renraku.Messenger<MyPopupFns>({
-    conduit: new Renraku.conduits.WindowConduit({
-      localWindow: window,
+  import Renraku from "@e280/renraku"
 
-      // who we're talking to (a popup we made via window.open)
-      targetWindow: myPopup,
+  export type PopupFns = typeof popupFns
+  export const appOrigin = "https://example.e280.org"
 
-      targetOrigin: "https://example.e280.org",
-      allow: e => e.origin === "https://example.e280.org",
-    }),
+  export const popupFns = Renraku.asFns({
+    async sum(a: number, b: number) {
+      return a + b
+    },
   })
-
-  // calling a popup fn
-  await messenger.remote.sum(2, 3) // 5
   ```
-- create a messenger on the popup window (it sends responses)
+- `popup.ts` — in the popup, we create a messenger to expose our fns
   ```ts
+  import Renraku from "@e280/renraku"
+  import {popupFns, appOrigin} from "./api.js"
+
     //                             no remote fns
     //                                    👇
   const messenger = new Renraku.Messenger<{}>({
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
-
-      // who we're talking to (the opener)
       targetWindow: window.opener,
-
-      targetOrigin: "https://example.e280.org",
-      allow: e => e.origin === "https://example.e280.org",
+      targetOrigin: appOrigin,
+      allow: e => e.origin === appOrigin,
     }),
     getLocalEndpoint: async(remote, rig) => (
-      Renraku.makeEndpoint(myPopupFns)
+      Renraku.makeEndpoint(popupFns)
         //                    ☝️
         //          exposed popup fns
     ),
   })
   ```
-
-### two-way messenger, between a main window and a popup
-- create a messenger on the opener window
+- `parent.ts` — in the parent window, we create a messenger to call our fns
   ```ts
-    //                          remote-side fns type
+  import Renraku from "@e280/renraku"
+  import {PopupFns, appOrigin} from "./api.js"
+
+  const popup = window.open(`${appOrigin}/popup`)
+
+    //                               remote fns type
     //                                       👇
   const messenger = new Renraku.Messenger<MyPopupFns>({
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
-      targetWindow: myPopup,
-      targetOrigin: "https://example.e280.org",
-      allow: e => e.origin === "https://example.e280.org",
+      targetWindow: popup,
+      targetOrigin: appOrigin,
+      allow: e => e.origin === appOrigin,
+    }),
+  })
+  ```
+  now we can call the popup's fns:
+  ```ts
+  await messenger.remote.sum(2, 3)
+    // 5
+  ```
+
+### example — bidirectional parent and popup calls — two-way messenger
+- `api.ts` — make both apis
+  ```ts
+  import Renraku from "@e280/renraku"
+
+  export const appOrigin = "https://example.e280.org"
+
+  export type PopupFns = typeof popupFns
+  export const popupFns = Renraku.asFns({
+    async sum(a: number, b: number) {
+      return a + b
+    },
+  })
+
+  export type ParentFns = typeof parentFns
+  export const parentFns = Renraku.asFns({
+    async mul(a: number, b: number) {
+      return a * b
+    },
+  })
+  ```
+- `popup.ts` — popup window side
+  ```ts
+  import Renraku from "@e280/renraku"
+  import {appOrigin, ParentFns, popupFns} from "./api.js"
+
+    //                           local-side fns type
+    //                                       👇
+  const messenger = new Renraku.Messenger<ParentFns>({
+    conduit: new Renraku.conduits.WindowConduit({
+      localWindow: window,
+      targetWindow: window.opener,
+      targetOrigin: appOrigin,
+      allow: e => e.origin === appOrigin,
     }),
     getLocalEndpoint: async(remote, rig) => (
-      Renraku.makeEndpoint(myOpenerFns)
+      Renraku.makeEndpoint(popupFns)
+        //                   ☝️
+        //           remote-side fns
+    ),
+  })
+  ```
+  now the popup can call parent fns
+  ```ts
+  await messenger.remote.mul(2, 3)
+    // 6
+  ```
+- `parent.ts` — parent window side
+  ```ts
+  import Renraku from "@e280/renraku"
+  import {appOrigin, PopupFns, parentFns} from "./api.js"
+
+  const popup = window.open(`${appOrigin}/popup`)
+
+    //                          remote-side fns type
+    //                                       👇
+  const messenger = new Renraku.Messenger<PopupFns>({
+    conduit: new Renraku.conduits.WindowConduit({
+      localWindow: window,
+      targetWindow: popup,
+      targetOrigin: appOrigin,
+      allow: e => e.origin === appOrigin,
+    }),
+    getLocalEndpoint: async(remote, rig) => (
+      Renraku.makeEndpoint(parentFns)
         //                    ☝️
         //            local-side fns
     ),
   })
-
-  // calling a popup fn
-  await messenger.remote.sum(2, 3) // 5
   ```
-- create a messenger on the popup side, which will respond
+  now the parent can call popup fns
   ```ts
-    //                               local-side fns type
-    //                                           👇
-  const messenger = new Renraku.Messenger<MyOpenerFns>({
-    conduit: new Renraku.conduits.WindowConduit({
-      localWindow: window,
-      targetWindow: window.opener,
-      targetOrigin: "https://example.e280.org",
-      allow: e => e.origin === "https://example.e280.org",
-    }),
-    getLocalEndpoint: async(remote, rig) => (
-      Renraku.makeEndpoint(myPopupFns)
-        //                    ☝️
-        //            remote-side fns
-    ),
-  })
-
-  // calling an opener fn
-  await messenger.remote.mul(2, 3) // 6
+  await messenger.remote.sum(2, 3)
+    // 5
   ```
 
 <br/>
