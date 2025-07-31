@@ -45,7 +45,7 @@ export class Messenger<xRemoteFns extends Fns = any> {
 	}
 
 	async recv(incoming: JsonRpc.Bidirectional) {
-		const rig = new MessengerMeta<xRemoteFns>(this.remote)
+		const meta = new MessengerMeta<xRemoteFns>(this.remote)
 		const {conduit, rpc, tap} = this.options
 
 		const {requests, responses} = interpretIncoming(incoming)
@@ -56,7 +56,7 @@ export class Messenger<xRemoteFns extends Fns = any> {
 		if (!rpc)
 			return
 
-		const fns = await rpc(rig)
+		const fns = await rpc(meta)
 		const endpoint = makeEndpoint({
 			fns,
 			tap: tap && bindTap(tap, {remote: false}),
@@ -64,7 +64,7 @@ export class Messenger<xRemoteFns extends Fns = any> {
 
 		const outgoing = await handleIncomingRequests(endpoint, requests)
 		if (outgoing)
-			await conduit.sendResponse(outgoing, rig.transfer)
+			await conduit.sendResponse(outgoing, meta.transfer)
 	}
 
 	dispose() {

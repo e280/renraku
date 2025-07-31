@@ -4,14 +4,14 @@
 > ***"an api should just be a bunch of async functions, damn it!"***  
 > &nbsp; &nbsp; — *Chase Moskal, many years ago*
 
-**renraku** is a magic typescript json-rpc library.  
+**renraku** is a magic typescript json-rpc library that makes life joyous again.  
 
 📦 `npm install @e280/renraku`  
 💡 async functions as api  
 🔌 http, websockets, postmessage, anything  
-↔️ ready for bidirectionality  
-🏛️ json-rpc 2.0  
+↔️ fully stoked for bidirectionality  
 🌐 node + browser  
+🏛️ json-rpc 2.0  
 🤖 for web workers, see [comrade](https://github.com/e280/comrade)  
 💻 *an https://e280.org/ project*  
 
@@ -455,15 +455,20 @@ the following examples will demonstrate using Messengers with WindowConduits for
   import Renraku from "@e280/renraku"
 
   export const appOrigin = "https://example.e280.org"
-
   export type PopupFns = Awaited<ReturnType<typeof popupRpc>>
+  export type ParentFns = Awaited<ReturnType<typeof parentRpc>>
+
   export const popupRpc = Renraku.asMessengerRpc(async meta => ({
     async sum(a: number, b: number) {
+
+      // 🧐 yes, we can call the other side
+      await meta.remote.mul(2, 3)
+        // 6
+
       return a + b
     },
   }))
 
-  export type ParentFns = Awaited<ReturnType<typeof parentRpc>>
   export const parentRpc = Renraku.asMessengerRpc(async meta => ({
     async mul(a: number, b: number) {
       return a * b
@@ -513,10 +518,25 @@ the following examples will demonstrate using Messengers with WindowConduits for
     // 5
   ```
 
+### messenger zero-copy transferables
+
+`Messenger` is often used across postMessage boundaries, to talk to popups, iframes, or web wokers.
+
+as such, you can set `meta.transfer` array, so you can return [transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects):
+```ts
+export const popupRpc = Renraku.asMessengerRpc(async meta => ({
+  async getData() {
+    const bytes = new Uint8Array(0xB0, 0x0B, 0x1E, 0x5)
+    meta.transfer = [bytes]
+    return bytes // ⚡ transferred speedy-fastly
+  },
+}))
+```
+
 <br/>
 
 ## ⛩️ *RENRAKU core primitives*
-- *TODO* we should write more in depth docs about the core tools here
+- *TODO* lol we should write more in depth docs about the core tools here
 - [`makeEndpoint(~)`](./s/core/endpoint.ts) — make a json-rpc endpoint fn for a group of async fns
 - [`makeRemote(~)`](./s/core/remote.ts) — make a nested proxy tree of invokable fns, given an endpoint
 - [`makeMock(~)`](./s/core/mock.ts) — sugar for making an endpoint and then a remote for the given fns
