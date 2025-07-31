@@ -4,7 +4,7 @@ export * from "./universal.js"
 export * from "../server/server.js"
 export * from "../server/types.js"
 
-export * from "../transports/http/parts/endpoint-listener.js"
+export * from "../transports/http/parts/request-listener.js"
 export * from "../transports/http/parts/read-stream.js"
 export * from "../transports/http/parts/responding.js"
 export * from "../transports/http/parts/routing.js"

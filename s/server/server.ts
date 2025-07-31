@@ -6,14 +6,14 @@ import {respond} from "../transports/http/parts/responding.js"
 import {route, router} from "../transports/http/parts/routing.js"
 import {transmuters} from "../transports/http/parts/transmuting.js"
 import {WsIntegration} from "../transports/websocket/integration.js"
-import {makeEndpointListener} from "../transports/http/parts/endpoint-listener.js"
+import {makeRequestListener} from "../transports/http/parts/request-listener.js"
 
 export class Server extends HttpServer {
 	#ws: WsIntegration<any> | undefined
 
 	constructor(options: ServerOptions) {
 		const tap = options.tap ?? new LoggerTap()
-		const rpcListener = makeEndpointListener({
+		const rpcListener = makeRequestListener({
 			...options,
 			tap,
 			rpc: options.rpc ?? (async() => ({})),

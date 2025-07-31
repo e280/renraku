@@ -23,9 +23,9 @@
     ```ts
     import Renraku from "@e280/renraku"
 
-    export type MyFns = ReturnType<typeof myRpc>
+    export type MyFns = Awaited<ReturnType<typeof myRpc>>
 
-    export const myRpc = Renraku.asRpc(({request, ip}) => ({
+    export const myRpc = Renraku.asRpc(async meta => ({
       async now() {
         return Date.now()
       },
@@ -45,6 +45,8 @@
       },
     }))
     ```
+    - `meta.request` is the http node request object (with headers and stuff)
+    - `meta.ip` is the ip address associated with the request
     - for input validation, you should use [zod](https://github.com/colinhacks/zod) or something
 1. 🍏 **make an http server** — `server.ts`
     ```ts
@@ -82,7 +84,7 @@
 > import * as http from "node:http"
 > import {myRpc} from "./rpc.js"
 >
-> const requestListener = Renraku.makeEndpointListener({rpc: myRpc})
+> const requestListener = Renraku.makeRequestListener({rpc: myRpc})
 >
 > new http.Server(requestListener)
 >   .listen(8000)

@@ -10,6 +10,9 @@
 
 ### v0.5.0-24
 - 🟥 renames:
+  - `makeEndpointListener` => `makeRequestListener`
+  - `EndpointListenerOptions` => `RequestListenerOptions`
+- 🟥 renames:
   - `Accepter` => `WsAccepter`
   - `Connector` => `WsAccepter`
   - `asAccepter` => `asWsAccepter`

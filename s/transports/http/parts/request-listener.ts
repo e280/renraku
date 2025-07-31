@@ -10,14 +10,14 @@ import {ErrorTap} from "../../../core/taps/error.js"
 import {makeEndpoint} from "../../../core/endpoint.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 
-export type EndpointListenerOptions = {
+export type RequestListenerOptions = {
 	rpc: Rpc<any>
 	tap?: Tap
 	timeout?: number
 	maxRequestBytes?: number
 }
 
-export function makeEndpointListener(options: EndpointListenerOptions): http.RequestListener {
+export function makeRequestListener(options: RequestListenerOptions): http.RequestListener {
 	const tap = options.tap ?? new ErrorTap()
 	const maxRequestBytes = options.maxRequestBytes ?? defaults.maxRequestBytes
 
