@@ -76,7 +76,7 @@
     ```
 
 > ### 👹 *roll your own: node http integration*
-> you can produce an ordinary node http `RequestListener` that calls your rpc functions:
+> if you're feeling spartan, you can produce an ordinary node http `RequestListener` for your rpc functions:
 > ```ts
 > import Renraku from "@e280/renraku"
 > import * as http from "node:http"
@@ -198,8 +198,8 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
       connection.request // http request with headers and such
       ```
 
-> ### 👹 *roll your own: node http integration*
-> the `WsIntegration` that provides an `upgrader` that you can plug into a stock node http server:
+> ### 👹 *roll your own: websocket upgrader integration*
+> `WsIntegration` provides an `upgrader` that you can plug into a stock node http server:
 > ```ts
 > import Renraku from "@e280/renraku"
 > import * as http from "node:http"
