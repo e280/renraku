@@ -1,7 +1,7 @@
 
 import {MessengerMeta} from "./parts/meta.js"
 import {Conduit} from "./conduits/conduit.js"
-import {DoubleTap, Fns} from "../../core/types.js"
+import {Tap, Fns} from "../../core/types.js"
 
 export type MessengerRpc<F extends Fns> = (meta: MessengerMeta<F>) => Promise<Fns>
 
@@ -11,7 +11,7 @@ export function asMessengerRpc<F extends Fns>(mrpc: MessengerRpc<F>) {
 
 export type MessengerOptions<xRemoteFns extends Fns> = {
 	conduit: Conduit
-	taps?: DoubleTap
+	tap?: Tap
 	timeout?: number
 	rpc?: MessengerRpc<xRemoteFns>
 }

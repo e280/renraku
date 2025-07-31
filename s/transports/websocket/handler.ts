@@ -3,18 +3,26 @@ import {defer} from "@e280/stz"
 import {Fns} from "../../core/types.js"
 import {defaults} from "../../defaults.js"
 import {Rtt} from "../../tools/pingponger.js"
+import {bindTap} from "../../core/taps/bind.js"
 import {ipAddress} from "../../tools/ip-address.js"
 import {Messenger} from "../messenger/messenger.js"
 import {WsHandler, WsHandlerOptions} from "./types.js"
+import {RandomUserEmojis} from "../../tools/random-user-emojis.js"
 import {WebsocketConduit} from "../messenger/conduits/websocket.js"
 
 export function wsHandler<ClientFns extends Fns>(
-		{tap, accepter, timeout = defaults.timeout}: WsHandlerOptions<ClientFns>
+		{tap: oTap, accepter, timeout = defaults.timeout}: WsHandlerOptions<ClientFns>
 	): WsHandler {
+
+	const emojis = new RandomUserEmojis()
 
 	return async(socket, request) => {
 		const ip = ipAddress(request)
-		const taps = tap?.websocket({ip, request})
+
+		const tap = oTap && bindTap(oTap, {
+			meta: {ip, request},
+			label: emojis.pull(),
+		})
 
 		function detach() {
 			conduit.dispose()
@@ -34,7 +42,7 @@ export function wsHandler<ClientFns extends Fns>(
 			timeout,
 			onClose: kill,
 			onError: error => {
-				taps?.remote?.error(error)
+				tap?.error({error})
 				kill()
 			},
 		})
@@ -47,7 +55,7 @@ export function wsHandler<ClientFns extends Fns>(
 		const messenger = new Messenger<ClientFns>({
 			conduit,
 			timeout,
-			taps,
+			tap,
 			rpc: async() => (await deferred.promise).fns,
 		})
 

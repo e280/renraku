@@ -16,24 +16,25 @@ export type HttpMeta = {
 	ip: string
 }
 
-export type Tap = {
-	error: (error: any) => Promise<void>
-
-	request: (options: {
-		request: JsonRpc.Request
-		label?: string
-	}) => Promise<void>
-
-	rpcError: (options: {
-		error: any
-		request: JsonRpc.Request
-		label?: string
-	}) => Promise<void>
+export type TapContext = {
+	label?: string
+	meta?: HttpMeta
+	remote?: boolean
 }
 
-export type DoubleTap = {
-	local?: Tap
-	remote?: Tap
+export type Tap = {
+	error: (o: {
+		error: any
+	} & TapContext) => Promise<void>
+
+	rpcRequest: (o: {
+		request: JsonRpc.Request
+	} & TapContext) => Promise<void>
+
+	rpcError: (o: {
+		error: any
+		request: JsonRpc.Request
+	} & TapContext) => Promise<void>
 }
 
 export type EndpointSpecial = {

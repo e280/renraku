@@ -20,7 +20,7 @@ export function httpEndpoint({
 	}: HttpEndpointOptions): Endpoint {
 
 	return async request => {
-		tap.request({request})
+		tap.rpcRequest({request, remote: false})
 
 		const response = await fetch(url, {
 			method: "POST",

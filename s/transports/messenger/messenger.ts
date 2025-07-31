@@ -1,10 +1,11 @@
 
 import {Trash} from "@e280/stz"
 
-import {MessengerMeta} from "./parts/meta.js"
 import {defaults} from "../../defaults.js"
 import {MessengerOptions} from "./types.js"
+import {MessengerMeta} from "./parts/meta.js"
 import {JsonRpc} from "../../core/json-rpc.js"
+import {bindTap} from "../../core/taps/bind.js"
 import {makeRemote} from "../../core/remote.js"
 import {Remote} from "../../core/remote-proxy.js"
 import {Endpoint, Fns} from "../../core/types.js"
@@ -18,7 +19,7 @@ import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint} from "./p
  *  - you can use a messenger to call a remote messenger
  *  - you can use a messenger to respond to incoming requests
  */
-export class Messenger<xRemoteFns extends Fns> {
+export class Messenger<xRemoteFns extends Fns = any> {
 	remote: Remote<xRemoteFns>
 	remoteEndpoint: Endpoint
 
@@ -26,7 +27,7 @@ export class Messenger<xRemoteFns extends Fns> {
 	#trash = new Trash()
 
 	constructor(private options: MessengerOptions<xRemoteFns>) {
-		const {conduit} = options
+		const {conduit, tap} = options
 
 		this.#waiter = new ResponseWaiter(options.timeout ?? defaults.timeout)
 
@@ -37,7 +38,7 @@ export class Messenger<xRemoteFns extends Fns> {
 
 		this.remote = makeRemote<xRemoteFns>({
 			endpoint: this.remoteEndpoint,
-			tap: options.taps?.remote,
+			tap: tap && bindTap(tap, {remote: true}),
 		})
 
 		this.#trash.add(conduit.recv.sub(m => this.recv(m)))
@@ -45,18 +46,22 @@ export class Messenger<xRemoteFns extends Fns> {
 
 	async recv(incoming: JsonRpc.Bidirectional) {
 		const rig = new MessengerMeta<xRemoteFns>(this.remote)
-		const {conduit, rpc: getLocalEndpoint} = this.options
+		const {conduit, rpc, tap} = this.options
 
 		const {requests, responses} = interpretIncoming(incoming)
 
 		for (const response of responses)
 			this.#waiter.deliverResponse(response)
 
-		if (!getLocalEndpoint)
+		if (!rpc)
 			return
 
-		const fns = await getLocalEndpoint(rig)
-		const endpoint = makeEndpoint({fns, tap: this.options.taps?.local})
+		const fns = await rpc(rig)
+		const endpoint = makeEndpoint({
+			fns,
+			tap: tap && bindTap(tap, {remote: false}),
+		})
+
 		const outgoing = await handleIncomingRequests(endpoint, requests)
 		if (outgoing)
 			await conduit.sendResponse(outgoing, rig.transfer)

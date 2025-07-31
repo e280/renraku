@@ -1,89 +1,52 @@
 
 import {Logger} from "@e280/sten"
-import {Tap, HttpMeta, DoubleTap} from "../types.js"
-import {RandomUserEmojis} from "../../tools/random-user-emojis.js"
+import {Tap, HttpMeta, TapContext} from "../types.js"
 
 export class LoggerTap extends Logger implements Tap {
 	static dummy() {
 		return new this().setWriter(Logger.writers.void())
 	}
 
-	request: Tap["request"] = async({request, label}) => {
+	rpcRequest: Tap["rpcRequest"] = async({request, ...context}) => {
 		const g = this.colors.none
 		this.log(
-			...[label].filter(Boolean),
+			...this.#context(context),
 			g(`${request.method}()`),
 		)
 	}
 
-	rpcError: Tap["rpcError"] = async({request, error, label}) => {
+	rpcError: Tap["rpcError"] = async({request, error, ...context}) => {
 		this.error(
-			...[label].filter(Boolean),
+			...this.#context(context),
 			`${request.method}()`,
 			error,
 		)
 	}
 
-	#emojis = new RandomUserEmojis()
+	#context({meta, label, remote}: TapContext) {
+		const cRemote = this.colors.mix(this.colors.blue, this.colors.dim)
+		const cLocal = this.colors.mix(this.colors.cyan, this.colors.dim)
+		return [
+			meta
+				? this.#meta(meta)
+				: undefined,
+			label
+				? label
+				: undefined,
+			remote === undefined
+				? undefined
+				: remote
+					? cRemote("<-")
+					: cLocal("->"),
+		].filter(Boolean)
+	}
 
-	#requestInfo(meta: HttpMeta) {
+	#meta(meta: HttpMeta) {
 		const {headers} = meta.request
 		return [
 			this.colors.yellow(`[${meta.ip}]`),
 			this.colors.green(headers.origin ?headers.origin :"(no-origin)"),
 		].join(" ")
-	}
-
-	http(meta: HttpMeta): Tap {
-		const label = this.#requestInfo(meta)
-		return {
-			error: this.error.bind(this),
-			request: o => this.request({...o, label}),
-			rpcError: o => this.rpcError({...o, label}),
-		}
-	}
-
-	double(n: string): DoubleTap {
-		const info = this.colors.yellow(n)
-		const g = this.colors.yellow
-		const prep = (isRemote: boolean): Tap => {
-			const label = info + " " + (
-				isRemote
-					? g(" <-")
-					: g(" ->")
-			)
-			return {
-				error: this.error.bind(this),
-				request: o => this.request({...o, label}),
-				rpcError: o => this.rpcError({...o, label}),
-			}
-		}
-		return {
-			remote: prep(true),
-			local: prep(false),
-		}
-	}
-
-	websocket(meta: HttpMeta): DoubleTap {
-		const info = this.#requestInfo(meta)
-		const emoji = this.#emojis.pull()
-		const g = this.colors.yellow
-		const prep = (isRemote: boolean): Tap => {
-			const label = info + " " + (
-				isRemote
-					? emoji + g(" <-")
-					: emoji + g(" ->")
-			)
-			return {
-				error: this.error.bind(this),
-				request: o => this.request({...o, label}),
-				rpcError: o => this.rpcError({...o, label}),
-			}
-		}
-		return {
-			remote: prep(true),
-			local: prep(false),
-		}
 	}
 }
 

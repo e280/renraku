@@ -2,6 +2,7 @@
 export * from "../core/auth/authorize.js"
 export * from "../core/auth/secure.js"
 export * from "../core/auth/types.js"
+export * from "../core/taps/bind.js"
 export * from "../core/taps/dud.js"
 export * from "../core/taps/error.js"
 export * from "../core/taps/logger.js"

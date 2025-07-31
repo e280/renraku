@@ -40,8 +40,7 @@ export async function wsConnect<RemoteFns extends Fns>(
 	const rtt = new Rtt(conduit.pingponger)
 
 	const messenger = new Messenger<RemoteFns>({
-		// TODO taps
-		taps: {remote: tap, local: tap},
+		tap,
 		conduit,
 		timeout,
 		rpc: async() => connret.fns,

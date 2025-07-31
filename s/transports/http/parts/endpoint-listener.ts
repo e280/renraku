@@ -1,18 +1,18 @@
 
 import type * as http from "http"
 
+import {Tap} from "../../../core/types.js"
 import {readStream} from "./read-stream.js"
 import {Rpc} from "../../../server/types.js"
 import {defaults} from "../../../defaults.js"
 import {JsonRpc} from "../../../core/json-rpc.js"
 import {ErrorTap} from "../../../core/taps/error.js"
 import {makeEndpoint} from "../../../core/endpoint.js"
-import {LoggerTap} from "../../../core/taps/logger.js"
 import {ipAddress} from "../../../tools/ip-address.js"
 
 export type EndpointListenerOptions = {
 	rpc: Rpc<any>
-	tap?: LoggerTap
+	tap?: Tap
 	timeout?: number
 	maxRequestBytes?: number
 }
@@ -54,7 +54,7 @@ export function makeEndpointListener(options: EndpointListenerOptions): http.Req
 		catch (error) {
 			response.statusCode = 500
 			response.end()
-			tap.error(error)
+			await tap.error({error})
 		}
 	}
 }

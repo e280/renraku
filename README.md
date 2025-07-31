@@ -403,34 +403,28 @@ the following examples will demonstrate using Messengers with WindowConduits for
   ```ts
   import Renraku from "@e280/renraku"
 
-  export type PopupFns = typeof popupFns
   export const appOrigin = "https://example.e280.org"
+  export type PopupFns = Awaited<ReturnType<typeof popupRpc>>
 
-  export const popupFns = Renraku.asFns({
+  export const popupRpc = Renraku.asMessengerRpc(async meta => ({
     async sum(a: number, b: number) {
       return a + b
     },
-  })
+  }))
   ```
 - `popup.ts` — in the popup, we create a messenger to expose our fns
   ```ts
   import Renraku from "@e280/renraku"
-  import {popupFns, appOrigin} from "./api.js"
+  import {popupRpc, appOrigin} from "./api.js"
 
-    //                             no remote fns
-    //                                    👇
-  const messenger = new Renraku.Messenger<{}>({
+  const messenger = new Renraku.Messenger({
+    rpc: popupRpc,
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
       targetWindow: window.opener,
       targetOrigin: appOrigin,
       allow: e => e.origin === appOrigin,
     }),
-    getLocalEndpoint: async(remote, rig) => (
-      Renraku.makeEndpoint(popupFns)
-        //                    ☝️
-        //          exposed popup fns
-    ),
   })
   ```
 - `parent.ts` — in the parent window, we create a messenger to call our fns
@@ -440,9 +434,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
 
   const popup = window.open(`${appOrigin}/popup`)
 
-    //                               remote fns type
-    //                                       👇
-  const messenger = new Renraku.Messenger<MyPopupFns>({
+  const messenger = new Renraku.Messenger<PopupFns>({
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
       targetWindow: popup,
@@ -464,39 +456,33 @@ the following examples will demonstrate using Messengers with WindowConduits for
 
   export const appOrigin = "https://example.e280.org"
 
-  export type PopupFns = typeof popupFns
-  export const popupFns = Renraku.asFns({
+  export type PopupFns = Awaited<ReturnType<typeof popupRpc>>
+  export const popupRpc = Renraku.asMessengerRpc(async meta => ({
     async sum(a: number, b: number) {
       return a + b
     },
-  })
+  }))
 
-  export type ParentFns = typeof parentFns
-  export const parentFns = Renraku.asFns({
+  export type ParentFns = Awaited<ReturnType<typeof parentRpc>>
+  export const parentRpc = Renraku.asMessengerRpc(async meta => ({
     async mul(a: number, b: number) {
       return a * b
     },
-  })
+  }))
   ```
 - `popup.ts` — popup window side
   ```ts
   import Renraku from "@e280/renraku"
-  import {appOrigin, ParentFns, popupFns} from "./api.js"
+  import {appOrigin, ParentFns, popupRpc} from "./api.js"
 
-    //                           local-side fns type
-    //                                       👇
   const messenger = new Renraku.Messenger<ParentFns>({
+    rpc: popupRpc,
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
       targetWindow: window.opener,
       targetOrigin: appOrigin,
       allow: e => e.origin === appOrigin,
     }),
-    getLocalEndpoint: async(remote, rig) => (
-      Renraku.makeEndpoint(popupFns)
-        //                   ☝️
-        //           remote-side fns
-    ),
   })
   ```
   now the popup can call parent fns
@@ -507,24 +493,18 @@ the following examples will demonstrate using Messengers with WindowConduits for
 - `parent.ts` — parent window side
   ```ts
   import Renraku from "@e280/renraku"
-  import {appOrigin, PopupFns, parentFns} from "./api.js"
+  import {appOrigin, PopupFns, parentRpc} from "./api.js"
 
   const popup = window.open(`${appOrigin}/popup`)
 
-    //                          remote-side fns type
-    //                                       👇
   const messenger = new Renraku.Messenger<PopupFns>({
+    rpc: parentRpc,
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
       targetWindow: popup,
       targetOrigin: appOrigin,
       allow: e => e.origin === appOrigin,
     }),
-    getLocalEndpoint: async(remote, rig) => (
-      Renraku.makeEndpoint(parentFns)
-        //                    ☝️
-        //            local-side fns
-    ),
   })
   ```
   now the parent can call popup fns

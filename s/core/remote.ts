@@ -43,7 +43,7 @@ export function makeRemote<F extends Fns>(options: RemoteOptions) {
 				: {...base, id: id++}
 		)
 
-		tap.request({request})
+		tap.rpcRequest({request})
 
 		const response = await endpoint(request, {transfer})
 

@@ -9,10 +9,16 @@
 ## v0.5
 
 ### v0.5.0-24
+- 🟥 rework logging and tap system
+  - remove logger's `websocket` and `http` methods
+  - add new `bindTap` fn helper
+  - tap methods now take `TapContext` with label, meta, etc
 - 🟥 rename `fns` helper to `asFns`
 - 🟥 make `Rpc` and `asRpc` async
-- 🟥 replace `Messenger`'s `getLocalEndpoint` with `rpc` of type `MessengerRpc`
-- 🟥 `Rig` replaced by `MessengerMeta`
+- 🟥 `Messenger` rework:
+  - replace `getLocalEndpoint` with simpler `rpc`, of type `MessengerRpc`
+  - introduce helper `asMessengerRpc`
+  - `Rig` replaced by `MessengerMeta`
 - 🟥 obscure renames:
   - `WebSocketTaps` renamed to `DoubleTap`
   - `tap.webSocket` renamed to `tap.websocket`

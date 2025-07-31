@@ -23,7 +23,7 @@ export function makeEndpoint<F extends Fns>(options: EndpointOptions<F>): Endpoi
 		const fn = drill(options.fns, path) as Fn
 		const action = async() => await fn(...request.params)
 
-		tap.request({request})
+		tap.rpcRequest({request})
 
 		const response = await execute({
 			tap,
