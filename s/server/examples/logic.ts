@@ -2,7 +2,7 @@
 import {asRpc} from "../types.js"
 import {AsFns} from "../../core/types.js"
 import {secure} from "../../core/auth/secure.js"
-import {asWsAccepter, asWsConnector} from "../../transports/websocket/types.js"
+import {asAccepter, asConnector} from "../../transports/websocket/types.js"
 
 export type ExRpc = ReturnType<typeof exampleRpc>
 
@@ -41,7 +41,7 @@ export const exampleRpc = asRpc(async _meta => ({
 }))
 
 /** example websocket serverside */
-export const exampleAccepter = asWsAccepter<ExServerside, ExClientside>(async connection => {
+export const exampleAccepter = asAccepter<ExServerside, ExClientside>(async connection => {
 	const clientside = connection.remote
 	return {
 		fns: {
@@ -56,7 +56,7 @@ export const exampleAccepter = asWsAccepter<ExServerside, ExClientside>(async co
 
 /** example websocket clientside */
 export const exampleConnector = (rememberCall: () => void) => (
-	asWsConnector<ExClientside, ExServerside>(async _connection => {
+	asConnector<ExClientside, ExServerside>(async _connection => {
 		return {
 			fns: {
 				async sum(a: number, b: number) {

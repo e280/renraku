@@ -8,6 +8,13 @@
 
 ## v0.5
 
+### v0.5.0-25
+- 🟥 revert previous renames, lol:
+  - `WsAccepter` => `Accepter`
+  - `WsAccepter` => `Connector`
+  - `asWsAccepter` => `asAccepter`
+  - `asWsConnector` => `asConnector`
+
 ### v0.5.0-24
 - 🟥 renames:
   - `makeEndpointListener` => `makeRequestListener`

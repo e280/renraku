@@ -7,25 +7,25 @@ import {Remote} from "../../core/remote-proxy.js"
 import {LoggerTap} from "../../core/taps/logger.js"
 import {Fns, HttpMeta, Tap} from "../../core/types.js"
 
-export type WsConnector<LocalFns extends Fns, RemoteFns extends Fns> = (
+export type Connector<LocalFns extends Fns, RemoteFns extends Fns> = (
 	(connection: Connection<RemoteFns>) => Promise<Connret<LocalFns>>
 )
 
-export const asWsConnector = <LocalFns extends Fns, RemoteFns extends Fns>(
-	connector: WsConnector<LocalFns, RemoteFns>
+export const asConnector = <LocalFns extends Fns, RemoteFns extends Fns>(
+	connector: Connector<LocalFns, RemoteFns>
 ) => connector
 
-export type WsAccepter<LocalFns extends Fns, RemoteFns extends Fns> = (
+export type Accepter<LocalFns extends Fns, RemoteFns extends Fns> = (
 	(connection: Connection<RemoteFns> & HttpMeta) => Promise<Connret<LocalFns>>
 )
 
-export const asWsAccepter = <LocalFns extends Fns, RemoteFns extends Fns>(
-	accepter: WsAccepter<LocalFns, RemoteFns>
+export const asAccepter = <LocalFns extends Fns, RemoteFns extends Fns>(
+	accepter: Accepter<LocalFns, RemoteFns>
 ) => accepter
 
 export type WsConnectOptions<RemoteFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
-	connector: WsConnector<any, RemoteFns>
+	connector: Connector<any, RemoteFns>
 	disconnected: (error?: any) => void
 	tap?: Tap
 	timeout?: number
@@ -46,14 +46,14 @@ export type Connret<LocalFns extends Fns> = {
 }
 
 export type WsIntegrationOptions<RemoteFns extends Fns> = {
-	accepter: WsAccepter<any, RemoteFns>
+	accepter: Accepter<any, RemoteFns>
 	tap?: LoggerTap
 	timeout?: number
 	maxRequestBytes?: number
 }
 
 export type WsHandlerOptions<ClientFns extends Fns> = {
-	accepter: WsAccepter<any, ClientFns>
+	accepter: Accepter<any, ClientFns>
 	timeout?: number
 	tap?: LoggerTap
 }
