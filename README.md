@@ -9,9 +9,10 @@
 📦 `npm install @e280/renraku`  
 💡 async functions as api  
 🔌 http, websockets, postmessage, anything  
-🌐 node and browser  
+↔️ supports bidirectionality  
 🏛️ json-rpc 2.0  
-🤖 foundation of our worker library [comrade](https://github.com/e280/comrade)  
+🌐 node + browser  
+🤖 for web workers, see [comrade](https://github.com/e280/comrade)  
 💻 *an https://e280.org/ project*  
 
 <br/>
@@ -78,7 +79,7 @@
 
 ## ⛩️ *RENRAKU websockets api*
 
-renraku websocket apis are *bidirectional,* meaning the serverside and clientside can call each other.. just be careful not to create a circular loop, lol.
+renraku websocket apis are *bidirectional,* meaning the serverside and clientside can call each other.. just be careful not to create a circular loop, lol..
 
 and yes — a single renraku server can support an http rpc endpoint *and* a websocket api simultaneously.
 
