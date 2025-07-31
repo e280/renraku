@@ -520,13 +520,13 @@ the following examples will demonstrate using Messengers with WindowConduits for
 
 ### messenger zero-copy transferables
 
-`Messenger` is often used across postMessage boundaries, to talk to popups, iframes, or web wokers.
+`Messenger` is often used across postMessage boundaries, to talk to popups, iframes, or web workers.
 
 as such, you can set `meta.transfer` array, so you can return [transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects):
 ```ts
 export const popupRpc = Renraku.asMessengerRpc(async meta => ({
   async getData() {
-    const bytes = new Uint8Array(0xB0, 0x0B, 0x1E, 0x5)
+    const bytes = new Uint8Array([0xB0, 0x0B, 0x1E, 0x5])
     meta.transfer = [bytes]
     return bytes // ⚡ transferred speedy-fastly
   },
