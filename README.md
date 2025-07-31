@@ -106,7 +106,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
     }
 
     export const serverside = (
-      Renraku.asAccepter<Serverside, Clientside>(async connection => {
+      Renraku.asWsAccepter<Serverside, Clientside>(async connection => {
         console.log("connected", connection.ip)
         return {
           fns: {
@@ -133,7 +133,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
     }
 
     export const clientside = (
-      Renraku.asConnector<Clientside, Serverside>(async connection => {
+      Renraku.asWsConnector<Clientside, Serverside>(async connection => {
         console.log("connected")
         return {
           fns: {
@@ -219,16 +219,14 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
 new Renraku.Server({
 
   // expose http json-rpc api
-  rpc: ({request, ip}) => ({
+  rpc: async meta => ({
     async hello() { return "lol" },
   }),
 
   // expose websocket json-rpc api
-  websocket: Renraku.asAccepter<Serverside, Clientside>(
+  websocket: Renraku.asWsAccepter<Serverside, Clientside>(
     async connection => ({
-      fns: {
-        async hello() { return "lmao" },
-      },
+      fns: {async hello() { return "lmao" }},
       disconnected() {},
     })
   ),

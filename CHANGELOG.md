@@ -9,6 +9,11 @@
 ## v0.5
 
 ### v0.5.0-24
+- 🟥 renames:
+  - `Accepter` => `WsAccepter`
+  - `Connector` => `WsAccepter`
+  - `asAccepter` => `asWsAccepter`
+  - `asConnector` => `asWsConnector`
 - 🟥 rework logging and tap system
   - remove logger's `websocket` and `http` methods
   - add new `bindTap` fn helper
@@ -20,8 +25,8 @@
   - introduce helper `asMessengerRpc`
   - `Rig` replaced by `MessengerMeta`
 - 🟥 obscure renames:
-  - `WebSocketTaps` renamed to `DoubleTap`
-  - `tap.webSocket` renamed to `tap.websocket`
+  - `WebSocketTaps` => `DoubleTap`
+  - `tap.webSocket` => `tap.websocket`
 
 ### v0.5.0-23
 - 🟥 lots of renames
