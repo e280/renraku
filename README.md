@@ -214,7 +214,7 @@ and yes — a single renraku server can support an http rpc endpoint *and* a web
 
 ## ⛩️ *RENRAKU gnarly details*
 
-### all `Renraku.Server` options
+### 🍏 all `Renraku.Server` options
 ```ts
 new Renraku.Server({
 
@@ -259,14 +259,14 @@ new Renraku.Server({
 })
 ```
 
-### logging and error handling
+### 🍏 logging and error handling
 - renraku has this concept of a `Tap`, which allows you to hook into renraku for logging purposes
 - almost every renraku facility, can accept a `tap` — like `makeRemote`, `makeEndpoint`, etc
   - `ErrorTap` *(default)* — logs errors, but not every request
   - `LoggerTap` — *(default for `Server`)* verbose logging, all errors and every request
   - `DudTap` — silent, doesn't log anything
 
-### error handling
+### 🍏 error handling
 - for security-by-default, when renraku encounters an error, it reports `unexposed error` to the client
   ```ts
   const timingApi = {
@@ -292,7 +292,7 @@ new Renraku.Server({
 - any other kind of error will NOT send the message to the client
 - the intention here is security-by-default, because error messages could potentially include sensitive information
 
-### `secure` and `authorize` auth helpers
+### 🍏 `secure` and `authorize` auth helpers
 - use the `secure` function to section off parts of your api that require auth
   ```ts
   // auth param can be any type you want
@@ -324,7 +324,7 @@ new Renraku.Server({
     the getter is called for each api call.  
 - `secure` and `authorize` do not support arbitrary nesting, so you have to pass them a flat object of async functions
 
-### optimize fn calls
+### 🍏 optimize fn calls
 
 #### `tune` symbol
 - all the functions on a renraku `Remote` can be 'tuned'
@@ -383,7 +383,7 @@ new Renraku.Server({
 
 the following examples will demonstrate using Messengers with WindowConduits for a common popup api example.
 
-### incredible high-effort diagram
+### 🍏 incredible high-effort diagram
 ```
 +----ALPHA----+      +----BRAVO----+
 |             |      |             |
@@ -398,7 +398,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
 - the conduits are literally talking to each other
 - the messenger's job is to deal with json-rpc and provide you with a callable `remote` and execute your local rpc endpoint
 
-### example — calling fns on a popup — one-way messenger
+### 🍏 example — calling fns on a popup — one-way messenger
 - `api.ts` — make a popup api
   ```ts
   import Renraku from "@e280/renraku"
@@ -449,7 +449,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
     // 5
   ```
 
-### example — bidirectional parent and popup calls — two-way messenger
+### 🍏 example — bidirectional parent and popup calls — two-way messenger
 - `api.ts` — make both apis
   ```ts
   import Renraku from "@e280/renraku"
@@ -518,7 +518,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
     // 5
   ```
 
-### messenger zero-copy transferables
+### 🍏 messenger zero-copy transferables
 
 `Messenger` is often used across postMessage boundaries, to talk to popups, iframes, or web workers.
 
