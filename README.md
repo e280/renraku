@@ -220,13 +220,15 @@ new Renraku.Server({
 
   // expose http json-rpc api
   rpc: ({request, ip}) => ({
-    hello: async() => "world",
+    async hello() { return "lol" },
   }),
 
   // expose websocket json-rpc api
   websocket: Renraku.asAccepter<Serverside, Clientside>(
     async connection => ({
-      fns: {async hello() { return "hi" }},
+      fns: {
+        async hello() { return "lmao" },
+      },
       disconnected() {},
     })
   ),
@@ -387,7 +389,7 @@ the following examples will demonstrate using Messengers with WindowConduits for
 ```
 +----ALPHA----+      +----BRAVO----+
 |             |      |             |
-|  [Conduit]<---------->[Conduit]  |
+|  [Conduit]<==========>[Conduit]  |
 |      |      |      |      |      |
 | [Messenger] |      | [Messenger] |
 |             |      |             |
