@@ -348,7 +348,7 @@ new Renraku.Server({
   - sometimes responses are not needed, so this can be a nice little optimization
 - `tune` a call with `transfer`
   ```ts
-  const buffer = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF])
+  const buffer = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]).buffer
 
   await remote.deliver[tune]({transfer: [buffer]})(buffer)
   ```
@@ -528,7 +528,7 @@ as such, you can set `meta.transfer` array, so you can return [transferables](ht
 ```ts
 export const popupRpc = Renraku.asMessengerRpc(async meta => ({
   async getData() {
-    const bytes = new Uint8Array([0xB0, 0x0B, 0x1E, 0x5])
+    const bytes = new Uint8Array([0xB0, 0x0B, 0x1E, 0x5]).buffer
     meta.transfer = [bytes]
     return bytes // ⚡ transferred speedy-fastly
   },
