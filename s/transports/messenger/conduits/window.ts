@@ -7,6 +7,8 @@ import {onMessage} from "../parts/helpers.js"
 export class WindowConduit extends Conduit {
 	#trash = new Trash()
 
+	targetOrigin: string
+
 	constructor(options: {
 			localWindow: Window
 			targetWindow: WindowProxy
@@ -15,14 +17,15 @@ export class WindowConduit extends Conduit {
 		}) {
 
 		super()
-		const {localWindow, targetWindow, targetOrigin, allow} = options
+		const {localWindow, targetWindow, allow} = options
+		this.targetOrigin = options.targetOrigin
 
 		this.#trash.add(
 			this.sendRequest.sub((m, transfer) =>
-				targetWindow.postMessage(m, targetOrigin, transfer)),
+				targetWindow.postMessage(m, this.targetOrigin, transfer)),
 
 			this.sendResponse.sub((m, transfer) =>
-				targetWindow.postMessage(m, targetOrigin, transfer)),
+				targetWindow.postMessage(m, this.targetOrigin, transfer)),
 
 			onMessage(localWindow, e => {
 				if (allow(e))
