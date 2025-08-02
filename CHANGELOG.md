@@ -8,6 +8,9 @@
 
 ## v0.5
 
+### v0.5.0-26
+- 🍏 export `MessengerMeta`
+
 ### v0.5.0-25
 - 🟥 revert previous renames, lol:
   - `WsAccepter` => `Accepter`
