@@ -8,6 +8,12 @@
 
 ## v0.5
 
+### v0.5.0-28
+- 🍏 update dependencies
+
+### v0.5.0-27
+- 🍏 fix: add writable `targetOrigin` on `WindowConduit`
+
 ### v0.5.0-26
 - 🍏 export `MessengerMeta`
 
