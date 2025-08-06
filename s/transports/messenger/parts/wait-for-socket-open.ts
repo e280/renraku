@@ -32,10 +32,6 @@ export async function waitForSocketOpen<S extends WebSocket | ws.WebSocket>(
 		})
 	})
 
-	return deadline(
-		timeout,
-		"timed out waiting for socket open",
-		async() => promise,
-	)
+	return deadline(timeout, async() => promise)
 }
 

@@ -45,7 +45,7 @@ export class Pingponger {
 		this.#pends.set(pingId, {time, deferred})
 		this.options.send(["ping", pingId])
 
-		return deadline(this.options.timeout, "ping timeout", () => deferred.promise)
+		return deadline(this.options.timeout, () => deferred.promise)
 			.finally(() => this.#prune())
 	}
 
