@@ -19,14 +19,14 @@ import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint} from "./p
  *  - you can use a messenger to call a remote messenger
  *  - you can use a messenger to respond to incoming requests
  */
-export class Messenger<xRemoteFns extends Fns = any> {
-	remote: Remote<xRemoteFns>
+export class Messenger<LocalFns extends Fns = any, RemoteFns extends Fns = any> {
+	remote: Remote<RemoteFns>
 	remoteEndpoint: Endpoint
 
 	#waiter: ResponseWaiter
 	#trash = new Trash()
 
-	constructor(private options: MessengerOptions<xRemoteFns>) {
+	constructor(private options: MessengerOptions<LocalFns, RemoteFns>) {
 		const {conduit, tap} = options
 
 		this.#waiter = new ResponseWaiter(options.timeout ?? defaults.timeout)
@@ -36,7 +36,7 @@ export class Messenger<xRemoteFns extends Fns = any> {
 			conduit.sendRequest.pub.bind(conduit.sendRequest),
 		)
 
-		this.remote = makeRemote<xRemoteFns>({
+		this.remote = makeRemote<RemoteFns>({
 			endpoint: this.remoteEndpoint,
 			tap: tap && bindTap(tap, {remote: true}),
 		})
@@ -45,7 +45,7 @@ export class Messenger<xRemoteFns extends Fns = any> {
 	}
 
 	async recv(incoming: JsonRpc.Bidirectional) {
-		const meta = new MessengerMeta<xRemoteFns>(this.remote)
+		const meta = new MessengerMeta<RemoteFns>(this.remote)
 		const {conduit, rpc, tap} = this.options
 
 		const {requests, responses} = interpretIncoming(incoming)

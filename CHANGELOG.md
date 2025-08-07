@@ -8,6 +8,9 @@
 
 ## v0.5
 
+### v0.5.0-29
+- 🟥 rework `Messenger` to take two generic types, `<LocalFns, RemoteFns>`
+
 ### v0.5.0-28
 - 🍏 update dependencies
 

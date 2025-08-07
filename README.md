@@ -457,22 +457,18 @@ the following examples will demonstrate using Messengers with WindowConduits for
   import Renraku from "@e280/renraku"
 
   export const appOrigin = "https://example.e280.org"
-  export type PopupFns = Awaited<ReturnType<typeof popupRpc>>
-  export type ParentFns = Awaited<ReturnType<typeof parentRpc>>
+  export type PopupFns = {sum(a: number, b: number): Promise<number>}
+  export type ParentFns = {mul(a: number, b: number): Promise<number>}
 
-  export const popupRpc = Renraku.asMessengerRpc(async meta => ({
-    async sum(a: number, b: number) {
-
-      // 🧐 yes, we can call the other side
-      await meta.remote.mul(2, 3)
-        // 6
-
+  export const popupRpc = Renraku.asMessengerRpc<PopupFns, ParentFns>(async meta => ({
+    async sum(a, b) {
+      await meta.remote.mul(2, 3) // 🧐 yes, we can call the other side
       return a + b
     },
   }))
 
-  export const parentRpc = Renraku.asMessengerRpc(async meta => ({
-    async mul(a: number, b: number) {
+  export const parentRpc = Renraku.asMessengerRpc<ParentFns, PopupFns>(async meta => ({
+    async mul(a, b) {
       return a * b
     },
   }))
@@ -480,9 +476,9 @@ the following examples will demonstrate using Messengers with WindowConduits for
 - `popup.ts` — popup window side
   ```ts
   import Renraku from "@e280/renraku"
-  import {appOrigin, ParentFns, popupRpc} from "./api.js"
+  import {appOrigin, popupRpc} from "./api.js"
 
-  const messenger = new Renraku.Messenger<ParentFns>({
+  const messenger = new Renraku.Messenger({
     rpc: popupRpc,
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,
@@ -500,11 +496,11 @@ the following examples will demonstrate using Messengers with WindowConduits for
 - `parent.ts` — parent window side
   ```ts
   import Renraku from "@e280/renraku"
-  import {appOrigin, PopupFns, parentRpc} from "./api.js"
+  import {appOrigin, parentRpc} from "./api.js"
 
   const popup = window.open(`${appOrigin}/popup`)
 
-  const messenger = new Renraku.Messenger<PopupFns>({
+  const messenger = new Renraku.Messenger({
     rpc: parentRpc,
     conduit: new Renraku.conduits.WindowConduit({
       localWindow: window,

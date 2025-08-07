@@ -3,17 +3,17 @@ import {MessengerMeta} from "./parts/meta.js"
 import {Conduit} from "./conduits/conduit.js"
 import {Tap, Fns} from "../../core/types.js"
 
-export type MessengerRpc<F extends Fns> = (meta: MessengerMeta<F>) => Promise<Fns>
+export type MessengerRpc<LocalFns extends Fns, RemoteFns extends Fns> = (meta: MessengerMeta<RemoteFns>) => Promise<LocalFns>
 
-export function asMessengerRpc<F extends Fns>(mrpc: MessengerRpc<F>) {
+export function asMessengerRpc<LocalFns extends Fns, RemoteFns extends Fns>(mrpc: MessengerRpc<LocalFns, RemoteFns>) {
 	return mrpc
 }
 
-export type MessengerOptions<xRemoteFns extends Fns> = {
+export type MessengerOptions<LocalFns extends Fns, RemoteFns extends Fns> = {
 	conduit: Conduit
 	tap?: Tap
 	timeout?: number
-	rpc?: MessengerRpc<xRemoteFns>
+	rpc?: MessengerRpc<LocalFns, RemoteFns>
 }
 
 export type ChannelMessage<D = any> = {data: D, origin: string}

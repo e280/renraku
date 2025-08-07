@@ -30,23 +30,23 @@ export const messenger = suite({
 		let alphaCalls = 0
 		let bravoCalls = 0
 
-		const alphaMessenger = new Messenger<BravoFns>({
+		const alphaMessenger = new Messenger<AlphaFns, BravoFns>({
 			conduit: conduitA,
 			rpc: async meta => ({
 				async alpha() {
 					alphaCalls++
 					await meta.remote.bravo()
 				},
-			} as AlphaFns),
+			}),
 		})
 
-		const bravoMessenger = new Messenger<AlphaFns>({
+		const bravoMessenger = new Messenger<BravoFns, AlphaFns>({
 			conduit: conduitB,
 			rpc: async() => ({
 				async bravo() {
 					bravoCalls++
 				},
-			} as BravoFns),
+			}),
 		})
 
 		expect(alphaCalls).is(0)
