@@ -1,6 +1,6 @@
 
-import {nap} from "@e280/stz"
-import {Science, test, expect} from "@e280/science"
+import {DeadlineError, nap} from "@e280/stz"
+import {Science, test, expect, spy} from "@e280/science"
 import {Pingponger} from "./pingponger.js"
 
 export default Science.suite({
@@ -24,6 +24,35 @@ export default Science.suite({
 			pingponger.ping(),
 			nap(200),
 		])).throwsAsync()
+	}),
+
+	"heartbeat": test(async() => {
+		let circulation = true
+		let beats = 0
+		const onTimeout = spy((_error: any) => {})
+		const pingponger = new Pingponger({
+			timeout: 100,
+			send: ([,id]) => nap(10).then(() => {
+				if (circulation) {
+					beats++
+					pingponger.recv(["pong", id])
+				}
+			}),
+		})
+
+		// start the heartbeat, wait a bit, see that we get beats
+		const stop = pingponger.heartbeat(onTimeout)
+		await nap(300)
+		expect(beats).gte(3)
+
+		// now we cut the circulation, onTimeout should have been called
+		circulation = false
+		await nap(200)
+		expect(onTimeout.spy.calls.length).is(1)
+		expect(onTimeout.spy.calls[0].args[0] instanceof DeadlineError).ok()
+
+		// cleanup heartbeat so we don't screw up other tests
+		stop()
 	}),
 })
 
