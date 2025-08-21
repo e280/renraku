@@ -1,10 +1,10 @@
 
-import {suite, test, expect} from "@e280/science"
+import {Science, test, expect} from "@e280/science"
 import {makeRemote} from "./remote.js"
 import {makeEndpoint} from "./endpoint.js"
 import {setupMathSpy} from "./testing/setup-math-spy.js"
 
-export const core = suite({
+export default Science.suite({
 	"remote can call fns": test(async() => {
 		const math = setupMathSpy()
 		const mathEndpoint = makeEndpoint({fns: math.fns})

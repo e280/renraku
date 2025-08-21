@@ -1,10 +1,10 @@
 
-import {suite, test, expect} from "@e280/science"
+import {Science, test, expect} from "@e280/science"
 import {Messenger} from "./messenger.js"
 import {Conduit} from "./conduits/conduit.js"
 import {setupSide} from "./testing/setup-side.js"
 
-export const messenger = suite({
+export default Science.suite({
 	"two messengers can call each other": test(async() => {
 		const [conduitA, conduitB] = Conduit.makeEntangledPair()
 		const alice = setupSide(conduitA)
