@@ -6,9 +6,6 @@ import {appropriateHeartbeat} from "./appropriate-heartbeat.js"
 export type Ping = ["ping", number]
 export type Pong = ["pong", number]
 
-type PingId = number
-type Pend = {time: number, deferred: Deferred<number>}
-
 export class Rtt {
 	constructor(private pingponger: Pingponger) {}
 	get on() { return this.pingponger.onRtt }
@@ -22,7 +19,7 @@ export class Pingponger {
 	#id = new IdCounter()
 	#rtt = 99
 	#averager = new Averager(5)
-	#pends = new Map<PingId, Pend>()
+	#pends = new Map<number, {time: number, deferred: Deferred<number>}>()
 
 	constructor(public options: {
 		timeout: number

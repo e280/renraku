@@ -18,6 +18,7 @@ export * from "../core/types.js"
 export * from "../tools/ip-address.js"
 export * from "../tools/random-user-emojis.js"
 export * from "../tools/simple-headers.js"
+export * from "../tools/pingponger.js"
 
 export * from "../transports/http/remote.js"
 export * from "../transports/messenger/index.js"
