@@ -1,7 +1,12 @@
 
+const coefficient = 2 / 3
+const fallback = 60_000
+
 export function appropriateHeartbeat(timeout: number) {
-	return timeout === Infinity
-		? 20_000
-		: (timeout * (2 / 3))
+	return coefficient * (
+		timeout === Infinity
+			? fallback
+			: timeout
+	)
 }
 
