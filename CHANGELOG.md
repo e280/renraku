@@ -8,6 +8,9 @@
 
 ## v0.5
 
+### v0.5.0 🎉
+- 🍏 harmless addition, fix, or enhancement
+
 ### v0.5.0-31
 - 🍏 export the pingponger for outside use
 
