@@ -9,7 +9,7 @@
 ## v0.5
 
 ### v0.5.0 🎉
-- 🍏 harmless addition, fix, or enhancement
+- 🍏 just decided it was time to get outta prerelease hell
 
 ### v0.5.0-31
 - 🍏 export the pingponger for outside use
