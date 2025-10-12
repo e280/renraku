@@ -21,7 +21,7 @@ export function wsHandler<ClientFns extends Fns>(
 
 		const tap = oTap && bindTap(oTap, {
 			meta: {ip, request},
-			label: emojis.pull(),
+			label: emojis.takeRandom(),
 		})
 
 		function detach() {

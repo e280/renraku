@@ -1,6 +1,6 @@
 
 import type * as ws from "ws"
-import {Trash, ev} from "@e280/stz"
+import {disposer, ev} from "@e280/stz"
 
 import {Conduit} from "./conduit.js"
 import {JsonRpc} from "../../../core/json-rpc.js"
@@ -13,7 +13,9 @@ type Message = InfraMessage | RpcMessage
 export class WebsocketConduit extends Conduit {
 	socket: WebSocket | ws.WebSocket
 	pingponger: Pingponger
-	#trash = new Trash()
+
+	/** clean up this conduit, detaching socket listeners. does not close the socket. */
+	dispose = disposer()
 
 	constructor(options: {
 			socket: WebSocket | ws.WebSocket
@@ -26,13 +28,13 @@ export class WebsocketConduit extends Conduit {
 		this.socket = options.socket
 
 		// sending rpc messages
-		this.#trash.add(
+		this.dispose.schedule(
 			this.sendRequest.sub(this.#sendRpc),
 			this.sendResponse.sub(this.#sendRpc),
 		)
 
 		// listening to socket events
-		this.#trash.add(
+		this.dispose.schedule(
 			ev(this.socket, {
 				error: error => {
 					this.dispose()
@@ -55,7 +57,7 @@ export class WebsocketConduit extends Conduit {
 		})
 
 		// establish pingponger heartbeat
-		this.#trash.add(
+		this.dispose.schedule(
 			this.pingponger.heartbeat(() => {
 				if (this.socket.readyState === 1)
 					this.socket.close()
@@ -85,11 +87,6 @@ export class WebsocketConduit extends Conduit {
 			default:
 				throw new Error("message listener")
 		}
-	}
-
-	/** clean up this conduit, detaching socket listeners. does not close the socket. */
-	dispose() {
-		this.#trash.dispose()
 	}
 }
 

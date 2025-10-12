@@ -1,5 +1,5 @@
 
-import {deadline, defer, Deferred, IdCounter, nap, sub, repeat} from "@e280/stz"
+import {deadline, defer, Deferred, IdCounter, nap, sub, cycle} from "@e280/stz"
 import {Averager} from "./averager.js"
 import {appropriateHeartbeat} from "./appropriate-heartbeat.js"
 
@@ -60,7 +60,7 @@ export class Pingponger {
 	/** start an ongoing heartbeat */
 	heartbeat(onTimeout: (error: any) => void = () => {}) {
 		const ms = appropriateHeartbeat(this.options.timeout)
-		return repeat(async stop => {
+		return cycle(async stop => {
 			try {
 				await this.ping()
 				await nap(ms)

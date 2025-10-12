@@ -1,5 +1,5 @@
 
-import {Trash} from "@e280/stz"
+import {disposer} from "@e280/stz"
 
 import {defaults} from "../../defaults.js"
 import {MessengerOptions} from "./types.js"
@@ -22,9 +22,9 @@ import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint} from "./p
 export class Messenger<LocalFns extends Fns = any, RemoteFns extends Fns = any> {
 	remote: Remote<RemoteFns>
 	remoteEndpoint: Endpoint
+	dispose = disposer()
 
 	#waiter: ResponseWaiter
-	#trash = new Trash()
 
 	constructor(private options: MessengerOptions<LocalFns, RemoteFns>) {
 		const {conduit, tap} = options
@@ -41,7 +41,7 @@ export class Messenger<LocalFns extends Fns = any, RemoteFns extends Fns = any> 
 			tap: tap && bindTap(tap, {remote: true}),
 		})
 
-		this.#trash.add(conduit.recv.sub(m => this.recv(m)))
+		this.dispose.schedule(conduit.recv.sub(m => this.recv(m)))
 	}
 
 	async recv(incoming: JsonRpc.Bidirectional) {
@@ -65,10 +65,6 @@ export class Messenger<LocalFns extends Fns = any, RemoteFns extends Fns = any> 
 		const outgoing = await handleIncomingRequests(endpoint, requests)
 		if (outgoing)
 			await conduit.sendResponse(outgoing, meta.transfer)
-	}
-
-	dispose() {
-		this.#trash.dispose()
 	}
 }
 
