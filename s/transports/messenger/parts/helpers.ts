@@ -2,12 +2,12 @@
 import {defer} from "@e280/stz"
 import {Endpoint} from "../../../core/types.js"
 import {JsonRpc} from "../../../core/json-rpc.js"
-import {Channel, ChannelMessage} from "../types.js"
+import {MessageReceiver, MessageLike} from "../types.js"
 import {ResponseWaiter} from "./response-waiter.js"
 
-export function onMessage(channel: Channel, fn: (e: ChannelMessage) => void) {
-	channel.addEventListener("message", fn)
-	return () => channel.removeEventListener("message", fn)
+export function onMessage(receiver: MessageReceiver, fn: (e: MessageLike) => void) {
+	receiver.addEventListener("message", fn)
+	return () => receiver.removeEventListener("message", fn)
 }
 
 ////////////////

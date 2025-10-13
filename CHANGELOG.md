@@ -8,6 +8,13 @@
 
 ## v0.5
 
+### v0.5.1
+- 🔶 renames (old names deprecated)
+    - `Channel` -> `MessageReceiver`
+    - `PostableChannel` -> `Messagable`
+    - `ChannelMessage` -> `MessageLike`
+- 🍏 update deps
+
 ### v0.5.0 🎉
 - 🍏 just decided it was time to get outta prerelease hell
 
