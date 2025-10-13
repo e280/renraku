@@ -17,9 +17,9 @@ export function httpEndpoint({
 		url,
 		tap = new ErrorTap(),
 		headers = {},
-	}: HttpEndpointOptions): Endpoint {
+	}: HttpEndpointOptions) {
 
-	return async request => {
+	return (async request => {
 		tap.rpcRequest({request, remote: false})
 
 		const response = await fetch(url, {
@@ -40,6 +40,6 @@ export function httpEndpoint({
 		})
 
 		return response.json()
-	}
+	}) as Endpoint
 }
 

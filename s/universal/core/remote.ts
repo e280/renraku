@@ -29,7 +29,7 @@ export function makeRemote<F extends Fns>(options: RemoteOptions) {
 		) => {
 
 		const notify = settings.notify ?? options.notify ?? false
-		const transfer = settings.transfer
+		const transfer = (settings as {transfer?: any[]}).transfer
 
 		const base: JsonRpc.Notification<any[]> = {
 			jsonrpc: "2.0" as const,

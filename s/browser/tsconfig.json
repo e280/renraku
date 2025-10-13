@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"rootDir": ".",
+		"outDir": "../../x/browser",
+		"lib": ["es2023", "dom"],
+		"types": ["node"],
+		"composite": true
+	},
+	"references": [
+		{"path": "../universal"}
+	],
+	"include": ["./**/*.ts"],
+	"exclude": ["./**/_*"]
+}

@@ -4,8 +4,8 @@ import {JsonRpc} from "../../core/json-rpc.js"
 
 export class Conduit {
 	recv = pub<[incoming: JsonRpc.Bidirectional, {origin: string}]>()
-	sendRequest = pub<[request: JsonRpc.Requestish, transfer: Transferable[] | undefined]>()
-	sendResponse = pub<[response: JsonRpc.Respondish, transfer: Transferable[] | undefined]>()
+	sendRequest = pub<[request: JsonRpc.Requestish, transfer: any[] | undefined]>()
+	sendResponse = pub<[response: JsonRpc.Respondish, transfer: any[] | undefined]>()
 
 	dispose() {
 		this.recv.clear()

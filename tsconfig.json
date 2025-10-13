@@ -1,24 +1,9 @@
 {
-	"compilerOptions": {
-		"rootDir": "s",
-		"outDir": "x",
-
-		"lib": ["es2023", "dom"],
-		"module": "node16",
-		"target": "es2022",
-
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"moduleResolution": "node16",
-
-		"sourceMap": true,
-		"declaration": true
-	},
-	"include": [
-		"s/**/*"
-	],
-	"exclude": [
-		"s/**/_*"
+	"files": [],
+	"references": [
+		{ "path": "./s/universal" },
+		{ "path": "./s/node" },
+		{ "path": "./s/browser" },
+		{ "path": "./s/demo" }
 	]
 }
