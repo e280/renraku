@@ -6,7 +6,7 @@ import {onMessage} from "../parts/helpers.js"
 
 export class WindowConduit extends Conduit {
 	targetOrigin: string
-	dispose = disposer()
+	dispose = disposer().schedule(() => super.dispose())
 
 	constructor(options: {
 			localWindow: Window
@@ -31,6 +31,43 @@ export class WindowConduit extends Conduit {
 					this.recv(e.data, e)
 			}),
 		)
+	}
+
+	static windowConduitAlice(options: {
+			aliceWindow: Window | WindowProxy
+			bobWindow: Window | WindowProxy
+			bobOrigin: string
+		}) {
+
+		return new WindowConduit({
+			localWindow: options.aliceWindow,
+			targetWindow: options.bobWindow,
+			targetOrigin: options.bobOrigin,
+			allow: e => (
+				e.source === options.bobWindow &&
+				e.origin === options.bobOrigin
+			),
+		})
+	}
+
+	static windowConduitBob(options: {
+			aliceWindow: Window | WindowProxy
+			bobWindow: Window | WindowProxy
+			aliceOrigin?: string
+			bobOrigin: string
+		}) {
+
+		return new WindowConduit({
+			localWindow: options.bobWindow,
+			targetWindow: options.aliceWindow,
+			targetOrigin: options.aliceOrigin ?? "*",
+			allow: e => (
+				(e.source === options.aliceWindow) &&
+				(options.aliceOrigin !== undefined
+					? e.origin === options.aliceOrigin
+					: true)
+			),
+		})
 	}
 }
 

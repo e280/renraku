@@ -5,7 +5,7 @@ import {Messagable} from "../types.js"
 import {onMessage} from "../parts/helpers.js"
 
 export class PostableConduit extends Conduit {
-	dispose = disposer()
+	dispose = disposer().schedule(() => super.dispose())
 
 	constructor(messagable: Messagable) {
 		super()

@@ -4,7 +4,7 @@ import {Conduit} from "./conduit.js"
 import {onMessage} from "../parts/helpers.js"
 
 export class BroadcastConduit extends Conduit {
-	dispose = disposer()
+	dispose = disposer().schedule(() => super.dispose())
 
 	constructor(channel: BroadcastChannel) {
 		super()

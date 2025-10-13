@@ -7,6 +7,12 @@ export class Conduit {
 	sendRequest = pub<[request: JsonRpc.Requestish, transfer: Transferable[] | undefined]>()
 	sendResponse = pub<[response: JsonRpc.Respondish, transfer: Transferable[] | undefined]>()
 
+	dispose() {
+		this.recv.clear()
+		this.sendRequest.clear()
+		this.sendResponse.clear()
+	}
+
 	static makeEntangledPair({origin = "example.e280.org"}: {origin?: string} = {}) {
 		const a = new this()
 		const b = new this()

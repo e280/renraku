@@ -15,7 +15,7 @@ export class WebsocketConduit extends Conduit {
 	pingponger: Pingponger
 
 	/** clean up this conduit, detaching socket listeners. does not close the socket. */
-	dispose = disposer()
+	dispose = disposer().schedule(() => super.dispose())
 
 	constructor(options: {
 			socket: WebSocket | ws.WebSocket

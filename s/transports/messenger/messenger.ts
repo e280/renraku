@@ -22,9 +22,10 @@ import {handleIncomingRequests, interpretIncoming, makeRemoteEndpoint} from "./p
 export class Messenger<LocalFns extends Fns = any, RemoteFns extends Fns = any> {
 	remote: Remote<RemoteFns>
 	remoteEndpoint: Endpoint
-	dispose = disposer()
-
 	#waiter: ResponseWaiter
+
+	/** dispose this messenger (not the conduit inside) */
+	dispose = disposer()
 
 	constructor(private options: MessengerOptions<LocalFns, RemoteFns>) {
 		const {conduit, tap} = options
@@ -42,6 +43,10 @@ export class Messenger<LocalFns extends Fns = any, RemoteFns extends Fns = any> 
 		})
 
 		this.dispose.schedule(conduit.recv.sub(m => this.recv(m)))
+	}
+
+	get conduit() {
+		return this.options.conduit
 	}
 
 	async recv(incoming: JsonRpc.Bidirectional) {
