@@ -1,5 +1,5 @@
 
-import {exampleClient} from "../universal/server/examples/client.js"
+import {exampleClient} from "../node/server/examples/client.js"
 
 console.log("renraku")
 await exampleClient()

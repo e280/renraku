@@ -1,5 +1,4 @@
 
-import type * as http from "node:http"
 import {JsonRpc} from "./json-rpc.js"
 
 export type Fn = (...p: any[]) => Promise<any>
@@ -11,8 +10,18 @@ export function asFns<F extends Fns>(f: F) {
 	return f
 }
 
+export type HttpRequest = {
+	headers: Record<string, string | string[] | undefined>
+	headersDistinct: Record<string, string[] | undefined>
+	rawHeaders: string[]
+	method?: string
+	url?: string
+	statusCode?: number
+	statusMessage?: string
+}
+
 export type HttpMeta = {
-	request: http.IncomingMessage
+	request: HttpRequest
 	ip: string
 }
 
@@ -38,7 +47,7 @@ export type Tap = {
 }
 
 export type EndpointSpecial = {
-	transfer?: Transferable[]
+	transfer?: any[]
 }
 
 export type Endpoint = (

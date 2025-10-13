@@ -1,6 +1,7 @@
 
 import {Logger} from "@e280/sten"
 import {Tap, HttpMeta, TapContext} from "../types.js"
+import {simplifyHeader} from "../../tools/simple-headers.js"
 
 export class LoggerTap extends Logger implements Tap {
 	static dummy() {
@@ -42,10 +43,10 @@ export class LoggerTap extends Logger implements Tap {
 	}
 
 	#meta(meta: HttpMeta) {
-		const {headers} = meta.request
+		const origin = simplifyHeader(meta.request.headers.origin)
 		return [
 			this.colors.yellow(`[${meta.ip}]`),
-			this.colors.green(headers.origin ?headers.origin :"(no-origin)"),
+			this.colors.green(origin ?origin :"(no-origin)"),
 		].join(" ")
 	}
 }

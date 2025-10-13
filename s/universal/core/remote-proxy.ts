@@ -11,6 +11,10 @@ export type QuerySymbol = typeof query
 export type NotifySymbol = typeof notify
 export type SettingsSymbol = typeof settings
 
+declare global {
+	interface RenrakuSettings {}
+}
+
 export type Executor = (
 	path: string[],
 	args: any[],
@@ -19,8 +23,7 @@ export type Executor = (
 
 export type Settings = {
 	notify?: boolean
-	transfer?: Transferable[]
-}
+} & Partial<RenrakuSettings>
 
 export type Remote<F extends Fn | Fns> = (
 	F extends Fn
