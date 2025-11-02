@@ -24,7 +24,7 @@
 		"_clean": "rm -rf x && mkdir x",
 		"_tsc": "tsc",
 		"_ln": "ln -s '$(realpath s)' x/s",
-		"_scute": "scute -v",
+		"_scute": "scute -v --exclude _archive",
 		"api": "node x/server/examples/server.js",
 		"api-watch": "node --watch x/server/examples/server.js",
 		"api-debug": "node inspect x/server/examples/server.js",

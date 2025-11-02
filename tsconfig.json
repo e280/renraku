@@ -1,9 +1,8 @@
 {
 	"files": [],
 	"references": [
-		{ "path": "./s/universal" },
-		{ "path": "./s/node" },
 		{ "path": "./s/browser" },
-		{ "path": "./s/demo" }
+		{ "path": "./s/common" },
+		{ "path": "./s/node" }
 	]
 }
