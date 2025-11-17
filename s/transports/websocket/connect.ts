@@ -1,4 +1,5 @@
 
+import {pub} from "@e280/stz"
 import {Fns} from "../../core/types.js"
 import {defaults} from "../../defaults.js"
 import {Rtt} from "../../tools/pingponger.js"
@@ -25,11 +26,14 @@ export async function wsConnect<RemoteFns extends Fns>(
 		messenger.dispose()
 	}
 
+	const onDisconnect = pub<[error?: any]>(detach)
+	onDisconnect.subscribe(options.disconnected ?? (() => {}))
+
 	const conduit = new WebsocketConduit({
 		socket,
 		timeout,
-		onClose: detach,
-		onError: detach,
+		onClose: onDisconnect,
+		onError: onDisconnect,
 	})
 
 	const kill = () => {
@@ -55,8 +59,9 @@ export async function wsConnect<RemoteFns extends Fns>(
 	}
 
 	const connret = await connector(connection)
-	await conduit.pingponger.onRtt.next()
+	onDisconnect.subscribe(connret.disconnected)
 
+	await conduit.pingponger.onRtt.next()
 	return connection
 }
 

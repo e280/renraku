@@ -8,6 +8,9 @@
 
 ## v0.5
 
+### v0.5.2
+- 🍏 make `wsConnect` option `disconnected` optional, and actually work
+
 ### v0.5.1
 - 🍏 make WindowConduit ignore non-jsonrpc messages, avoiding unwanted noise
 - 🍏 update deps

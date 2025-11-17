@@ -26,7 +26,7 @@ export const asAccepter = <LocalFns extends Fns, RemoteFns extends Fns>(
 export type WsConnectOptions<RemoteFns extends Fns> = {
 	socket: WebSocket | ws.WebSocket
 	connector: Connector<any, RemoteFns>
-	disconnected: (error?: any) => void
+	disconnected?: (error?: any) => void
 	tap?: Tap
 	timeout?: number
 }
