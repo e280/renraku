@@ -10,6 +10,16 @@ export function onMessage(channel: Channel, fn: (e: ChannelMessage) => void) {
 	return () => channel.removeEventListener("message", fn)
 }
 
+export function is_valid_json_rpc_message(data: any): data is JsonRpc.Bidirectional {
+	return (
+		data !== undefined &&
+		data !== null &&
+		typeof data === "object" &&
+		"jsonrpc" in data &&
+		data.jsonrpc === JsonRpc.version
+	)
+}
+
 ////////////////
 
 export type SendRequestFn = (
