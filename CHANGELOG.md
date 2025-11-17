@@ -8,6 +8,10 @@
 
 ## v0.5
 
+### v0.5.1
+- 🍏 make WindowConduit ignore non-jsonrpc messages, avoiding unwanted noise
+- 🍏 update deps
+
 ### v0.5.0 🎉
 - 🍏 just decided it was time to get outta prerelease hell
 
