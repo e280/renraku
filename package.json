@@ -34,7 +34,7 @@
 	},
 	"dependencies": {
 		"@e280/sten": "^0.0.0-6",
-		"@e280/stz": "^0.2.14",
+		"@e280/stz": "^0.2.15",
 		"ws": "^8.18.3"
 	},
 	"devDependencies": {
