@@ -32,11 +32,13 @@ export function makeRemoteEndpoint(waiter: ResponseWaiter, sendRequest: SendRequ
 	return async(request, {transfer} = {}) => {
 		if ("id" in request) {
 			const done = defer<JsonRpc.Response | null>()
+			const waiting = waiter.wait(request.id, request.method)
+				.then(response => {
+					done.resolve(response)
+					return response
+				})
 			sendRequest(request, transfer, done.promise)
-			return waiter.wait(request.id, request.method).then(response => {
-				done.resolve(response)
-				return response
-			})
+			return await waiting
 		}
 		else {
 			const done = Promise.resolve(null)

@@ -19,10 +19,12 @@ export class ResponseWaiter {
 		this.pending.set(id, {method, deferred})
 		return await deadline(this.timeout, () => deferred.promise)
 			.catch(error => {
+				this.pending.delete(id)
 				if (error instanceof DeadlineError)
 					error.message = `request #${id} ${method}(), ${error.message}`
 				throw error
 			})
+			.finally(() => this.pending.delete(id))
 	}
 
 	deliverResponse(response: JsonRpc.Response) {
