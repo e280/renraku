@@ -6,6 +6,10 @@ on:
     tags:
     - 'v*'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -18,9 +22,5 @@ jobs:
     - run: npm ci
     - run: npm run build -s
     - run: npm test
-    - name: 🚀 npm publish
-      uses: JS-DevTools/npm-publish@v3
-      with:
-        token: ${{ secrets.NPM_TOKEN }}
-        access: public
+    - run: npm publish
 
