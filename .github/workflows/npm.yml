@@ -1,0 +1,27 @@
+
+name: 📦 npm publish
+on:
+  push:
+    tags:
+    - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: npm
+      url: "https://www.npmjs.com/package/@e280/renraku"
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v6
+      with:
+        node-version: "25"
+
+    - run: npm ci
+    - run: npm run build -s
+    - run: npm test
+    - run: npm publish --ignore-scripts --tag latest
+
