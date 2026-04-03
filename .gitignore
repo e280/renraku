@@ -1,5 +1,6 @@
 
-*.pem
-/x*
 /node_modules
 /temp
+/x
+/.codex
+
