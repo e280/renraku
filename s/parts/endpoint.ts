@@ -1,6 +1,7 @@
 
 import {dig, err, ok} from "@e280/stz"
 import {Endpoint, Fn, Fns} from "./types.js"
+import {ExposedError} from "./exposed-error.js"
 
 export function makeEndpoint(fns: Fns): Endpoint {
 	return async([method, params]) => {
@@ -15,7 +16,9 @@ export function makeEndpoint(fns: Fns): Endpoint {
 			return ok(value)
 		}
 		catch (error) {
-			return err("error")
+			return (error instanceof ExposedError)
+				? err(error.toString())
+				: err("error")
 		}
 	}
 }
