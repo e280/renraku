@@ -1,6 +1,7 @@
 
 import {defer, Deferred, err, errorString, GMap, nap} from "@e280/stz"
 import {Fns, Ret} from "../base/types.js"
+import {defaultTimeout} from "./consts.js"
 import {makeRemote} from "../base/remote.js"
 import {makeEndpoint} from "../base/endpoint.js"
 import {Request, Message, MessageKind, Response} from "./types.js"
@@ -23,7 +24,7 @@ export class Messenger<RemoteFns extends Fns> {
 		const id = this.#id++
 		const deferred = defer<Ret>()
 		this.#pending.set(id, deferred)
-		nap(this.options.timeout ?? 60_000).then(() => {
+		nap(this.options.timeout ?? defaultTimeout).then(() => {
 			const deferred = this.#pending.get(id)
 			if (deferred) {
 				this.#pending.delete(id)

@@ -4,6 +4,7 @@
 		"rootDir": "s",
 		"outDir": "x",
 		"lib": ["es2024", "dom", "webworker"],
+		"types": ["node"],
 		"target": "es2024",
 		"module": "nodenext",
 		"moduleResolution": "nodenext",

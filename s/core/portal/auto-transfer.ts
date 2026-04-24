@@ -1,6 +1,8 @@
 
 import {is} from "@e280/stz"
 
+export const noTransfer = () => undefined
+
 export function makeAutoTransfer(shouldTransfer: (x: unknown) => boolean) {
 	return (tree: unknown) => auto_transfer_algo(tree, shouldTransfer)
 }
