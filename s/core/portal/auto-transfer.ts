@@ -1,37 +1,13 @@
 
 import {is} from "@e280/stz"
 
-export const isBrowserTransferable = (x: unknown) => {
-	return is.object(x) && [
-		ArrayBuffer,
-		MessagePort,
-		ImageBitmap,
-		OffscreenCanvas,
-
-		AudioData,
-		VideoFrame,
-		MediaSourceHandle,
-		MediaStreamTrack,
-		MIDIAccess,
-		RTCDataChannel,
-
-		ReadableStream,
-		WritableStream,
-		TransformStream,
-	].some(Thing => x instanceof Thing)
+export function makeAutoTransfer(shouldTransfer: (x: unknown) => boolean) {
+	return (tree: unknown) => auto_transfer_algo(tree, shouldTransfer)
 }
 
-export const isNodeTransferable = (x: unknown) => {
-	return is.object(x) && [
-		ArrayBuffer,
-		MessagePort,
-	].some(Thing => x instanceof Thing)
-}
-
-
-export function autoTransfer(
+function auto_transfer_algo(
 		tree: unknown,
-		shouldTransfer = isBrowserTransferable,
+		shouldTransfer: (x: unknown) => boolean,
 	): Transferable[] {
 
 	const transfers = new Set<Transferable>()

@@ -7,7 +7,9 @@
 	"type": "module",
 	"main": "./x/index.js",
 	"exports": {
-		".": "./x/index.js"
+		".": "./x/core/index.js",
+		"./node": "./x/node/index.js",
+		"./web": "./x/web/index.js"
 	},
 	"files": [
 		"x",

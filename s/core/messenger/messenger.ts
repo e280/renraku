@@ -1,17 +1,18 @@
 
 import {defer, Deferred, err, errorString, GMap, nap} from "@e280/stz"
-import {Fns, Ret} from "../parts/types.js"
-import {makeRemote} from "../parts/remote.js"
-import {makeEndpoint} from "../parts/endpoint.js"
-import {CallMsg, Msg, MsgKind, RetMsg} from "./types.js"
+import {Fns, Ret} from "../base/types.js"
+import {makeRemote} from "../base/remote.js"
+import {makeEndpoint} from "../base/endpoint.js"
+import {Request, Message, MessageKind, Response} from "./types.js"
 
-export class Conduit<RemoteFns extends Fns> {
+/** bidirectional messenger */
+export class Messenger<RemoteFns extends Fns> {
 	#id = 0
 	#localEndpoint
 	#pending = new GMap<number, Deferred<Ret>>()
 
 	constructor(private options: {
-			send: (msg: Msg) => void
+			send: (msg: Message) => void
 			fns?: Fns
 			timeout?: number
 		}) {
@@ -30,7 +31,7 @@ export class Conduit<RemoteFns extends Fns> {
 			}
 		})
 		try {
-			this.options.send([MsgKind.Call, id, call])
+			this.options.send([MessageKind.Request, id, call])
 		}
 		catch (error) {
 			this.#pending.delete(id)
@@ -39,19 +40,19 @@ export class Conduit<RemoteFns extends Fns> {
 		return deferred.promise
 	})
 
-	recv = async(msg: Msg) => {
+	recv = async(msg: Message) => {
 		switch (msg[0]) {
-			case MsgKind.Call: return this.#recvCall(msg)
-			case MsgKind.Ret: return this.#recvRet(msg)
+			case MessageKind.Request: return this.#recvCall(msg)
+			case MessageKind.Response: return this.#recvRet(msg)
 		}
 	}
 
-	async #recvCall([, id, call]: CallMsg) {
+	async #recvCall([, id, call]: Request) {
 		const ret = await this.#localEndpoint(call)
-		this.options.send([MsgKind.Ret, id, ret])
+		this.options.send([MessageKind.Response, id, ret])
 	}
 
-	async #recvRet([, id, ret]: RetMsg) {
+	async #recvRet([, id, ret]: Response) {
 		const pending = this.#pending.get(id)
 		if (pending) {
 			this.#pending.delete(id)

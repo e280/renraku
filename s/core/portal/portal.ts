@@ -1,25 +1,25 @@
 
-import {Conduit} from "./conduit.js"
-import {Fns} from "../parts/types.js"
-import {autoTransfer} from "./auto-transfer.js"
+import {Fns} from "../base/types.js"
+import {AutoTransfer, Port} from "./types.js"
+import {Messenger} from "../messenger/messenger.js"
 
 export class Portal<RemoteFns extends Fns> {
 	close
 	#conduit
 
 	constructor(
-			port: MessagePort,
+			port: Port,
+			autoTransfer: AutoTransfer,
 			options: {fns?: Fns, timeout?: number} = {},
 		) {
 
-		this.#conduit = new Conduit<RemoteFns>({
+		this.#conduit = new Messenger<RemoteFns>({
 			fns: options.fns,
 			timeout: options.timeout,
 			send: msg => port.postMessage(msg, autoTransfer(msg)),
 		})
 
-		const onmessage = (event: MessageEvent) => this.#conduit.recv(event.data)
-		port.addEventListener("message", onmessage)
+		port.addEventListener("message", event => this.#conduit.recv(event.data))
 		port.start()
 		this.close = () => port.close()
 	}
