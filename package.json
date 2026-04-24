@@ -21,15 +21,15 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.2.29"
+		"@e280/stz": "^0.2.34"
 	},
 	"devDependencies": {
-		"@e280/octo": "^0.1.0",
-		"@e280/science": "^0.1.10",
-		"@e280/scute": "^0.3.1",
-		"@types/node": "^25.5.0",
+		"@e280/octo": "^0.1.1",
+		"@e280/science": "^0.1.11",
+		"@e280/scute": "^0.3.3",
+		"@types/node": "^25.6.0",
 		"http-server": "^14.1.1",
-		"typescript": "^6.0.2"
+		"typescript": "^6.0.3"
 	},
 	"homepage": "https://github.com/e280/renraku#readme",
 	"repository": {
