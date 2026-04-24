@@ -1,11 +1,11 @@
 
 import {dig, err, ok} from "@e280/stz"
+import {ExposedError} from "./errors.js"
 import {Endpoint, Fn, Fns} from "./types.js"
-import {ExposedError} from "./exposed-error.js"
 
 export function makeEndpoint(fns: Fns): Endpoint {
-	return async([method, params]) => {
-		const fnResult = dig<Fn>(fns, method)
+	return async([path, ...params]) => {
+		const fnResult = dig<Fn>(fns, path)
 
 		if (!fnResult.ok)
 			return err("not found")
@@ -17,7 +17,7 @@ export function makeEndpoint(fns: Fns): Endpoint {
 		}
 		catch (error) {
 			return (error instanceof ExposedError)
-				? err(error.toString())
+				? err(error.message)
 				: err("error")
 		}
 	}
