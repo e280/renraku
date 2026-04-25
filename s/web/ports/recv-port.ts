@@ -26,7 +26,10 @@ export async function recvPort(options: {
 		) {
 			const [port] = event.ports
 			const id = event.data?.id
-			from.postMessage({kind: portAccepted, topic, id}, {targetOrigin: fromOrigin})
+			from.postMessage(
+				{kind: portAccepted, topic, id},
+				{targetOrigin: fromOrigin},
+			)
 			deferred.resolve(port)
 		}
 	}

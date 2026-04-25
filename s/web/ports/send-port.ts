@@ -14,9 +14,12 @@ export async function sendPort(options: {
 
 	const {topic, to, toOrigin, timeout = defaultTimeout} = options
 	const {port1, port2} = new MessageChannel()
-
 	const id = randomId()
-	to.postMessage({kind: portOffer, topic, id}, {targetOrigin: toOrigin, transfer: [port2]})
+
+	to.postMessage(
+		{kind: portOffer, topic, id},
+		{targetOrigin: toOrigin, transfer: [port2]},
+	)
 
 	const deferred = defer<MessagePort>()
 	const allow = gatekeep(to, toOrigin)
