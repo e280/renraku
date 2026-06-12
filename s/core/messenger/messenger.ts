@@ -1,5 +1,5 @@
 
-import {defer, Deferred, err, errorString, GMap, nap} from "@e280/stz"
+import {defer, Deferred, err, errorString, nap} from "@e280/stz"
 import {Fns, Ret} from "../base/types.js"
 import {defaultTimeout} from "./consts.js"
 import {makeRemote} from "../base/remote.js"
@@ -10,7 +10,7 @@ import {Request, Message, MessageKind, Response} from "./types.js"
 export class Messenger<RemoteFns extends Fns> {
 	#id = 0
 	#localEndpoint
-	#pending = new GMap<number, Deferred<Ret>>()
+	#pending = new Map<number, Deferred<Ret>>()
 
 	constructor(private options: {
 			send: (msg: Message) => void
