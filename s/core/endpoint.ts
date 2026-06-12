@@ -1,5 +1,5 @@
 
-import {drill} from "@e280/stz"
+import {dig, needOk} from "@e280/stz"
 import {execute} from "./execute.js"
 import {ErrorTap} from "./taps/error.js"
 import {Endpoint, Fn, Fns, Tap} from "./types.js"
@@ -20,7 +20,7 @@ export function makeEndpoint<F extends Fns>(options: EndpointOptions<F>): Endpoi
 
 	return async request => {
 		const path = request.method.split(".")
-		const fn = drill(options.fns, path) as Fn
+		const fn = needOk(dig(options.fns, path)) as Fn
 		const action = async() => await fn(...request.params)
 
 		tap.rpcRequest({request})
