@@ -8,6 +8,28 @@
 
 ## v0.5
 
+### v0.5.9
+- 🍏 update deps, upgrade scute version for demo page
+
+### v0.5.8
+- 🍏 update deps, switch from stz `drill` to `dig` utility fn
+
+### v0.5.7
+- 🍏 update deps, tsconfig, and gh workflows
+
+### v0.5.6
+- 🍏 fix release workflow
+
+### v0.5.5
+- 🍏 use new npm trusted publishers for package deployment
+
+### v0.5.4
+- 🍏 fix dropped promise in remote
+- 🍏 update deps
+
+### v0.5.3
+- 🍏 update deps
+
 ### v0.5.2
 - 🍏 make `wsConnect` option `disconnected` optional, and actually work
 
