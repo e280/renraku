@@ -4,9 +4,42 @@
 - 🔶 deprecation or possible breaking change
 - 🍏 harmless addition, fix, or enhancement
 
+
+
+<br/>
+
+## v0.6
+
+### v0.6.0
+- 🟥 total rewrite
+
+
+
 <br/>
 
 ## v0.5
+
+### v0.5.9
+- 🍏 update deps, upgrade scute version for demo page
+
+### v0.5.8
+- 🍏 update deps, switch from stz `drill` to `dig` utility fn
+
+### v0.5.7
+- 🍏 update deps, tsconfig, and gh workflows
+
+### v0.5.6
+- 🍏 fix release workflow
+
+### v0.5.5
+- 🍏 use new npm trusted publishers for package deployment
+
+### v0.5.4
+- 🍏 fix dropped promise in remote
+- 🍏 update deps
+
+### v0.5.3
+- 🍏 update deps
 
 ### v0.5.2
 - 🍏 make `wsConnect` option `disconnected` optional, and actually work
@@ -175,6 +208,10 @@
 - 🍏 add new remote fn symbol `advanced` which allows us to specify `transfer` on remote requests
 - 🍏 messenger has `logistics` system allowing us to specify `transfer` in local responses
 
+
+
+<br/>
+
 ## v0.4
 
 ### v0.4.3 — v0.4.5
@@ -219,6 +256,10 @@ logging and error handling has been revised and greatly improved.
     - so now, you can disable logging by passing empty functions for onCall/onCallError/onError
     - i suppose you could actually set those empty functions on the `logger` instance 🤔
 
+
+
+<br/>
+
 ## v0.3
 
 ### v0.3.0
@@ -249,6 +290,8 @@ logging and error handling has been revised and greatly improved.
 - 🍏 new `PostMessenger` for bidirectional postmessage apis
 - 🍏 add `timeout` for HttpServer and also WebSocketServer, defaults to 10 seconds.
 
+
+
 <br/>
 
 ## v0.2
@@ -259,11 +302,15 @@ logging and error handling has been revised and greatly improved.
   - everything has changed, deal with it 😎
   - you're gonna have to just read the new readme 💀
 
+
+
 <br/>
 
 ## v0.1
 
 - undocumented small tweaks and renames
+
+
 
 <br/>
 

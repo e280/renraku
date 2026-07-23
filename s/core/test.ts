@@ -1,5 +1,5 @@
 
-import {needErr, needOk, ok} from "@e280/stz"
+import {ok, gotErr, gotOk} from "@e280/stz"
 import {science, test, expect} from "@e280/science"
 
 import {makeRemote} from "./base/remote.js"
@@ -11,24 +11,24 @@ export default science.suite({
 		"call": test(async() => {
 			const fns = {add: async(x: number, y: number) => (x + y)}
 			const endpoint = makeEndpoint(fns)
-			expect(needOk(await endpoint([["add"], 1, 2]))).is(3)
+			expect(gotOk(await endpoint([["add"], 1, 2]))).is(3)
 		}),
 
 		"not found": test(async() => {
 			const endpoint = makeEndpoint({})
-			expect(needErr(await endpoint([["add"], 1, 2]))).is("not found")
+			expect(gotErr(await endpoint([["add"], 1, 2]))).is("not found")
 		}),
 
 		"error is masked for security": test(async() => {
 			const fns = {hello: async() => { throw new Error("danger") }}
 			const endpoint = makeEndpoint(fns)
-			expect(needErr(await endpoint([["hello"]]))).is("error")
+			expect(gotErr(await endpoint([["hello"]]))).is("error")
 		}),
 
 		"exposed error is passed through": test(async() => {
 			const fns = {hello: async() => { throw new ExposedError("safe error") }}
 			const endpoint = makeEndpoint(fns)
-			expect(needErr(await endpoint([["hello"]]))).is("safe error")
+			expect(gotErr(await endpoint([["hello"]]))).is("safe error")
 		}),
 	},
 
