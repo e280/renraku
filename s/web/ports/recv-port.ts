@@ -15,8 +15,8 @@ export async function recvPort(options: {
 	const deferred = defer<{port: MessagePort}>()
 	const allow = gatekeep(from, fromOrigin)
 
-	nap(timeout)
-		.then(() => deferred.reject(new Error("timed out")))
+	if (timeout !== Infinity)
+		nap(timeout).then(() => deferred.reject(new Error("timed out")))
 
 	const onmessage = (event: MessageEvent) => {
 		if (

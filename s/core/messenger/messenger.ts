@@ -24,13 +24,15 @@ export class Messenger<RemoteFns extends Fns> {
 		const id = this.#id++
 		const deferred = defer<Ret>()
 		this.#pending.set(id, deferred)
-		nap(this.options.timeout ?? defaultTimeout).then(() => {
-			const deferred = this.#pending.get(id)
-			if (deferred) {
-				this.#pending.delete(id)
-				deferred.resolve(err("timed out"))
-			}
-		})
+		const timeout = this.options.timeout ?? defaultTimeout
+		if (timeout !== Infinity)
+			nap(timeout).then(() => {
+				const deferred = this.#pending.get(id)
+				if (deferred) {
+					this.#pending.delete(id)
+					deferred.resolve(err("timed out"))
+				}
+			})
 		try {
 			this.options.send([MessageKind.Request, id, call])
 		}

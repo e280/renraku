@@ -16,8 +16,8 @@ export async function sendPort(options: {
 	const {port1, port2} = new MessageChannel()
 	const id = randomId()
 
-	nap(timeout)
-		.then(() => deferred.reject(new Error("timed out")))
+	if (timeout !== Infinity)
+		nap(timeout).then(() => deferred.reject(new Error("timed out")))
 
 	const onmessage = (event: MessageEvent) => {
 		if (
