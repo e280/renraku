@@ -13,5 +13,5 @@ const {port} = await sendPort({
 	to: window.parent,
 })
 
-new Portal(port, webAutoTransfer, {fns})
+new Portal({port, fns, autoTransfer: webAutoTransfer})
 

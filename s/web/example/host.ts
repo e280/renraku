@@ -12,7 +12,7 @@ const {port} = await recvPort({
 	fromOrigin: "http://localhost:8080",
 })
 
-const portal = new Portal<ExampleFns>(port, webAutoTransfer)
+const portal = new Portal<ExampleFns>({port, autoTransfer: webAutoTransfer})
 
 console.log(await portal.remote.hello())
 

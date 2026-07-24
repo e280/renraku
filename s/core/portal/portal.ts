@@ -7,15 +7,16 @@ export class Portal<RemoteFns extends Fns> {
 	close
 	#messenger
 
-	constructor(
+	constructor({port, autoTransfer, fns, timeout}: {
 			port: Port,
 			autoTransfer: AutoTransfer,
-			options: {fns?: Fns, timeout?: number} = {},
-		) {
+			fns?: Fns,
+			timeout?: number,
+		}) {
 
 		this.#messenger = new Messenger<RemoteFns>({
-			fns: options.fns,
-			timeout: options.timeout,
+			fns,
+			timeout,
 			send: msg => port.postMessage(msg, autoTransfer(msg)),
 		})
 
