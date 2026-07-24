@@ -8,10 +8,9 @@ const fns: ExampleFns = {
 	hello: async() => "world",
 }
 
-const port = await sendPort({
+const {port} = await sendPort({
 	topic: "example",
 	to: window.parent,
-	toOrigin: "http://localhost:8080",
 })
 
 new Portal(port, webAutoTransfer, {fns})

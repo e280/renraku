@@ -12,7 +12,7 @@ export async function recvPort(options: {
 	}) {
 
 	const {topic, from, fromOrigin, timeout = defaultTimeout} = options
-	const deferred = defer<MessagePort>()
+	const deferred = defer<{port: MessagePort}>()
 	const allow = gatekeep(from, fromOrigin)
 
 	nap(timeout)
@@ -30,7 +30,7 @@ export async function recvPort(options: {
 				{kind: portAccepted, topic, id},
 				{targetOrigin: fromOrigin},
 			)
-			deferred.resolve(port)
+			deferred.resolve({port})
 		}
 	}
 

@@ -6,7 +6,7 @@ import {webAutoTransfer} from "../web-transferable.js"
 
 const iframe = document.querySelector<HTMLIFrameElement>("iframe")!
 
-const port = await recvPort({
+const {port} = await recvPort({
 	topic: "example",
 	from: iframe.contentWindow!,
 	fromOrigin: "http://localhost:8080",
