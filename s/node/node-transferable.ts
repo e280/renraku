@@ -5,8 +5,8 @@ import {makeAutoTransfer} from "../core/portal/auto-transfer.js"
 
 export const nodeAutoTransfer = makeAutoTransfer(
 	(x: unknown) => is.object(x) && [
-		ArrayBuffer,
+		globalThis.ArrayBuffer,
 		MessagePort,
-	].some(Thing => x instanceof Thing)
+	].filter(is.happy).some(Thing => x instanceof Thing)
 )
 

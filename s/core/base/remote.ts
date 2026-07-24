@@ -6,7 +6,7 @@ export function makeRemote<F extends Fns>(endpoint: Endpoint) {
 	function makeProxy(endpoint: Endpoint, path: string[]) {
 		return new Proxy(() => {}, {
 			get(_target, key) {
-				if (typeof key !== "string")
+				if (typeof key !== "string" || key === "then")
 					return undefined
 				return makeProxy(endpoint, [...path, key])
 			},
