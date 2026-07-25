@@ -1,6 +1,5 @@
 
 import {defer, nap} from "@e280/stz"
-import {gatekeep} from "./gatekeep.js"
 import {portOffer, portAccepted} from "./consts.js"
 import {defaultTimeout} from "../../core/messenger/consts.js"
 
@@ -12,15 +11,15 @@ export async function recvPort(options: {
 	}) {
 
 	const {topic, from, fromOrigin, timeout = defaultTimeout} = options
-	const deferred = defer<{port: MessagePort}>()
-	const allow = gatekeep(from, fromOrigin)
+	const deferred = defer<{port: MessagePort, origin: string}>()
 
 	if (timeout !== Infinity)
 		nap(timeout).then(() => deferred.reject(new Error("timed out")))
 
 	const onmessage = (event: MessageEvent) => {
 		if (
-			allow(event) &&
+			event.source === from &&
+			event.origin === fromOrigin &&
 			event.data?.kind === portOffer &&
 			event.data.topic === topic
 		) {
@@ -30,7 +29,7 @@ export async function recvPort(options: {
 				{kind: portAccepted, topic, id},
 				{targetOrigin: fromOrigin},
 			)
-			deferred.resolve({port})
+			deferred.resolve({port, origin: event.origin})
 		}
 	}
 
