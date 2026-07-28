@@ -1,5 +1,5 @@
 
-import {defer, nap} from "@e280/stz"
+import {defer, ev, nap} from "@e280/stz"
 import {portOffer, portAccepted} from "./consts.js"
 import {defaultTimeout} from "../../core/messenger/consts.js"
 
@@ -16,7 +16,7 @@ export async function recvPort(options: {
 	if (timeout !== Infinity)
 		nap(timeout).then(() => deferred.reject(new Error("timed out")))
 
-	const onmessage = (event: MessageEvent) => {
+	const off = ev(globalThis, {message: (event: MessageEvent) => {
 		if (
 			event.source === from &&
 			event.origin === fromOrigin &&
@@ -31,12 +31,8 @@ export async function recvPort(options: {
 			)
 			deferred.resolve({port, origin: event.origin})
 		}
-	}
+	}})
 
-	globalThis.addEventListener("message", onmessage)
-
-	return deferred.promise.finally(() => {
-		globalThis.removeEventListener("message", onmessage)
-	})
+	return deferred.promise.finally(off)
 }
 
