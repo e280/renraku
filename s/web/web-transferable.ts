@@ -4,21 +4,21 @@ import {makeAutoTransfer} from "../core/portal/auto-transfer.js"
 
 export const webAutoTransfer = makeAutoTransfer(
 	(x: unknown) => is.object(x) && [
-		window.ArrayBuffer,
-		window.MessagePort,
-		window.ImageBitmap,
-		window.OffscreenCanvas,
+		globalThis.ArrayBuffer,
+		globalThis.MessagePort,
+		globalThis.ImageBitmap,
+		globalThis.OffscreenCanvas,
 
-		window.AudioData,
-		window.VideoFrame,
-		window.MediaSourceHandle,
-		window.MediaStreamTrack,
-		window.MIDIAccess,
-		window.RTCDataChannel,
+		globalThis.AudioData,
+		globalThis.VideoFrame,
+		globalThis.MediaSourceHandle,
+		globalThis.MediaStreamTrack,
+		globalThis.MIDIAccess,
+		globalThis.RTCDataChannel,
 
-		window.ReadableStream,
-		window.WritableStream,
-		window.TransformStream,
+		globalThis.ReadableStream,
+		globalThis.WritableStream,
+		globalThis.TransformStream,
 	].filter(is.happy).some(Thing => x instanceof Thing)
 )
 
