@@ -20,7 +20,7 @@ export class Portal<RemoteFns extends Fns> {
 			send: msg => port.postMessage(msg, autoTransfer(msg)),
 		})
 
-		port.addEventListener("message", event => this.#messenger.recv(event.data))
+		port.addEventListener("message", event => this.#messenger.recv(event.data as any))
 		port.start()
 		this.close = () => port.close()
 	}
