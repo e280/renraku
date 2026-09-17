@@ -21,3 +21,13 @@ export function assert(x: any, err: string) {
 	else return x
 }
 
+export const allowgate = (
+		source: Window | WindowProxy,
+		origin: string,
+		allow: (event: MessageEvent) => boolean,
+	) => (event: MessageEvent) => (
+	assert(event.source === source, "bad message source") &&
+	assert(origin === "*" || event.origin === origin, "bad message origin") &&
+	assert(allow(event), "not allowed")
+)
+
