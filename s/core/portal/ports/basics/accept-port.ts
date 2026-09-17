@@ -1,9 +1,9 @@
 
 import {Port} from "../../types.js"
-import {Recv, Send} from "../types.js"
 import {acceptPorts} from "./accept-ports.js"
+import {Accept, Recv, Send} from "../types.js"
 
-export async function acceptPort(options: {send: Send, recv: Recv}) {
+export async function acceptPort(options: {send: Send<Accept>, recv: Recv}) {
 	return new Promise<Port>(resolve => {
 		const stop = acceptPorts({...options, onPort: port => {
 			stop()

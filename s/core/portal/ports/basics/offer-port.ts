@@ -1,12 +1,12 @@
 
 import {hex} from "@e280/stz"
-import {Recv, Send} from "../types.js"
 import {isAccept} from "../utils/is.js"
 import {offerKind} from "../utils/kinds.js"
 import {Channel, Port} from "../../types.js"
+import {Offer, Recv, Send} from "../types.js"
 
 export async function offerPort({send, recv, channel}: {
-		send: Send
+		send: Send<Offer>
 		recv: Recv
 		channel: Channel
 	}) {
