@@ -1,9 +1,9 @@
 
 import {Offer} from "../../core/portal/ports/types.js"
 import {allowgate, goodTopic, Topical} from "./utils.js"
-import {offerPort} from "../../core/portal/ports/basics/offer-port.js"
+import {offerPort} from "../../core/portal/ports/basics/offer.js"
 
-export async function webPortOffer(options: {
+export async function offerWindowPort(options: {
 		topic: string
 		to: Window | WindowProxy
 		origin?: string

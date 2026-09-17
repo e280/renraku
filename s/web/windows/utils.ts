@@ -1,7 +1,7 @@
 
 import {is} from "@e280/stz"
 
-export type WebAcceptOptions = {
+export type WindowAcceptOptions = {
 	topic: string
 	from: Window | WindowProxy
 	origin: string

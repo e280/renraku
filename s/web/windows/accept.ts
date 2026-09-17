@@ -1,11 +1,11 @@
 
-import {webPortAccepts} from "./accepts.js"
-import {WebAcceptOptions} from "./utils.js"
+import {acceptWindowPorts} from "./accepts.js"
+import {WindowAcceptOptions} from "./utils.js"
 import {Port} from "../../core/portal/types.js"
 
-export async function webPortAccept(options: WebAcceptOptions) {
+export async function acceptWindowPort(options: WindowAcceptOptions) {
 	return new Promise<Port>(resolve => {
-		const stop = webPortAccepts({...options, onPort: port => {
+		const stop = acceptWindowPorts({...options, onPort: port => {
 			stop()
 			resolve(port)
 		}})

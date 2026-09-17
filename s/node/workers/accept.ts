@@ -1,8 +1,8 @@
 
 import {Worker} from "node:worker_threads"
-import {acceptPort} from "../../core/portal/ports/basics/accept-port.js"
+import {acceptPort} from "../../core/portal/ports/basics/accept.js"
 
-export function nodeWorkerPortAccept(worker: Worker) {
+export function acceptNodeWorkerPort(worker: Worker) {
 	return acceptPort({
 		send: (data, transfer) => worker.postMessage(data, transfer),
 		recv: fn => {

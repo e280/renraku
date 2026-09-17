@@ -1,12 +1,12 @@
 
 import {ExampleFns} from "./types.js"
-import {webPortAccept} from "../windows/accept.js"
 import {Portal} from "../../core/portal/portal.js"
+import {acceptWindowPort} from "../windows/accept.js"
 import {webAutoTransfer} from "../web-transferable.js"
 
 const iframe = document.querySelector<HTMLIFrameElement>("iframe")!
 
-const port = await webPortAccept({
+const port = await acceptWindowPort({
 	topic: "example",
 	from: iframe.contentWindow!,
 	origin: "http://localhost:8080",

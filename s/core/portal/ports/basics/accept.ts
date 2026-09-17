@@ -1,6 +1,6 @@
 
 import {Port} from "../../types.js"
-import {acceptPorts} from "./accept-ports.js"
+import {acceptPorts} from "./accepts.js"
 import {Accept, Recv, Send} from "../types.js"
 
 export async function acceptPort(options: {send: Send<Accept>, recv: Recv}) {

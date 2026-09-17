@@ -1,10 +1,10 @@
 
 import {Port} from "../../core/portal/types.js"
 import {Accept} from "../../core/portal/ports/types.js"
-import {acceptPorts} from "../../core/portal/ports/basics/accept-ports.js"
-import {allowgate, goodTopic, Topical, WebAcceptOptions} from "./utils.js"
+import {acceptPorts} from "../../core/portal/ports/basics/accepts.js"
+import {allowgate, goodTopic, Topical, WindowAcceptOptions} from "./utils.js"
 
-export function webPortAccepts(options: WebAcceptOptions & {
+export function acceptWindowPorts(options: WindowAcceptOptions & {
 		onPort: (port: Port, origin: string) => void
 	}) {
 

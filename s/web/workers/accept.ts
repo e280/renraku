@@ -1,7 +1,7 @@
 
-import {acceptPort} from "../../core/portal/ports/basics/accept-port.js"
+import {acceptPort} from "../../core/portal/ports/basics/accept.js"
 
-export async function webWorkerPortAccept(worker: Worker) {
+export async function acceptWorkerPort(worker: Worker) {
 	return acceptPort({
 		send: (data, transfer) => worker.postMessage(data, transfer),
 		recv: fn => {

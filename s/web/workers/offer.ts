@@ -1,7 +1,7 @@
 
-import {offerPort} from "../../core/portal/ports/basics/offer-port.js"
+import {offerPort} from "../../core/portal/ports/basics/offer.js"
 
-export async function webWorkerPortOffer() {
+export async function offerWorkerPort() {
 	return offerPort({
 		channel: new MessageChannel(),
 		send: (data, transfer) => self.postMessage(data, transfer),
