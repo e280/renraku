@@ -1,5 +1,5 @@
 
-import {acceptPort} from "../../core/portal/ports/basics/accept.js"
+import {acceptPort} from "../../../core/portal/ports/basics/accept.js"
 
 export async function acceptWorkerPort(worker: Worker) {
 	return acceptPort({

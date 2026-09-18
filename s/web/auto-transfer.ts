@@ -2,7 +2,7 @@
 import {is} from "@e280/stz"
 import {makeAutoTransfer} from "../core/portal/auto-transfer.js"
 
-export const webAutoTransfer = makeAutoTransfer(
+export const autoTransfer = makeAutoTransfer(
 	(x: unknown) => is.object(x) && [
 		globalThis.ArrayBuffer,
 		globalThis.MessagePort,

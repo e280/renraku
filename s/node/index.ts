@@ -2,5 +2,5 @@
 export * from "./workers/accept.js"
 export * from "./workers/offer.js"
 
-export * from "./node-transferable.js"
+export * from "./auto-transfer.js"
 
