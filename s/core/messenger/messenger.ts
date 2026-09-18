@@ -1,7 +1,6 @@
 
-import {defer, Deferred, err, errorString, nap} from "@e280/stz"
+import {defaultTimeout, defer, Deferred, err, errorString, nap} from "@e280/stz"
 import {Fns, Ret} from "../base/types.js"
-import {defaultTimeout} from "./consts.js"
 import {makeRemote} from "../base/remote.js"
 import {makeEndpoint} from "../base/endpoint.js"
 import {Request, Message, MessageKind, Response} from "./types.js"
@@ -16,8 +15,13 @@ export class Messenger<RemoteFns extends Fns> {
 			send: (msg: Message) => void
 			fns?: Fns
 			timeout?: number
+			exposeAllErrors?: boolean
 		}) {
-		this.#localEndpoint = makeEndpoint(options.fns ?? {})
+
+		this.#localEndpoint = makeEndpoint(
+			options.fns ?? {},
+			{exposeAllErrors: options.exposeAllErrors},
+		)
 	}
 
 	remote = makeRemote<RemoteFns>(async call => {

@@ -5,6 +5,7 @@ import {science, test, expect} from "@e280/science"
 import {makeRemote} from "./base/remote.js"
 import {ExposedError} from "./base/errors.js"
 import {makeEndpoint} from "./base/endpoint.js"
+import {unexposedErrorMessage} from "./consts.js"
 
 export default science.suite({
 	"endpoint": {
@@ -16,19 +17,19 @@ export default science.suite({
 
 		"not found": test(async() => {
 			const endpoint = makeEndpoint({})
-			expect(gotErr(await endpoint([["add"], 1, 2]))).is("not found")
+			expect(gotErr(await endpoint([["add"], 1, 2]))).ok()
 		}),
 
-		"error is masked for security": test(async() => {
+		"error is concealed for security": test(async() => {
 			const fns = {hello: async() => { throw new Error("danger") }}
 			const endpoint = makeEndpoint(fns)
-			expect(gotErr(await endpoint([["hello"]]))).is("error")
+			expect(gotErr(await endpoint([["hello"]]))).is(unexposedErrorMessage)
 		}),
 
 		"exposed error is passed through": test(async() => {
 			const fns = {hello: async() => { throw new ExposedError("safe error") }}
 			const endpoint = makeEndpoint(fns)
-			expect(gotErr(await endpoint([["hello"]]))).is("safe error")
+			expect(gotErr(await endpoint([["hello"]]))).is("Error: safe error")
 		}),
 	},
 
@@ -63,7 +64,7 @@ export default science.suite({
 			let caught: any
 			try { await remote.hello() }
 			catch (error) { caught = error }
-			expect(caught?.message).is("problem")
+			expect(caught?.message).is("Error: problem")
 		}),
 	},
 })
