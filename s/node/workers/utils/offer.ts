@@ -1,9 +1,9 @@
 
 import {got} from "@e280/stz"
 import {MessageChannel, parentPort} from "node:worker_threads"
-import {offerPort} from "../../core/portal/ports/basics/offer.js"
+import {offerPort} from "../../../core/portal/ports/basics/offer.js"
 
-export async function offerNodeWorkerPort() {
+export async function nodeOfferWorkerPort() {
 	const parent = got(parentPort)
 
 	return offerPort({

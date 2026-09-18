@@ -17,8 +17,8 @@ export async function connectWorker<WorkerFns extends Fns>(
 		const portal = new Portal<WorkerFns>({port, fns: parentFns, autoTransfer})
 		const {remote} = portal
 		const dispose = () => {
-			worker.terminate()
 			portal.close()
+			worker.terminate()
 		}
 		return {remote, dispose}
 	}
