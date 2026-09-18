@@ -1,4 +1,9 @@
 
-export class RemoteError extends Error {}
-export class ExposedError extends Error {}
+export class RemoteError extends Error {
+	name = "RemoteError"
+}
+
+export class ExposedError extends Error {
+	name = "ExposedError"
+}
 
