@@ -29,7 +29,7 @@ export default science.suite({
 		"exposed error is passed through": test(async() => {
 			const fns = {hello: async() => { throw new ExposedError("safe error") }}
 			const endpoint = makeEndpoint(fns)
-			expect(gotErr(await endpoint([["hello"]]))).is("Error: safe error")
+			expect(gotErr(await endpoint([["hello"]]))).is("ExposedError: safe error")
 		}),
 	},
 
@@ -64,7 +64,7 @@ export default science.suite({
 			let caught: any
 			try { await remote.hello() }
 			catch (error) { caught = error }
-			expect(caught?.message).is("Error: problem")
+			expect(caught?.message).is("ExposedError: problem")
 		}),
 	},
 })
