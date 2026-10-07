@@ -26,12 +26,11 @@ import {connect, Messenger} from "@e280/renraku"
 
     connection.onRecv(recv)
     ```
-- **start a keepalive heartbeat (so the socket doesn't die).**
+- **read cool stats about ping time.**  
+    renraku automatically pings every 10s, to keep the socket alive and give you these stats.
     ```ts
-    connection.startHeartbeat(
-      seconds(10),
-      rtt => console.log(`ping ${rtt} ms`),
-    )
+    connection.rtt.latest // 81
+    connection.rtt.average // 84
     ```
 - **call remote fns.**
     ```ts

@@ -2,6 +2,8 @@
 import {cycle, defer, ev, Json, nap, pipe, sub} from "@e280/stz"
 import {Pingpong} from "./pingpong.js"
 
+const heartbeatInterval = 10_000
+
 export async function connect<X extends Json = any>(socket: WebSocket) {
 	const connect = defer()
 	const onRecv = sub<[X]>()
@@ -28,6 +30,11 @@ export async function connect<X extends Json = any>(socket: WebSocket) {
 
 	await connect
 
+	onClose(cycle(async() => {
+		await pingpong.ping().catch(() => socket.close())
+		await nap(heartbeatInterval)
+	}))
+
 	return {
 		socket,
 		onRecv,
@@ -36,21 +43,6 @@ export async function connect<X extends Json = any>(socket: WebSocket) {
 		ping: pingpong.ping,
 		send: pingpong.sendData,
 		close: () => socket.close(),
-		startHeartbeat(interval: number, fn?: (rtt: number) => void) {
-			const stop = cycle(async() => {
-				await nap(interval)
-				try {
-					const rtt = await pingpong.ping()
-					fn?.(rtt)
-				}
-				catch {
-					socket.close()
-					stop()
-				}
-			})
-			onClose(stop)
-			return stop
-		},
 	}
 }
 
