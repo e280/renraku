@@ -1,9 +1,9 @@
 
-import {is} from "@e280/stz"
+import {isHappy, isObject} from "@e280/stz"
 import {makeAutoTransfer} from "../core/portal/auto-transfer.js"
 
 export const autoTransfer = makeAutoTransfer(
-	(x: unknown) => is.object(x) && [
+	(x: unknown) => isObject(x) && [
 		globalThis.ArrayBuffer,
 		globalThis.MessagePort,
 		globalThis.ImageBitmap,
@@ -19,6 +19,6 @@ export const autoTransfer = makeAutoTransfer(
 		globalThis.ReadableStream,
 		globalThis.WritableStream,
 		globalThis.TransformStream,
-	].filter(is.happy).some(Thing => x instanceof Thing)
+	].filter(isHappy).some(Thing => x instanceof Thing)
 )
 

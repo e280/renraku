@@ -1,5 +1,5 @@
 
-import {is} from "@e280/stz"
+import {isObject, isString} from "@e280/stz"
 
 export type WindowAcceptOptions = {
 	topic: string
@@ -11,8 +11,8 @@ export type WindowAcceptOptions = {
 export type Topical<P> = {topic: string, payload: P}
 
 export const goodTopic = <P>(data: any, topic: string): data is Topical<P> => (
-	is.object(data)
-	&& is.string(data.topic)
+	isObject(data)
+	&& isString(data.topic)
 	&& data.topic === topic
 )
 

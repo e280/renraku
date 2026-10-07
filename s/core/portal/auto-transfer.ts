@@ -1,5 +1,5 @@
 
-import {is} from "@e280/stz"
+import {isObject} from "@e280/stz"
 
 export const noTransfer = () => undefined
 
@@ -16,7 +16,7 @@ function auto_transfer_algo(
 	const seen = new WeakSet<object>()
 
 	function visit(x: unknown) {
-		if (!is.object(x)) return
+		if (!isObject(x)) return
 		if (seen.has(x)) return
 		seen.add(x)
 
