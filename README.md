@@ -10,15 +10,15 @@ you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may in
 
 <br/>
 
-## ⛩️ renraku's *remotes* are the best part.
+## ⛩️ renraku is about async fns.
 
 ```ts
-import {asFns, makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
+import {makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
 ```
 
-- **renraku is about async fns.**
+- **your fns should accept only json-friendly values.**
     ```ts
-    const myFns = asFns({
+    const myFns = {
       async hello() {
         return "world"
       },
@@ -34,7 +34,7 @@ import {asFns, makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
           },
         },
       },
-    })
+    }
     ```
 - **endpoints make fns json-callable.**
     ```ts
@@ -44,7 +44,7 @@ import {asFns, makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
     await myEndpoint([["sum"], 1, 2])
       // {ok: true, value: 3}
     ```
-- **🌠 remotes make endpoints beautiful.**
+- **🌟 remotes make endpoints beautiful.**
     ```ts
     const myRemote = makeRemote<typeof myFns>(myEndpoint)
     ```
