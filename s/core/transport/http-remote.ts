@@ -1,7 +1,7 @@
 
 import {defaultTimeout} from "@e280/stz"
-import {Fns, Ret} from "./types.js"
-import {makeRemote} from "./remote.js"
+import {Fns, Ret} from "../base/types.js"
+import {makeRemote} from "../base/remote.js"
 
 export function httpRemote<F extends Fns>(
 		url: string,

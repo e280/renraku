@@ -1,33 +1,38 @@
 
-import {deadline, defaultTimeout, defer, Deferred, hex, Rollerstat, sub} from "@e280/stz"
+import {deadline, defaultTimeout, defer, Deferred, hex, Json, Rollerstat} from "@e280/stz"
 
 type Ping = [kind: "ping", id: string]
 type Pong = [kind: "pong", id: string]
 type Data<X> = [kind: "data", x: X]
 
-export class Pingpong<X> {
-	onRtt = sub<[number]>()
+export class Pingpong<X extends Json> {
 	readonly rtt = new Rollerstat(10)
 
+	#send
+	#forward
 	#pending = new Map<string, {time: number, deferred: Deferred<number>}>()
 
-	constructor(
-		public send: (message: Ping | Pong) => void,
-		public forward: (x: X) => Promise<void>,
-	) {}
+	constructor(options: {
+			send: (message: Ping | Pong | Data<X>) => void
+			forward: (x: X) => (void | Promise<void>)
+		}) {
+		this.#send = options.send
+		this.#forward = options.forward
+	}
 
-	async ping(timeout = defaultTimeout) {
+	sendData = (x: X) => this.#send(["data", x])
+
+	ping = async(timeout = defaultTimeout) => {
 		const id = hex.random(16)
 		const deferred = defer<number>()
 
 		this.#pending.set(id, {deferred, time: performance.now()})
-		this.send(["ping", id])
+		this.#send(["ping", id])
 
 		return deadline(timeout, deferred.promise)
 			.then(rtt => {
 				this.#pending.delete(id)
 				this.rtt.add(rtt)
-				this.onRtt.publish(rtt)
 				return rtt
 			})
 			.catch(error => {
@@ -41,7 +46,7 @@ export class Pingpong<X> {
 		switch (data[0]) {
 
 			case "ping":
-				return this.send(["pong", data[1]])
+				return this.#send(["pong", data[1]])
 
 			case "pong": {
 				const id = data[1]
@@ -54,7 +59,7 @@ export class Pingpong<X> {
 			}
 
 			case "data":
-				return this.forward(data[1])
+				return this.#forward(data[1])
 		}
 	}
 }

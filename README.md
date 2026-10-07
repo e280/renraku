@@ -8,6 +8,46 @@ you are looking at prerelease v0.6 `@e280/renraku@next`, which does not yet have
 
 
 
+<br/>
+
+## websocket client
+
+```ts
+import {connect, Messenger} from "@e280/renraku"
+```
+
+- **connect the socket.**
+    ```ts
+    const connection = await connect(new WebSocket("https://e280.org/api"))
+    ```
+- **create a messenger, and give it connection messages.**
+    ```ts
+    const {recv, remote} = new Messenger<RemoteFns>({send: connection.send})
+
+    connection.onRecv(recv)
+    ```
+- **start a keepalive heartbeat (so the socket doesn't die).**
+    ```ts
+    connection.startHeartbeat(
+      seconds(10),
+      rtt => console.log(`ping ${rtt} ms`),
+    )
+    ```
+- **call remote fns.**
+    ```ts
+    remote.hello() // "world"
+    ```
+- **decide what happens when the connection is closed.**
+    ```ts
+    connection.onClose(() => console.log("connection closed"))
+    ```
+- **close the connection.**
+    ```ts
+    connection.close()
+    ```
+
+
+
 <br/><br/>
 
 🧑‍💻 *https://e280.org/*
