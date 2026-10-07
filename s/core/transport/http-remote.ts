@@ -4,7 +4,7 @@ import {Fns, Ret} from "../base/types.js"
 import {makeRemote} from "../base/remote.js"
 
 export function httpRemote<F extends Fns>(
-		url: string,
+		url: string | URL,
 		options: {timeout?: number} = {},
 	) {
 
