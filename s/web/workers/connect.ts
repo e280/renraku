@@ -1,45 +1,30 @@
 
-import {deadline} from "@e280/stz"
-import {WorkerConnection} from "./types.js"
-import {Fns} from "../../core/base/types.js"
+import {deadline, defaultTimeout} from "@e280/stz"
 import {autoTransfer} from "../auto-transfer.js"
-import {Portal} from "../../core/portal/portal.js"
+import {portal} from "../../core/portal/portal.js"
 import {acceptWorkerPort} from "./utils/accept.js"
+import {Messenger} from "../../core/messenger/messenger.js"
 
-export async function connectWorker<WorkerFns extends Fns>(options: {
-
-		/** web worker we're connecting to. */
+export async function connectWorker<M extends Messenger<any>>(options: {
 		worker: Worker
-
-		/** local parent functions that the worker can call. */
-		fns?: Fns
-
-		/** how long we're willing to wait before an error is thrown. */
+		messenger: M
 		timeout?: number
+	}) {
 
-		/** timeout override for specifically the connection process (defaults to 'timeout'). */
-		connectTimeout?: number
-
-		/** let the worker read error details when our functions throw (default false). */
-		exposeAllErrors?: boolean
-
-	}): Promise<WorkerConnection<WorkerFns>> {
-
-	const {worker, fns, timeout, connectTimeout = timeout, exposeAllErrors} = options
+	const {worker, messenger, timeout = defaultTimeout} = options
 
 	try {
-		const portal = new Portal<WorkerFns>({
-			fns,
-			timeout,
+		const {port, remote} = portal({
+			messenger,
 			autoTransfer,
-			exposeAllErrors,
-			port: await deadline(connectTimeout, acceptWorkerPort(worker)),
+			port: await deadline(timeout, acceptWorkerPort(worker)),
 		})
 
 		return {
-			remote: portal.remote,
+			remote,
+			messenger,
 			dispose: () => {
-				portal.close()
+				port.close()
 				worker.terminate()
 			},
 		}

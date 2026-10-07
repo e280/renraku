@@ -1,34 +1,29 @@
 
-import {defaultTimeout, defer, Deferred, err, errorString, nap} from "@e280/stz"
-import {Fns, Ret} from "../base/types.js"
+import {defaultTimeout, defer, Deferred, err, errorString, nap, sub} from "@e280/stz"
 import {makeRemote} from "../base/remote.js"
 import {makeEndpoint} from "../base/endpoint.js"
+import {Endpoint, Fns, Ret} from "../base/types.js"
 import {Request, Message, MessageKind, Response} from "./types.js"
 
 /** bidirectional messenger */
-export class Messenger<RemoteFns extends Fns> {
+export class Messenger<RemoteFns extends Fns = any> {
 	#id = 0
-	#localEndpoint
+	#timeout
+	#endpoint
 	#pending = new Map<number, Deferred<Ret>>()
 
-	constructor(private options: {
-			send: (msg: Message) => void
-			fns?: Fns
-			timeout?: number
-			exposeAllErrors?: boolean
-		}) {
+	readonly onSend = sub<[Message]>()
 
-		this.#localEndpoint = makeEndpoint(
-			options.fns ?? {},
-			{exposeAllErrors: options.exposeAllErrors},
-		)
+	constructor(endpoint?: Endpoint, timeout = defaultTimeout) {
+		this.#endpoint = endpoint ?? makeEndpoint({})
+		this.#timeout = timeout
 	}
 
-	remote = makeRemote<RemoteFns>(async call => {
+	readonly remote = makeRemote<RemoteFns>(async call => {
 		const id = this.#id++
 		const deferred = defer<Ret>()
 		this.#pending.set(id, deferred)
-		const timeout = this.options.timeout ?? defaultTimeout
+		const timeout = this.#timeout ?? defaultTimeout
 		if (timeout !== Infinity)
 			nap(timeout).then(() => {
 				const deferred = this.#pending.get(id)
@@ -38,7 +33,7 @@ export class Messenger<RemoteFns extends Fns> {
 				}
 			})
 		try {
-			this.options.send([MessageKind.Request, id, call])
+			this.onSend.publish([MessageKind.Request, id, call])
 		}
 		catch (error) {
 			this.#pending.delete(id)
@@ -47,7 +42,7 @@ export class Messenger<RemoteFns extends Fns> {
 		return deferred.promise
 	})
 
-	recv = async(msg: Message) => {
+	readonly recv = async(msg: Message) => {
 		switch (msg[0]) {
 			case MessageKind.Request: return this.#recvCall(msg)
 			case MessageKind.Response: return this.#recvRet(msg)
@@ -55,8 +50,8 @@ export class Messenger<RemoteFns extends Fns> {
 	}
 
 	async #recvCall([, id, call]: Request) {
-		const ret = await this.#localEndpoint(call)
-		this.options.send([MessageKind.Response, id, ret])
+		const ret = await this.#endpoint(call)
+		this.onSend.publish([MessageKind.Response, id, ret])
 	}
 
 	async #recvRet([, id, ret]: Response) {

@@ -1,34 +1,25 @@
 
-import {Fns} from "../base/types.js"
 import {AutoTransfer, Port} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
 
-export class Portal<RemoteFns extends Fns> {
-	close
-	#messenger
+export function portal<M extends Messenger<any>>(options: {
+		port: Port
+		messenger: M
+		autoTransfer: AutoTransfer
+	}) {
 
-	constructor({port, autoTransfer, fns, timeout, exposeAllErrors}: {
-			port: Port
-			autoTransfer: AutoTransfer
-			fns?: Fns
-			timeout?: number
-			exposeAllErrors?: boolean
-		}) {
+	const {port, messenger, autoTransfer} = options
 
-		this.#messenger = new Messenger<RemoteFns>({
-			fns,
-			timeout,
-			exposeAllErrors,
-			send: msg => port.postMessage(msg, autoTransfer(msg)),
-		})
+	messenger.onSend(x => port.postMessage(x, autoTransfer(x)))
 
-		port.addEventListener("message", event => this.#messenger.recv(event.data as any))
-		port.start()
-		this.close = () => port.close()
-	}
+	port.addEventListener("message", event => messenger.recv(event.data as any))
+	port.start()
 
-	get remote() {
-		return this.#messenger.remote
+	return {
+		port,
+		messenger,
+		remote: messenger.remote,
+		close: () => port.close(),
 	}
 }
 

@@ -34,7 +34,7 @@ import {connect, Messenger} from "@e280/renraku"
     ```
 - **call remote fns.**
     ```ts
-    remote.hello() // "world"
+    await remote.hello() // "world"
     ```
 - **decide what happens when the connection is closed.**
     ```ts
