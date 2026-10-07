@@ -1,7 +1,8 @@
 
 # 連絡 <br/> ***R·E·N·R·A·K·U***
+> *elegant weapons, for a more civilized age.*
 
-**renraku makes async typescript functions callable across boundaries.**  
+**renraku makes typescript functions callable across boundaries.**  
 servers can expose functions for clients to call. iframes can expose functions for pages to call. websockets. web workers. the details melt away, and you just focus on async functions.
 
 you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may instead like to see the [v0.5 `@e280/renraku@latest` readme](https://github.com/e280/renraku/tree/ohfive#readme).
@@ -10,13 +11,13 @@ you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may in
 
 <br/>
 
-## ⛩️ renraku is about async fns.
+## ⛩️ renraku provides composable primitives.
 
 ```ts
 import {makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
 ```
 
-- **your fns should accept only json-friendly values.**
+- **renraku is all about async fns.**
     ```ts
     const myFns = {
       async hello() {
