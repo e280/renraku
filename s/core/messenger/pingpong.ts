@@ -1,5 +1,5 @@
 
-import {deadline, defaultTimeout, defer, Deferred, got, hex, sub} from "@e280/stz"
+import {deadline, defaultTimeout, defer, Deferred, hex, Rollerstat, sub} from "@e280/stz"
 
 type Ping = [kind: "ping", id: string]
 type Pong = [kind: "pong", id: string]
@@ -7,18 +7,14 @@ type Data<X> = [kind: "data", x: X]
 
 export class Pingpong<X> {
 	onRtt = sub<[number]>()
+	readonly rtt = new Rollerstat(10)
 
-	#rtt: number | undefined
 	#pending = new Map<string, {time: number, deferred: Deferred<number>}>()
 
 	constructor(
 		public send: (message: Ping | Pong) => void,
 		public forward: (x: X) => Promise<void>,
 	) {}
-
-	get rtt() {
-		return this.#rtt
-	}
 
 	async ping(timeout = defaultTimeout) {
 		const id = hex.random(16)
@@ -30,7 +26,7 @@ export class Pingpong<X> {
 		return deadline(timeout, deferred.promise)
 			.then(rtt => {
 				this.#pending.delete(id)
-				this.#rtt = rtt
+				this.rtt.add(rtt)
 				this.onRtt.publish(rtt)
 				return rtt
 			})
@@ -49,9 +45,11 @@ export class Pingpong<X> {
 
 			case "pong": {
 				const id = data[1]
-				const pend = got(this.#pending.get(id))
-				const rtt = performance.now() - pend.time
-				pend.deferred.resolve(rtt)
+				const pend = this.#pending.get(id)
+				if (pend) {
+					const rtt = performance.now() - pend.time
+					pend.deferred.resolve(rtt)
+				}
 				return
 			}
 
