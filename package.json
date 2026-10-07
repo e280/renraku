@@ -16,8 +16,8 @@
 		"s"
 	],
 	"scripts": {
-		"build": "rm -rf x && mkdir x && tsc && scute -v",
-		"dev": "octo 'node --watch x/test.js' 'tsc -w' 'scute -vw'",
+		"build": "rm -rf x && mkdir x && tsc",
+		"dev": "octo 'node --watch x/test.js' 'tsc -w'",
 		"test": "node x/test.js",
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
@@ -27,7 +27,6 @@
 	"devDependencies": {
 		"@e280/octo": "^0.1.5",
 		"@e280/science": "^0.1.12",
-		"@e280/scute": "^0.5.2",
 		"@types/node": "^26.6.4",
 		"typescript": "^7.0.2"
 	},
