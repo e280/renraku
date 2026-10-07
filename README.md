@@ -13,21 +13,18 @@ you are looking at prerelease v0.6 `@e280/renraku@next`, which does not yet have
 ## websocket client
 
 ```ts
-import {connect, Messenger} from "@e280/renraku"
+import {socle, messenger, connect} from "@e280/renraku"
 ```
 
-- **connect the socket.**
+- **make a websocket connection with a messenger.**
     ```ts
-    const connection = await connect(new WebSocket("https://e280.org/api"))
-    ```
-- **create a messenger, and give it connection messages.**
-    ```ts
-    const {recv, remote} = new Messenger<RemoteFns>({send: connection.send})
-
-    connection.onRecv(recv)
+    const {remote, connection} = socle({
+      messenger: new Messenger<MyFns>(),
+      connection: await connect(new WebSocket("https://e280.org/api")),
+    })
     ```
 - **read cool stats about ping time.**  
-    renraku automatically pings every 10s, to keep the socket alive and give you these stats.
+    renraku auto pings every 10s, to keep the socket alive.
     ```ts
     connection.rtt.latest // 81
     connection.rtt.average // 84

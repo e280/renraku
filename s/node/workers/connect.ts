@@ -19,6 +19,10 @@ export async function nodeConnectWorker<M extends Messenger>(options: {
 			messenger,
 			autoTransfer: nodeAutoTransfer,
 			port: await deadline(timeout, nodeAcceptWorkerPort(worker))
+				.catch(error => {
+					worker.terminate()
+					throw error
+				}),
 		})
 
 		return {

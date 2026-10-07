@@ -1,10 +1,12 @@
 
-import {cycle, defer, ev, Json, nap, pipe, sub} from "@e280/stz"
-import {Pingpong} from "./pingpong.js"
+import {cycle, deadline, defaultTimeout, defer, ev, Json, nap, pipe, sub} from "@e280/stz"
+import {Pingpong} from "./utils/pingpong.js"
 
 const heartbeatInterval = 10_000
 
-export async function connect<X extends Json = any>(socket: WebSocket) {
+export type Connection = Awaited<ReturnType<typeof connect>>
+
+export async function connect<X extends Json = any>(socket: WebSocket, timeout = defaultTimeout) {
 	const connect = defer()
 	const onRecv = sub<[X]>()
 	const onClose = sub<[CloseEvent]>()
@@ -28,7 +30,10 @@ export async function connect<X extends Json = any>(socket: WebSocket) {
 			.done(),
 	})
 
-	await connect
+	await deadline(timeout, connect).catch(error => {
+		socket.close()
+		throw error
+	})
 
 	onClose(cycle(async() => {
 		await pingpong.ping().catch(() => socket.close())

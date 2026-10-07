@@ -17,7 +17,11 @@ export async function connectWorker<M extends Messenger<any>>(options: {
 		const {port, remote} = portal({
 			messenger,
 			autoTransfer,
-			port: await deadline(timeout, acceptWorkerPort(worker)),
+			port: await deadline(timeout, acceptWorkerPort(worker))
+				.catch(error => {
+					worker.terminate()
+					throw error
+				}),
 		})
 
 		return {
