@@ -5,7 +5,7 @@ import {science, test, expect} from "@e280/science"
 import {makeRemote} from "./base/remote.js"
 import {ExposedError} from "./base/errors.js"
 import {makeEndpoint} from "./base/endpoint.js"
-import {unexposedErrorMessage} from "./consts.js"
+import {unexposedErrorMessage} from "../consts.js"
 
 export default science.suite({
 	"endpoint": {

@@ -2,7 +2,7 @@
 import {dig, err, errorString, ok} from "@e280/stz"
 import {ExposedError} from "./errors.js"
 import {Endpoint, Fn, Fns} from "./types.js"
-import {unexposedErrorMessage} from "../consts.js"
+import {unexposedErrorMessage} from "../../consts.js"
 
 export function makeEndpoint(fns: Fns, options: {exposeAllErrors?: boolean} = {}): Endpoint {
 	const {exposeAllErrors = false} = options
