@@ -1,8 +1,8 @@
 
 import * as ws from "ws"
-import {cycle, defer, Json, nap, pipe, sub} from "@e280/stz"
+import {cycle, defer, disposer, Json, nap, once, pipe} from "@e280/stz"
 import {Pingpong} from "./utils/pingpong.js"
-import {heartbeatInterval} from "../../consts.js"
+import {heartbeatInterval, maxSocketBacklog} from "../../consts.js"
 
 enum Readystate {
 	Connecting = 0,
@@ -11,19 +11,64 @@ enum Readystate {
 	Closed = 3,
 }
 
+enum Closecode {
+	Normal = 1000,
+	Error = 4001,
+}
+
 export type Sock = {
-	close(): void
+	close(code?: number, reason?: string): void
 	readyState: Readystate
-	send(data: string): void
+	send(data: any): void
 	onopen: ((...p: any[]) => void) | null
-	onclose: ((...p: any[]) => void) | null
 	onerror: ((...p: any[]) => void) | null
+	onclose: ((e: any) => void) | null
 	onmessage: ((event: any) => void) | null
 }
 
-export async function jsock(sock: Sock) {
+type JsockParams = {
+	close: (code?: number, reason?: string) => void
+	send: (data: Json) => void
+}
+
+type JsockHandlers = {
+	recv: (data: Json) => (void | Promise<void>)
+	errored: () => void
+	closed: () => void
+}
+
+type JsockFn = (params: JsockParams) => Promise<JsockHandlers>
+
+export class SockCloseError extends Error {
+	static fromEvent(e: any) {
+		return new this(e.code, e.reason, e.wasClean)
+	}
+
+	constructor(
+			readonly code: number,
+			readonly reason: string,
+			readonly wasClean: boolean,
+		) {
+		super(`web socket closed ${wasClean ? "cleanly" : "dirty"}, code ${code}, reason ${reason}`)
+	}
+}
+
+export async function jsock(sock: Sock, fn: JsockFn) {
 	const opened = defer()
-	let recv = (_json: any) => {}
+	const backlog: Json[] = []
+	const dispose = disposer()
+	const d = dispose.schedule
+
+	const kill = once((code = Closecode.Normal, reason = "bye") => {
+		dispose()
+		sock.close(code, reason)
+	})
+
+	let recv: (m: Json) => (void | Promise<void>) = m => {
+		backlog.push(m)
+		if (backlog.length > maxSocketBacklog)
+			kill(Closecode.Error, "too many messages before setup")
+	}
 
 	const pingpong = new Pingpong({
 		forward: o => recv(o),
@@ -33,14 +78,16 @@ export async function jsock(sock: Sock) {
 			.done(),
 	})
 
+	d(() => pingpong.dispose())
+
 	sock.onopen = opened.resolve
 	sock.onerror = () => opened.reject(new Error("connection error"))
-	sock.onclose = () => opened.reject(new Error("connection closed"))
-	sock.onmessage = e => pipe(e.data)
-		.to(String)
-		.to(JSON.parse)
-		.to(pingpong.recv)
-		.done()
+	sock.onclose = e => opened.reject(SockCloseError.fromEvent(e))
+	sock.onmessage = async e => Promise.resolve(e.data)
+		.then(String)
+		.then(JSON.parse)
+		.then(pingpong.recv)
+		.catch(() => kill(Closecode.Error, "bad request"))
 
 	switch (sock.readyState) {
 		case Readystate.Connecting: break
@@ -48,37 +95,49 @@ export async function jsock(sock: Sock) {
 		default: opened.reject(new Error("closed before open"))
 	}
 
-	await opened
-
-	const close = () => {
-		sock.close()
-		stopHeartbeat()
-		pingpong.dispose()
-	}
-
-	const onRecv = sub<[Json]>()
-	const onError = sub()
-	const onClose = sub()
-
-	recv = onRecv.publish
-	sock.onerror = onError.publish
-	sock.onclose = onClose.publish
-
-	const stopHeartbeat = cycle(async() => {
-		await pingpong.ping().catch(close)
-		await nap(heartbeatInterval)
+	await opened.catch(error => {
+		dispose()
+		throw error
 	})
 
-	return {
-		onRecv,
-		onError,
-		onClose,
+	const handlers = await fn({
+		close: kill,
 		send: pingpong.sendData,
-		close,
+	}).catch(error => {
+		kill()
+		throw error
+	})
+
+	if (sock.readyState !== Readystate.Open)
+		return dispose()
+
+	recv = handlers.recv
+
+	try {
+		void Promise.all(backlog.map(m => recv(m)))
+			.catch(() => kill())
 	}
+	catch {
+		return kill(Closecode.Error, "bad request")
+	}
+
+	sock.onerror = () => {
+		dispose()
+		handlers.errored()
+	}
+
+	sock.onclose = () => {
+		dispose()
+		handlers.closed()
+	}
+
+	d(cycle(async() => {
+		await pingpong.ping().catch(kill)
+		await nap(heartbeatInterval)
+	}))
 }
 
 // type compat checks
-jsock({} as WebSocket)
-jsock({} as ws.WebSocket)
+jsock3({} as WebSocket, {} as any)
+jsock3({} as ws.WebSocket, {} as any)
 
