@@ -185,45 +185,75 @@ portals bond messengers to [message ports](https://developer.mozilla.org/en-US/d
 let's learn how they work with web workers,  
 then, we'll skim over other patterns.  
 
-### 🎏 renraku imports
-- `@e280/renraku` imports are environment-agnostic, they should work in node and web.
-- `@e280/renraku/web` imports might only work on the web.
-- `@e280/renraku/node` imports might only work on node.
-- maybe sooner or later i'll look into deno and bun, that would be cool.
+### 🌀 imports.
+- `@e280/renraku` "core" imports should work universally.
+- `@e280/renraku/web` imports are for the web.
+- `@e280/renraku/node` imports are for node.
 
-### 🎏 web worker (hostside).
-```ts
-import {makePortal, Messenger} from "@e280/renraku"
-import {autoTransfer, acceptWorkerPort} from "@e280/renraku/web"
+### 🌀 web workers.
+- **hostside.**
+    ```ts
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {autoTransfer, acceptWorkerPort} from "@e280/renraku/web"
 
-const {remote} = makePortal({
-  autoTransfer,
-  messenger: new Messenger<BobFns>(aliceEndpoint),
-  port: await acceptWorkerPort(
-    new Worker("./my-worker.bundle.min.js", {type: "module"})
-  ),
-})
+    const {remote} = makePortal({
+      autoTransfer,
+      messenger: new Messenger<BobFns>(aliceEndpoint),
+      port: await acceptWorkerPort(
+        new Worker("./my-worker.bundle.min.js", {type: "module"})
+      ),
+    })
 
-await remote.bingus()
-  // 123
-```
-- `acceptWorkerPort`'s job is to do a postMessage connection handshake with the worker, and obtain a MessagePort.
-- `autoTransfer` from renraku-web, auto-transfers web transferables like ArrayBuffer, OffscreenCanvas, stuff like that. [transferables on mdn.](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
+    await remote.bingus()
+      // 123
+    ```
+    - `acceptWorkerPort`'s job is to do a postMessage connection handshake with the worker, and obtain a MessagePort.
+    - `autoTransfer` from renraku-web, auto-transfers web transferables like ArrayBuffer, OffscreenCanvas, stuff like that. [transferables on mdn.](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
+- **workerside.**
+    ```ts
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {autoTransfer, offerWorkerPort} from "@e280/renraku/web"
 
-### 🎏 web worker, (workerside).
-```ts
-import {makePortal, Messenger} from "@e280/renraku"
-import {autoTransfer, offerWorkerPort} from "@e280/renraku/web"
+    const {remote} = makePortal({
+      autoTransfer,
+      port: await offerWorkerPort(),
+      messenger: new Messenger<AliceFns>(bobEndpoint),
+    })
 
-const {remote} = makePortal({
-  autoTransfer,
-  port: await offerWorkerPort(),
-  messenger: new Messenger<AliceFns>(bobEndpoint),
-})
+    await remote.hello()
+      // "world"
+    ```
 
-await remote.hello()
-  // "world"
-```
+### 🌀 node workers.
+- **hostside.**
+    ```ts
+    import {Worker} from "node:worker_threads"
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {nodeAutoTransfer, nodeAcceptWorkerPort} from "@e280/renraku/node"
+
+    const {remote} = makePortal({
+      autoTransfer: nodeAutoTransfer,
+      messenger: new Messenger<BobFns>(aliceEndpoint),
+      port: await nodeAcceptWorkerPort(new Worker("./my-worker.js")),
+    })
+
+    await remote.bingus()
+      // 123
+    ```
+- **workerside.**
+    ```ts
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {nodeAutoTransfer, nodeOfferWorkerPort} from "@e280/renraku/node"
+
+    const {remote} = makePortal({
+      autoTransfer: nodeAutoTransfer,
+      port: await nodeOfferWorkerPort(),
+      messenger: new Messenger<AliceFns>(bobEndpoint),
+    })
+
+    await remote.hello()
+      // "world"
+    ```
 
 
 

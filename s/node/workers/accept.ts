@@ -1,6 +1,6 @@
 
 import {Worker} from "node:worker_threads"
-import {acceptPort} from "../../../core/portal/ports/basics/accept.js"
+import {acceptPort} from "../../core/portal/ports/basics/accept.js"
 
 export function nodeAcceptWorkerPort(worker: Worker) {
 	return acceptPort({
