@@ -14,6 +14,7 @@ export function attach<M extends Messenger>(options: {
 	return {
 		messenger,
 		connection,
+		remote: messenger.remote,
 	}
 }
 

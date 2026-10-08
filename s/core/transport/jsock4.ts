@@ -1,48 +1,15 @@
 
-import * as ws from "ws"
 import {cycle, defer, disposer, Json, nap, once, pipe, sub} from "@e280/stz"
+import {Websockety} from "./types.js"
 import {Pingpong} from "./utils/pingpong.js"
+import {CloseCode} from "./utils/close-code.js"
+import {CloseError} from "./utils/close-error.js"
+import {ReadyState} from "./utils/ready-state.js"
 import {heartbeatInterval, maxSocketBacklog} from "../../consts.js"
 
-enum Readystate {
-	Connecting = 0,
-	Open = 1,
-	Closing = 2,
-	Closed = 3,
-}
+export type Connection = Awaited<ReturnType<typeof connect>>
 
-enum Closecode {
-	Normal = 1000,
-	Error = 4001,
-}
-
-export type Sock = {
-	readyState: Readystate
-	close(code?: number, reason?: string): void
-	send(data: any): void
-	onopen: ((...p: any[]) => void) | null
-	onerror: ((...p: any[]) => void) | null
-	onclose: ((e: any) => void) | null
-	onmessage: ((event: any) => void) | null
-}
-
-export class SockCloseError extends Error {
-	static fromEvent(e: any) {
-		return new this(e.code, e.reason, e.wasClean)
-	}
-
-	constructor(
-			readonly code: number,
-			readonly reason: string,
-			readonly wasClean: boolean,
-		) {
-		super(`web socket closed ${wasClean ? "cleanly" : "dirty"}, code ${code}, reason ${reason}`)
-	}
-}
-
-export type Connection = Awaited<ReturnType<typeof jsock4>>
-
-export async function jsock4(sock: Sock) {
+export async function connect(websocket: Websockety) {
 	const opened = defer()
 	const backlog: Json[] = []
 	const dispose = disposer()
@@ -53,39 +20,39 @@ export async function jsock4(sock: Sock) {
 
 	d(() => onRecv.clear())
 
-	const kill = once((code = Closecode.Normal, reason = "bye") => {
+	const kill = once((code = CloseCode.Normal, reason = "bye") => {
 		dispose()
-		sock.close(code, reason)
+		websocket.close(code, reason)
 	})
 
 	let recv: (m: Json) => (void | Promise<void>) = m => {
 		backlog.push(m)
 		if (backlog.length > maxSocketBacklog)
-			kill(Closecode.Error, "too many messages before setup")
+			kill(CloseCode.Error, "too many messages before setup")
 	}
 
 	const pingpong = new Pingpong({
 		forward: o => recv(o),
 		send: o => pipe(o)
 			.to(o => JSON.stringify(o))
-			.to(o => sock.send(o))
+			.to(o => websocket.send(o))
 			.done(),
 	})
 
 	d(() => pingpong.dispose())
 
-	sock.onopen = opened.resolve
-	sock.onerror = () => opened.reject(new Error("connection error"))
-	sock.onclose = e => opened.reject(SockCloseError.fromEvent(e))
-	sock.onmessage = async e => Promise.resolve(e.data)
+	websocket.onopen = opened.resolve
+	websocket.onerror = () => opened.reject(new Error("connection error"))
+	websocket.onclose = e => opened.reject(CloseError.fromEvent(e))
+	websocket.onmessage = async e => Promise.resolve(e.data)
 		.then(String)
 		.then(JSON.parse)
 		.then(pingpong.recv)
-		.catch(() => kill(Closecode.Error, "bad request"))
+		.catch(() => kill(CloseCode.Error, "bad request"))
 
-	switch (sock.readyState) {
-		case Readystate.Connecting: break
-		case Readystate.Open: opened.resolve(); break
+	switch (websocket.readyState) {
+		case ReadyState.Connecting: break
+		case ReadyState.Open: opened.resolve(); break
 		default: opened.reject(new Error("closed before open"))
 	}
 
@@ -94,19 +61,25 @@ export async function jsock4(sock: Sock) {
 		throw error
 	})
 
-	sock.onclose = sock.onerror = () => {
+	websocket.onclose = websocket.onerror = () => {
 		dispose()
 		onClose.publish()
 	}
 
 	d(cycle(async() => {
-		await pingpong.ping().catch(kill)
+		await pingpong.ping().catch(() => {})
 		await nap(heartbeatInterval)
 	}))
 
-	const flushBacklog = once((recv: (data: any) => void) => {
+	const registerFirstReciever = once((recv: (data: any) => void) => {
+		// stop backlogging
+		recv = pingpong.recv
+
+		// flush backlog
 		for (const m of backlog)
-			recv(m)
+			void Promise.resolve()
+				.then(() => recv(m))
+				.catch(() => {})
 	})
 
 	return {
@@ -114,17 +87,14 @@ export async function jsock4(sock: Sock) {
 		close: () => kill(),
 
 		rtt: pingpong.rtt,
+		ping: pingpong.ping,
 
 		onClose,
 		onRecv: (fn: (data: any) => void) => {
 			const unsub = onRecv(fn)
-			flushBacklog(fn)
+			registerFirstReciever(fn)
 			return unsub
 		},
 	}
 }
-
-// type compat checks
-jsock4({} as WebSocket)
-jsock4({} as ws.WebSocket)
 
