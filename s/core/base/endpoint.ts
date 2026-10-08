@@ -4,7 +4,7 @@ import {ExposedError} from "./errors.js"
 import {Endpoint, Fn, Fns} from "./types.js"
 import {unexposedErrorMessage} from "../../consts.js"
 
-export function makeEndpoint(fns: Fns, options: {exposeAllErrors?: boolean} = {}): Endpoint {
+export function makeEndpoint<F extends Fns>(fns: F, options: {exposeAllErrors?: boolean} = {}): Endpoint {
 	const {exposeAllErrors = false} = options
 
 	return async([path, ...params]) => {

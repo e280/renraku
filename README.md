@@ -15,6 +15,8 @@ you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may in
 
 ### 🍙 renraku is about async fns.
 ```ts
+type MyFns = typeof myFns
+
 const myFns = {
   async hello() {
     return "world"
@@ -48,7 +50,7 @@ await myEndpoint([["sum"], 1, 2])
 ```ts
 import {makeRemote} from "@e280/renraku"
 
-const myRemote = makeRemote<typeof myFns>(myEndpoint)
+const myRemote = makeRemote<MyFns>(myEndpoint)
 
 await myRemote.hello()
   // "world"
@@ -67,7 +69,7 @@ import {Messenger} from "@e280/renraku"
 const bobFns = {rizz: async() => "sup"}
 
 const alice = new Messenger<typeof bobFns>(myEndpoint)
-const bob = new Messenger<typeof myFns>(makeEndpoint(bobFns))
+const bob = new Messenger<MyFns>(makeEndpoint(bobFns))
 
 alice.onSend(bob.recv)
 bob.onSend(alice.recv)
@@ -101,7 +103,7 @@ createServer(httpListener(makeEndpoint(myFns)))
 ```ts
 import {httpRemote} from "@e280/renraku"
 
-const remote = httpRemote<typeof myFns>("http://localhost:8080")
+const remote = httpRemote<MyFns>("http://localhost:8080")
 
 await remote.hello()
   // "world"
@@ -160,6 +162,51 @@ connection.rtt.average // 84
 connection.onClose(() => console.log("closed"))
 connection.close()
 ```
+
+
+
+<br/>
+
+## ⛩️ renraku over workers.
+```ts
+type HostFns = {hello(): Promise<string>}
+type WorkerFns = {bingus(): Promise<number>}
+```
+
+### 🎏 web workers.
+- **hostside.**
+    ```ts
+    import {connectWorker} from "@e280/renraku/web"
+    import {Messenger, makeEndpoint} from "@e280/renraku"
+
+    const {remote} = await connectWorker({
+      worker: new Worker("./my-worker.bundle.min.js", {type: "module"}),
+      messenger: new Messenger<WorkerFns>(makeEndpoint<HostFns>({
+        async hello() {
+          return "world"
+        },
+      })),
+    })
+
+    await remote.bingus()
+      // 123
+    ```
+- **workerside.**
+    ```ts
+    import {workerize} from "@e280/renraku/web"
+    import {Messenger, makeEndpoint} from "@e280/renraku"
+
+    const {remote} = await workerize(
+      new Messenger<HostFns>(makeEndpoint<WorkerFns>({
+        async bingus() {
+          return 123
+        },
+      }))
+    )
+
+    await remote.hello()
+      // "world"
+    ```
 
 
 
