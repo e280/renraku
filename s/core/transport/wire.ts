@@ -2,7 +2,7 @@
 import {Connection} from "./connect.js"
 import {Messenger} from "../messenger/messenger.js"
 
-export function attach<M extends Messenger>(options: {
+export function wire<M extends Messenger>(options: {
 		messenger: M
 		connection: Connection
 	}) {
