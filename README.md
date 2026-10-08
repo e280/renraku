@@ -13,133 +13,145 @@ you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may in
 
 ## ⛩️ renraku provides composable primitives.
 
+### 🍙 renraku is about async fns.
 ```ts
 import {makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
+
+const myFns = {
+  async hello() {
+    return "world"
+  },
+
+  async sum(a: number, b: number) {
+    return a + b
+  },
+
+  nesty: {
+    is: {
+      async besty() {
+        return Math.random()
+      },
+    },
+  },
+}
 ```
 
-- **renraku is all about async fns.**
-    ```ts
-    const myFns = {
-      async hello() {
-        return "world"
-      },
+### 🍙 endpoints make fns json-callable.
+```ts
+import {makeEndpoint} from "@e280/renraku"
 
-      async sum(a: number, b: number) {
-        return a + b
-      },
+const myEndpoint = makeEndpoint(myFns)
 
-      nesty: {
-        is: {
-          async besty() {
-            return Math.random()
-          },
-        },
-      },
-    }
-    ```
-- **endpoints make fns json-callable.**
-    ```ts
-    const myEndpoint = makeEndpoint(myFns)
-    ```
-    ```ts
-    await myEndpoint([["sum"], 1, 2])
-      // {ok: true, value: 3}
-    ```
-- **🌟 remotes make endpoints beautiful.**
-    ```ts
-    const myRemote = makeRemote<typeof myFns>(myEndpoint)
-    ```
-    ```ts
-    await myRemote.hello()
-      // "world"
-    ```
-    ```ts
-    await myRemote.sum(1, 2)
-      // 3
-    ```
-    ```ts
-    await myRemote.nesty.is.besty()
-      // 0.103639826821733
-    ```
-- **messenger enables bidirectional rpc.**
-    ```ts
-    const alice = new Messenger(myEndpoint)
-    const bob = new Messenger(makeEndpoint({rizz: async() => "sup"}))
+await myEndpoint([["sum"], 1, 2])
+  // {ok: true, value: 3}
+```
 
-    alice.onSend(bob.recv)
-    bob.onSend(alice.recv)
-    ```
-    ```ts
-    // alice's remote talks to bob
-    await alice.remote.rizz()
-      // "sup"
-    ```
-    ```ts
-    // bob's remote talks to alice
-    await bob.remote.hello()
-      // "world"
-    ```
+### 🍙 remotes make endpoints *beautiful* 🌟
+```ts
+const myRemote = makeRemote<typeof myFns>(myEndpoint)
+
+await myRemote.hello()
+  // "world"
+
+await myRemote.sum(1, 2)
+  // 3
+
+await myRemote.nesty.is.besty()
+  // 0.103639826821733
+```
+
+### 🍙 messengers enable bidirectionality.
+```ts
+const bobsFns = {rizz: async() => "sup"}
+
+const alice = new Messenger<typeof bobFns>(myEndpoint)
+const bob = new Messenger<typeof myFns>(makeEndpoint(bobFns))
+
+alice.onSend(bob.recv)
+bob.onSend(alice.recv)
+
+// alice talks to bob.
+await alice.remote.rizz()
+  // "sup"
+
+// bob talks to alice.
+await bob.remote.hello()
+  // "world"
+```
 
 
 
 <br/>
 
-## ⛩️ renraku http api.
+## ⛩️ renraku over http.
 
-- **serverside, node.**
-    ```ts
-    import {createServer} from "node:http"
-    import {httpListener, makeEndpoint} from "@e280/renraku/node"
+### 🍙 serverside (node).
+```ts
+import {createServer} from "node:http"
+import {httpListener, makeEndpoint} from "@e280/renraku/node"
 
-    createServer(httpListener(makeEndpoint(myFns)))
-      .listen(8080)
-    ```
-- **clientside, web or node.**
-    ```ts
-    import {httpRemote} from "@e280/renraku"
+createServer(httpListener(makeEndpoint(myFns)))
+  .listen(8080)
+```
 
-    const remote = httpRemote<typeof myFns>("https://e280.org/api")
-    ```
-    ```ts
+### 🍙 clientside (web, node).
+```ts
+import {httpRemote} from "@e280/renraku"
+
+const remote = httpRemote<typeof myFns>("https://e280.org/api")
+
+await remote.hello()
+  // "world"
+```
+
+
+
+<br/>
+
+## ⛩️ renraku over websockets.
+
+### 🍙 serverside (node).
+```ts
+import {createServer} from "node:http"
+import {websockets, wire, connect, messenger} from "@e280/renraku"
+
+createServer()
+  .on("upgrade", websockets(async websocket => {
+    const {connection, remote} = wire({
+      connection: await connect(websocket),
+      messenger: new Messenger<ClientFns>(serverEndpoint),
+    })
+
     await remote.hello()
       // "world"
-    ```
 
+    // handle connection closed
+    connection.onClose(() => console.log("closed"))
 
-
-<br/>
-
-## ⛩️ websocket client.
-
-```ts
-import {attach, connect, messenger} from "@e280/renraku"
+    // close the connection yourself
+    connection.close()
+  }))
+  .listen(8080)
 ```
 
-- **make a websocket connection with a messenger.**
-    ```ts
-    const {remote, connection} = attach({
-      messenger: new Messenger<typeof myFns>(),
-      connection: await connect(new WebSocket("wss://e280.org/api")),
-    })
-    ```
-- **read cool stats about ping time.**  
-    renraku auto pings every 10s, to keep the socket alive.
-    ```ts
-    connection.rtt.latest // 81
-    connection.rtt.average // 84
-    ```
-- **call remote fns.**
-    ```ts
-    await remote.hello() // "world"
-    ```
-- **decide what happens when the connection is closed.**
-    ```ts
-    connection.onClose(() => console.log("connection closed"))
-    ```
-- **close the connection.**
-    ```ts
-    connection.close()
-    ```
+### 🍙 clientside (web, node).
+```ts
+import {wire, connect, messenger} from "@e280/renraku"
+
+const {connection, remote} = wire({
+  messenger: new Messenger<ServerFns>(clientEndpoint),
+  connection: await connect(new WebSocket("wss://e280.org/api")),
+})
+
+await remote.hello()
+  // "world"
+
+connection.rtt.latest // 81
+connection.rtt.average // 84
+
+connection.onClose(() => console.log("connection closed"))
+connection.close()
+```
 
 
 
