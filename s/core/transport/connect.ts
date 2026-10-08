@@ -71,14 +71,14 @@ export async function connect(websocket: Websockety) {
 		await nap(heartbeatInterval)
 	}))
 
-	const registerFirstReciever = once((recv: (data: any) => void) => {
+	const registerFirstReciever = once((fn: (data: any) => void) => {
 		// stop backlogging
-		recv = pingpong.recv
+		recv = o => pingpong.recv(o as any)
 
 		// flush backlog
 		for (const m of backlog)
 			void Promise.resolve()
-				.then(() => recv(m))
+				.then(() => fn(m))
 				.catch(() => {})
 	})
 
