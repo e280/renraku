@@ -292,11 +292,11 @@ portals bond messengers to [message ports](https://developer.mozilla.org/en-US/d
 ### 🌀 popups.
 - **openerside.**
     ```ts
-    import {got} from "@e280/stz"
     import {makePortal, Messenger} from "@e280/renraku"
     import {autoTransfer, acceptWindowPort} from "@e280/renraku/web"
 
-    const popup = got(window.open("http://localhost:8080/popup"))
+    const popup = window.open("http://localhost:8080/popup")
+    if (!popup) throw new Error("popup blocked")
 
     const {remote} = makePortal({
       autoTransfer,
