@@ -16,7 +16,7 @@ export * from "./portal/portal.js"
 export * from "./portal/types.js"
 
 export * from "./transport/utils/pingpong.js"
+export * from "./transport/attach.js"
 export * from "./transport/connect.js"
 export * from "./transport/http-remote.js"
-export * from "./transport/socle.js"
 

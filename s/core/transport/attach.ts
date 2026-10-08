@@ -1,5 +1,5 @@
 
-import {Connection} from "./jsock4.js"
+import {Connection} from "./connect.js"
 import {Messenger} from "../messenger/messenger.js"
 
 export function attach<M extends Messenger>(options: {
