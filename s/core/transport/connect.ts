@@ -1,8 +1,7 @@
 
 import {cycle, deadline, defaultTimeout, defer, ev, Json, nap, pipe, sub} from "@e280/stz"
 import {Pingpong} from "./utils/pingpong.js"
-
-const heartbeatInterval = 10_000
+import {heartbeatInterval} from "../../consts.js"
 
 export type Connection = Awaited<ReturnType<typeof connect>>
 

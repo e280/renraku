@@ -5,7 +5,7 @@ type Ping = [kind: "ping", id: string]
 type Pong = [kind: "pong", id: string]
 type Data<X> = [kind: "data", x: X]
 
-export class Pingpong<X extends Json> {
+export class Pingpong<X extends Json = any> {
 	readonly rtt = new Rollerstat(10)
 
 	#send
@@ -61,6 +61,12 @@ export class Pingpong<X extends Json> {
 			case "data":
 				return this.#forward(data[1])
 		}
+	}
+
+	dispose = () => {
+		for (const {deferred} of this.#pending.values())
+			deferred.reject(new Error("pingpong disposed"))
+		this.#pending.clear()
 	}
 }
 

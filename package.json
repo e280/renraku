@@ -28,6 +28,7 @@
 		"@e280/octo": "^0.1.5",
 		"@e280/science": "^0.1.12",
 		"@types/node": "^26.6.4",
+		"@types/ws": "^8.18.2",
 		"typescript": "^7.0.2"
 	},
 	"allowScripts": {
