@@ -15,8 +15,6 @@ you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may in
 
 ### 🍙 renraku is about async fns.
 ```ts
-import {makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
-
 const myFns = {
   async hello() {
     return "world"
@@ -48,6 +46,8 @@ await myEndpoint([["sum"], 1, 2])
 
 ### 🍙 remotes make endpoints *beautiful* 🌟
 ```ts
+import {makeRemote} from "@e280/renraku"
+
 const myRemote = makeRemote<typeof myFns>(myEndpoint)
 
 await myRemote.hello()
@@ -62,6 +62,8 @@ await myRemote.nesty.is.besty()
 
 ### 🍙 messengers enable bidirectionality.
 ```ts
+import {Messenger} from "@e280/renraku"
+
 const bobsFns = {rizz: async() => "sup"}
 
 const alice = new Messenger<typeof bobFns>(myEndpoint)
@@ -113,16 +115,17 @@ await remote.hello()
 ### 🍙 serverside (node).
 ```ts
 import {createServer} from "node:http"
-import {websockets, wire, connect, messenger} from "@e280/renraku"
+import {websockets} from "@e280/renraku/node"
+import {wire, connect, Messenger} from "@e280/renraku"
 
 createServer()
   .on("upgrade", websockets(async websocket => {
-    const {connection, remote} = wire({
+    const {connection, messenger} = wire({
       connection: await connect(websocket),
       messenger: new Messenger<ClientFns>(serverEndpoint),
     })
 
-    await remote.hello()
+    await messenger.remote.hello()
       // "world"
 
     // handle connection closed
@@ -136,14 +139,14 @@ createServer()
 
 ### 🍙 clientside (web, node).
 ```ts
-import {wire, connect, messenger} from "@e280/renraku"
+import {wire, connect, Messenger} from "@e280/renraku"
 
-const {connection, remote} = wire({
+const {connection, messenger} = wire({
   messenger: new Messenger<ServerFns>(clientEndpoint),
   connection: await connect(new WebSocket("wss://e280.org/api")),
 })
 
-await remote.hello()
+await messenger.remote.hello()
   // "world"
 
 connection.rtt.latest // 81
