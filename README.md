@@ -15,9 +15,9 @@ you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may in
 
 ### 🍙 renraku is about async fns.
 ```ts
-type MyFns = typeof myFns
+type AliceFns = typeof aliceFns
 
-const myFns = {
+const aliceFns = {
   async hello() {
     return "world"
   },
@@ -40,9 +40,9 @@ const myFns = {
 ```ts
 import {makeEndpoint} from "@e280/renraku"
 
-const myEndpoint = makeEndpoint(myFns)
+const aliceEndpoint = makeEndpoint(aliceFns)
 
-await myEndpoint([["sum"], 1, 2])
+await aliceEndpoint([["sum"], 1, 2])
   // {ok: true, value: 3}
 ```
 
@@ -50,38 +50,51 @@ await myEndpoint([["sum"], 1, 2])
 ```ts
 import {makeRemote} from "@e280/renraku"
 
-const myRemote = makeRemote<MyFns>(myEndpoint)
+const remote = makeRemote<AliceFns>(myEndpoint)
 
-await myRemote.hello()
+await remote.hello()
   // "world"
 
-await myRemote.sum(1, 2)
+await remote.sum(1, 2)
   // 3
 
-await myRemote.nesty.is.besty()
+await remote.nesty.is.besty()
   // 0.103639826821733
 ```
 
 ### 🍙 messengers enable bidirectionality.
-```ts
-import {Messenger} from "@e280/renraku"
+- **introducing bob.**
+    ```ts
+    type BobFns = typeof bobFns
 
-const bobFns = {rizz: async() => "sup"}
+    const bobFns = {
+      async bingus() {
+        return 123
+      }
+    }
 
-const alice = new Messenger<typeof bobFns>(myEndpoint)
-const bob = new Messenger<MyFns>(makeEndpoint(bobFns))
+    const bobEndpoint = makeEndpoint(bobFns)
+    ```
+- **alice and bob each get their own messenger.**
+    ```ts
+    import {Messenger} from "@e280/renraku"
 
-alice.onSend(bob.recv)
-bob.onSend(alice.recv)
+    const alice = new Messenger<BobFns>(aliceEndpoint)
+    const bob = new Messenger<AliceFns>(bobEndpoint)
 
-// alice talks to bob.
-await alice.remote.rizz()
-  // "sup"
+    alice.onSend(bob.recv)
+    bob.onSend(alice.recv)
+    ```
+- **alice and bob can call each other's fns.**
+    ```ts
+    // alice talks to bob.
+    await alice.remote.bingus()
+      // 123
 
-// bob talks to alice.
-await bob.remote.hello()
-  // "world"
-```
+    // bob talks to alice.
+    await bob.remote.hello()
+      // "world"
+    ```
 
 
 
@@ -95,7 +108,7 @@ import {createServer} from "node:http"
 import {makeEndpoint} from "@e280/renraku"
 import {httpListener} from "@e280/renraku/node"
 
-createServer(httpListener(makeEndpoint(myFns)))
+createServer(httpListener(makeEndpoint(aliceFns)))
   .listen(8080)
 ```
 
@@ -103,7 +116,7 @@ createServer(httpListener(makeEndpoint(myFns)))
 ```ts
 import {httpRemote} from "@e280/renraku"
 
-const remote = httpRemote<MyFns>("http://localhost:8080")
+const remote = httpRemote<AliceFns>("http://localhost:8080")
 
 await remote.hello()
   // "world"
@@ -125,11 +138,11 @@ createServer()
   .on("upgrade", websockets(async websocket => {
     const {connection, messenger} = wire({
       connection: await connect(websocket),
-      messenger: new Messenger<ClientFns>(serverEndpoint),
+      messenger: new Messenger<BobFns>(aliceEndpoint),
     })
 
-    await messenger.remote.hello()
-      // "world"
+    await messenger.remote.bingus()
+      // 123
 
     // automatic ping time stats
     connection.rtt.latest // 81
@@ -149,7 +162,7 @@ createServer()
 import {wire, connect, Messenger} from "@e280/renraku"
 
 const {connection, messenger} = wire({
-  messenger: new Messenger<ServerFns>(clientEndpoint),
+  messenger: new Messenger<AliceFns>(bobEndpoint),
   connection: await connect(new WebSocket("wss://e280.org/api")),
 })
 
@@ -167,46 +180,50 @@ connection.close()
 
 <br/>
 
-## ⛩️ renraku over workers.
+## ⛩️ renraku portals.
+portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).  
+let's learn how they work with web workers,  
+then, we'll skim over other patterns.  
+
+### 🎏 renraku imports
+- `@e280/renraku` imports are environment-agnostic, they should work in node and web.
+- `@e280/renraku/web` imports might only work on the web.
+- `@e280/renraku/node` imports might only work on node.
+- maybe sooner or later i'll look into deno and bun, that would be cool.
+
+### 🎏 web worker (hostside).
 ```ts
-type HostFns = {hello(): Promise<string>}
-type WorkerFns = {bingus(): Promise<number>}
+import {makePortal, Messenger} from "@e280/renraku"
+import {autoTransfer, acceptWorkerPort} from "@e280/renraku/web"
+
+const {remote} = makePortal({
+  autoTransfer,
+  messenger: new Messenger<BobFns>(aliceEndpoint),
+  port: await acceptWorkerPort(
+    new Worker("./my-worker.bundle.min.js", {type: "module"})
+  ),
+})
+
+await remote.bingus()
+  // 123
 ```
+- `acceptWorkerPort`'s job is to do a postMessage connection handshake with the worker, and obtain a MessagePort.
+- `autoTransfer` from renraku-web, auto-transfers web transferables like ArrayBuffer, OffscreenCanvas, stuff like that. [transferables on mdn.](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
 
-### 🎏 web workers.
-- **hostside.**
-    ```ts
-    import {connectWorker} from "@e280/renraku/web"
-    import {Messenger, makeEndpoint} from "@e280/renraku"
+### 🎏 web worker, (workerside).
+```ts
+import {makePortal, Messenger} from "@e280/renraku"
+import {autoTransfer, offerWorkerPort} from "@e280/renraku/web"
 
-    const {remote} = await connectWorker({
-      worker: new Worker("./my-worker.bundle.min.js", {type: "module"}),
-      messenger: new Messenger<WorkerFns>(makeEndpoint<HostFns>({
-        async hello() {
-          return "world"
-        },
-      })),
-    })
+const {remote} = makePortal({
+  autoTransfer,
+  port: await offerWorkerPort(),
+  messenger: new Messenger<AliceFns>(bobEndpoint),
+})
 
-    await remote.bingus()
-      // 123
-    ```
-- **workerside.**
-    ```ts
-    import {workerize} from "@e280/renraku/web"
-    import {Messenger, makeEndpoint} from "@e280/renraku"
-
-    const {remote} = await workerize(
-      new Messenger<HostFns>(makeEndpoint<WorkerFns>({
-        async bingus() {
-          return 123
-        },
-      }))
-    )
-
-    await remote.hello()
-      // "world"
-    ```
+await remote.hello()
+  // "world"
+```
 
 
 

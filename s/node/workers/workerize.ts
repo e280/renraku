@@ -1,6 +1,6 @@
 
 import {deadline, defaultTimeout} from "@e280/stz"
-import {portal} from "../../core/portal/portal.js"
+import {makePortal} from "../../core/portal/portal.js"
 import {nodeAutoTransfer} from "../auto-transfer.js"
 import {nodeOfferWorkerPort} from "./utils/offer.js"
 import {Messenger} from "../../core/messenger/messenger.js"
@@ -10,7 +10,7 @@ export async function nodeWorkerize<M extends Messenger>(
 		timeout = defaultTimeout,
 	) {
 
-	return portal({
+	return makePortal({
 		messenger,
 		autoTransfer: nodeAutoTransfer,
 		port: await deadline(timeout, nodeOfferWorkerPort()),

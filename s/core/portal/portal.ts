@@ -1,25 +1,29 @@
 
+import {disposer, ev} from "@e280/stz"
 import {AutoTransfer, Port} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
 
-export function portal<M extends Messenger<any>>(options: {
+export function makePortal<M extends Messenger<any>>(options: {
 		port: Port
 		messenger: M
 		autoTransfer: AutoTransfer
 	}) {
 
 	const {port, messenger, autoTransfer} = options
+	const dispose = disposer()
 
-	messenger.onSend(x => port.postMessage(x, autoTransfer(x)))
+	dispose.schedule(
+		messenger.onSend(x => port.postMessage(x, autoTransfer(x))),
+		ev(port, {message: event => messenger.recv(event.data)}),
+	)
 
-	port.addEventListener("message", event => messenger.recv(event.data as any))
 	port.start()
 
 	return {
 		port,
 		messenger,
 		remote: messenger.remote,
-		close: () => port.close(),
+		dispose: () => dispose(),
 	}
 }
 

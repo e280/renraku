@@ -1,8 +1,8 @@
 
 import {deadline, defaultTimeout} from "@e280/stz"
 import {autoTransfer} from "../auto-transfer.js"
-import {portal} from "../../core/portal/portal.js"
-import {acceptWorkerPort} from "./utils/accept.js"
+import {makePortal} from "../../core/portal/portal.js"
+import {acceptWorkerPort} from "./accept.js"
 import {Messenger} from "../../core/messenger/messenger.js"
 
 export async function connectWorker<M extends Messenger<any>>(options: {
@@ -14,7 +14,7 @@ export async function connectWorker<M extends Messenger<any>>(options: {
 	const {worker, messenger, timeout = defaultTimeout} = options
 
 	try {
-		const {port, remote} = portal({
+		const {port, remote} = makePortal({
 			messenger,
 			autoTransfer,
 			port: await deadline(timeout, acceptWorkerPort(worker))

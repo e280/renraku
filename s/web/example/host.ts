@@ -1,13 +1,13 @@
 
 import {ExampleFns} from "./types.js"
 import {autoTransfer} from "../auto-transfer.js"
-import {portal} from "../../core/portal/portal.js"
+import {makePortal} from "../../core/portal/portal.js"
 import {acceptWindowPort} from "../windows/accept.js"
 import {Messenger} from "../../core/messenger/messenger.js"
 
 const iframe = document.querySelector<HTMLIFrameElement>("iframe")!
 
-const {remote} = portal({
+const {remote} = makePortal({
 	autoTransfer,
 	messenger: new Messenger<ExampleFns>(),
 	port: await acceptWindowPort({
