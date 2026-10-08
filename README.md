@@ -64,7 +64,7 @@ await myRemote.nesty.is.besty()
 ```ts
 import {Messenger} from "@e280/renraku"
 
-const bobsFns = {rizz: async() => "sup"}
+const bobFns = {rizz: async() => "sup"}
 
 const alice = new Messenger<typeof bobFns>(myEndpoint)
 const bob = new Messenger<typeof myFns>(makeEndpoint(bobFns))
@@ -90,7 +90,8 @@ await bob.remote.hello()
 ### 🍵 serverside (node).
 ```ts
 import {createServer} from "node:http"
-import {httpListener, makeEndpoint} from "@e280/renraku/node"
+import {makeEndpoint} from "@e280/renraku"
+import {httpListener} from "@e280/renraku/node"
 
 createServer(httpListener(makeEndpoint(myFns)))
   .listen(8080)
@@ -100,7 +101,7 @@ createServer(httpListener(makeEndpoint(myFns)))
 ```ts
 import {httpRemote} from "@e280/renraku"
 
-const remote = httpRemote<typeof myFns>("https://e280.org/api")
+const remote = httpRemote<typeof myFns>("http://localhost:8080")
 
 await remote.hello()
   // "world"
@@ -128,6 +129,10 @@ createServer()
     await messenger.remote.hello()
       // "world"
 
+    // automatic ping time stats
+    connection.rtt.latest // 81
+    connection.rtt.average // 84
+
     // handle connection closed
     connection.onClose(() => console.log("closed"))
 
@@ -152,7 +157,7 @@ await messenger.remote.hello()
 connection.rtt.latest // 81
 connection.rtt.average // 84
 
-connection.onClose(() => console.log("connection closed"))
+connection.onClose(() => console.log("closed"))
 connection.close()
 ```
 
