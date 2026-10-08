@@ -112,12 +112,12 @@ import {makeEndpoint, makeRemote, Messenger} from "@e280/renraku"
 ## ⛩️ websocket client.
 
 ```ts
-import {socle, Messenger, connect} from "@e280/renraku"
+import {attach, connect, messenger} from "@e280/renraku"
 ```
 
 - **make a websocket connection with a messenger.**
     ```ts
-    const {remote, connection} = socle({
+    const {remote, connection} = attach({
       messenger: new Messenger<typeof myFns>(),
       connection: await connect(new WebSocket("wss://e280.org/api")),
     })
