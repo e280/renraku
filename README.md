@@ -50,7 +50,7 @@ await aliceEndpoint([["sum"], 1, 2])
 ```ts
 import {makeRemote} from "@e280/renraku"
 
-const remote = makeRemote<AliceFns>(myEndpoint)
+const remote = makeRemote<AliceFns>(aliceEndpoint)
 
 await remote.hello()
   // "world"
@@ -163,17 +163,11 @@ import {wire, connect, Messenger} from "@e280/renraku"
 
 const {connection, messenger} = wire({
   messenger: new Messenger<AliceFns>(bobEndpoint),
-  connection: await connect(new WebSocket("wss://e280.org/api")),
+  connection: await connect(new WebSocket("ws://localhost:8080")),
 })
 
 await messenger.remote.hello()
   // "world"
-
-connection.rtt.latest // 81
-connection.rtt.average // 84
-
-connection.onClose(() => console.log("closed"))
-connection.close()
 ```
 
 
@@ -181,9 +175,7 @@ connection.close()
 <br/>
 
 ## ⛩️ renraku portals.
-portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).  
-let's learn how they work with web workers,  
-then, we'll skim over other patterns.  
+portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).
 
 ### 🌀 imports.
 - `@e280/renraku` "core" imports should work universally.
@@ -249,6 +241,89 @@ then, we'll skim over other patterns.
       autoTransfer: nodeAutoTransfer,
       port: await nodeOfferWorkerPort(),
       messenger: new Messenger<AliceFns>(bobEndpoint),
+    })
+
+    await remote.hello()
+      // "world"
+    ```
+
+### 🌀 iframes.
+- **parentside.**
+    ```ts
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {autoTransfer, acceptWindowPort} from "@e280/renraku/web"
+
+    const iframe = document.createElement("iframe")
+    iframe.src = "http://localhost:8080/iframe"
+    document.body.append(iframe)
+
+    const {remote} = makePortal({
+      autoTransfer,
+      messenger: new Messenger<BobFns>(aliceEndpoint),
+      port: await acceptWindowPort({
+        topic: "example",
+        from: iframe.contentWindow!,
+        origin: "http://localhost:8080",
+      }),
+    })
+
+    await remote.bingus()
+      // 123
+    ```
+- **iframeside.**
+    ```ts
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {autoTransfer, offerWindowPort} from "@e280/renraku/web"
+
+    const {remote} = makePortal({
+      autoTransfer,
+      messenger: new Messenger<AliceFns>(bobEndpoint),
+      port: await offerWindowPort({
+        topic: "example",
+        to: window.parent,
+        origin: "http://localhost:8080",
+      }),
+    })
+
+    await remote.hello()
+      // "world"
+    ```
+
+### 🌀 popups.
+- **openerside.**
+    ```ts
+    import {got} from "@e280/stz"
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {autoTransfer, acceptWindowPort} from "@e280/renraku/web"
+
+    const popup = got(window.open("http://localhost:8080/popup"))
+
+    const {remote} = makePortal({
+      autoTransfer,
+      messenger: new Messenger<BobFns>(aliceEndpoint),
+      port: await acceptWindowPort({
+        topic: "example",
+        from: popup,
+        origin: "http://localhost:8080",
+      }),
+    })
+
+    await remote.bingus()
+      // 123
+    ```
+- **popupside.**
+    ```ts
+    import {makePortal, Messenger} from "@e280/renraku"
+    import {autoTransfer, offerWindowPort} from "@e280/renraku/web"
+
+    const {remote} = makePortal({
+      autoTransfer,
+      messenger: new Messenger<AliceFns>(bobEndpoint),
+      port: await offerWindowPort({
+        topic: "example",
+        to: window.opener!,
+        origin: "https://alice.example",
+      }),
     })
 
     await remote.hello()
