@@ -87,7 +87,7 @@ await bob.remote.hello()
 
 ## ⛩️ renraku over http.
 
-### 🍙 serverside (node).
+### 🍵 serverside (node).
 ```ts
 import {createServer} from "node:http"
 import {httpListener, makeEndpoint} from "@e280/renraku/node"
@@ -96,7 +96,7 @@ createServer(httpListener(makeEndpoint(myFns)))
   .listen(8080)
 ```
 
-### 🍙 clientside (web, node).
+### 🍵 clientside (web, node).
 ```ts
 import {httpRemote} from "@e280/renraku"
 
@@ -112,7 +112,7 @@ await remote.hello()
 
 ## ⛩️ renraku over websockets.
 
-### 🍙 serverside (node).
+### 🎏 serverside (node).
 ```ts
 import {createServer} from "node:http"
 import {websockets} from "@e280/renraku/node"
@@ -137,7 +137,7 @@ createServer()
   .listen(8080)
 ```
 
-### 🍙 clientside (web, node).
+### 🎏 clientside (web, node).
 ```ts
 import {wire, connect, Messenger} from "@e280/renraku"
 
