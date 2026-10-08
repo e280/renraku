@@ -17,26 +17,14 @@ enum Closecode {
 }
 
 export type Sock = {
-	close(code?: number, reason?: string): void
 	readyState: Readystate
+	close(code?: number, reason?: string): void
 	send(data: any): void
 	onopen: ((...p: any[]) => void) | null
 	onerror: ((...p: any[]) => void) | null
 	onclose: ((e: any) => void) | null
 	onmessage: ((event: any) => void) | null
 }
-
-type JsockParams = {
-	close: (code?: number, reason?: string) => void
-	send: (data: Json) => void
-}
-
-type JsockHandlers = {
-	recv: (data: any) => (void | Promise<void>)
-	closed: () => void
-}
-
-type JsockFn = (params: JsockParams) => Promise<JsockHandlers>
 
 export class SockCloseError extends Error {
 	static fromEvent(e: any) {
@@ -52,6 +40,8 @@ export class SockCloseError extends Error {
 	}
 }
 
+export type Connection = Awaited<ReturnType<typeof jsock4>>
+
 export async function jsock4(sock: Sock) {
 	const opened = defer()
 	const backlog: Json[] = []
@@ -60,33 +50,8 @@ export async function jsock4(sock: Sock) {
 
 	const onRecv = sub<[message: any]>()
 	const onClose = sub()
-	const onError = sub()
 
-	const kill = once((code = Closecode.Normal, reason = "bye") => {
-		dispose()
-		sock.close(code, reason)
-	})
-
-	let recv: (m: Json) => (void | Promise<void>) = m => {
-		backlog.push(m)
-		if (backlog.length > maxSocketBacklog)
-			kill(Closecode.Error, "too many messages before setup")
-	}
-
-	const pingpong = new Pingpong({
-		forward: o => recv(o),
-		send: o => pipe(o)
-			.to(o => JSON.stringify(o))
-			.to(o => sock.send(o))
-			.done(),
-	})
-}
-
-export async function jsock(sock: Sock, fn: JsockFn) {
-	const opened = defer()
-	const backlog: Json[] = []
-	const dispose = disposer()
-	const d = dispose.schedule
+	d(() => onRecv.clear())
 
 	const kill = once((code = Closecode.Normal, reason = "bye") => {
 		dispose()
@@ -129,42 +94,37 @@ export async function jsock(sock: Sock, fn: JsockFn) {
 		throw error
 	})
 
-	const handlers = await fn({
-		close: kill,
-		send: pingpong.sendData,
-	}).catch(error => {
-		kill()
-		throw error
-	})
-
-	if (sock.readyState !== Readystate.Open)
-		return dispose()
-
-	recv = handlers.recv
-
-	try {
-		void Promise.all(backlog.map(m => recv(m)))
-			.catch(() => kill())
-	}
-	catch {
-		return kill(Closecode.Error, "bad request")
-	}
-
-	const bye = () => {
+	sock.onclose = sock.onerror = () => {
 		dispose()
-		handlers.closed()
+		onClose.publish()
 	}
-
-	sock.onerror = bye
-	sock.onclose = bye
 
 	d(cycle(async() => {
 		await pingpong.ping().catch(kill)
 		await nap(heartbeatInterval)
 	}))
+
+	const flushBacklog = once((recv: (data: any) => void) => {
+		for (const m of backlog)
+			recv(m)
+	})
+
+	return {
+		send: pingpong.sendData,
+		close: () => kill(),
+
+		rtt: pingpong.rtt,
+
+		onClose,
+		onRecv: (fn: (data: any) => void) => {
+			const unsub = onRecv(fn)
+			flushBacklog(fn)
+			return unsub
+		},
+	}
 }
 
 // type compat checks
-jsock({} as WebSocket, {} as any)
-jsock({} as ws.WebSocket, {} as any)
+jsock4({} as WebSocket)
+jsock4({} as ws.WebSocket)
 
