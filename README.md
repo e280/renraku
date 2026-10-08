@@ -2,11 +2,19 @@
 # 連絡 <br/> ***R·E·N·R·A·K·U***
 > *elegant weapons, for a more civilized age.*
 
+> [!TIP]
+> *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
+
+```sh
+npm install @e280/renraku@next
+```
+
 **renraku makes typescript functions callable across boundaries.**  
-servers can expose functions for clients to call. iframes can expose functions for pages to call. websockets. web workers. the details melt away, and you just focus on async functions.
+make a beautiful api. servers, clients. http, websockets. node, or web workers. popups, or iframes.  
 
-you are looking at wip docs for prerelease v0.6 `@e280/renraku@next`. you may instead like to see the [v0.5 `@e280/renraku@latest` readme](https://github.com/e280/renraku/tree/ohfive#readme).
-
+- `@e280/renraku` "core" imports are universal.
+- `@e280/renraku/web` imports are for the web.
+- `@e280/renraku/node` imports are for node.
 
 
 <br/>
@@ -96,6 +104,22 @@ await remote.nesty.is.besty()
       // "world"
     ```
 
+### 🍙 fns can throw errors.
+- **security precaution:** by default, renraku endpoints conceal error info from clients.
+  - they see a generic `RemoteError: an error occurred (details not exposed, renraku security precaution)`
+- renraku will expose error details from `ExposedError` instances:
+    ```ts
+    import {ExposedError} from "@e280/renraku"
+
+    throw new ExposedError("bingus")
+      // clients would see "RemoteError: ExposedError: bingus"
+    ```
+- `makeEndpoint` option `exposeAllErrors` exposes error info to the client.
+    ```ts
+    // danger mode, but great for debugging web workers.
+    makeEndpoint(aliceFns, {exposeAllErrors: true})
+    ```
+
 
 
 <br/>
@@ -176,11 +200,6 @@ await messenger.remote.hello()
 
 ## ⛩️ renraku portals.
 portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).
-
-### 🌀 imports.
-- `@e280/renraku` "core" imports should work universally.
-- `@e280/renraku/web` imports are for the web.
-- `@e280/renraku/node` imports are for node.
 
 ### 🌀 web workers.
 - **hostside.**
@@ -322,7 +341,7 @@ portals bond messengers to [message ports](https://developer.mozilla.org/en-US/d
       port: await offerWindowPort({
         topic: "example",
         to: window.opener!,
-        origin: "https://alice.example",
+        origin: "http://localhost:8080",
       }),
     })
 
