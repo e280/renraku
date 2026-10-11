@@ -22,12 +22,12 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.4.5"
+		"@e280/stz": "^0.4.10"
 	},
 	"devDependencies": {
-		"@e280/octo": "^0.1.5",
-		"@e280/science": "^0.1.12",
-		"@types/node": "^26.6.4",
+		"@e280/octo": "^0.1.7",
+		"@e280/science": "^0.1.14",
+		"@types/node": "^26.6.5",
 		"@types/ws": "^8.18.2",
 		"typescript": "^7.0.2"
 	},
