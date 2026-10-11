@@ -55,7 +55,7 @@ await aliceEndpoint([["sum"], 1, 2])
   // {ok: true, value: 3}
 ```
 
-### 🍙 remotes make endpoints *beautiful* 🌟
+### 🌟 remotes make endpoints *beautiful.*
 ```ts
 import {makeRemote} from "@e280/renraku"
 
@@ -371,15 +371,15 @@ await messenger.remote.hello()
     nodeParallelism() // 7
     ```
 
-### 🐝 cluster
-- **follow the worker tutorial from above**
+### 🐝 cluster.
+- **follow the worker tutorial from above.**
     ```ts
     // you prepare this fn to make your worker portal
     async function myWorkerPortal() {
       throw "todo"
     }
     ```
-- **load up your worker portals, and grab their endpoints**
+- **load up your worker portals, and grab their endpoints.**
     ```ts
     import {array} from "@e280/stz"
 
@@ -389,7 +389,7 @@ await messenger.remote.hello()
 
     const endpoints = portals.map(p => p.messenger.remoteEndpoint)
     ```
-- **now you create a cluster remote.**
+- 🌟 **now you create a cluster remote.**
     ```ts
     import {cluster} from "@e280/renraku"
 
@@ -400,7 +400,7 @@ await messenger.remote.hello()
     await remote.hello()
       // "world"
     ```
-    concurrent work gets distributed. *imagine the possibilities.*
+    concurrent work gets distributed. *imagine the possibilities* 🌈
     ```ts
     await Promise.all([
       remote.hello(),
