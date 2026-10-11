@@ -10,11 +10,3 @@ export type Ret<Value = any> = Result<Value, string>
 export type Call = [path: string[], ...params: any[]]
 export type Endpoint = (call: Call) => Promise<Ret>
 
-export type Remote<F extends Fns> = {
-	[K in keyof F]: (
-		F[K] extends Fns
-			? Remote<F[K]>
-			: F[K]
-	)
-}
-

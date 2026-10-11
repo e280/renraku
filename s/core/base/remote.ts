@@ -1,6 +1,6 @@
 
 import {RemoteError} from "./errors.js"
-import {Endpoint, Fns, Remote} from "./types.js"
+import {Endpoint, Fns} from "./types.js"
 
 export function makeRemote<F extends Fns>(endpoint: Endpoint) {
 	function makeProxy(endpoint: Endpoint, path: string[]) {
@@ -20,6 +20,6 @@ export function makeRemote<F extends Fns>(endpoint: Endpoint) {
 		})
 	}
 
-	return makeProxy(endpoint, []) as any as Remote<F>
+	return makeProxy(endpoint, []) as any as F
 }
 

@@ -17,6 +17,7 @@ make a beautiful api. servers, clients. http, websockets. node, or web workers. 
 - `@e280/renraku/node` imports are for node.
 
 
+
 <br/>
 
 ## ⛩️ renraku provides composable primitives.
@@ -199,7 +200,7 @@ await messenger.remote.hello()
 <br/>
 
 ## ⛩️ renraku portals.
-portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).
+> *portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).*
 
 ### 🌀 web workers.
 - **hostside.**
@@ -347,6 +348,65 @@ portals bond messengers to [message ports](https://developer.mozilla.org/en-US/d
 
     await remote.hello()
       // "world"
+    ```
+
+
+
+<br/>
+
+## ⛩️ renraku clustering.
+> *for distributing workloads across a pool of workers.*
+
+### 🐝 parallelism (your cpu count minus one).
+- **web parallelism.**
+    ```ts
+    import {parallelism} from "@e280/renraku/web"
+
+    parallelism() // 7
+    ```
+- **node parallelism.**
+    ```ts
+    import {nodeParallelism} from "@e280/renraku/node"
+
+    nodeParallelism() // 7
+    ```
+
+### 🐝 cluster
+- **follow the worker tutorial from above**
+    ```ts
+    // you prepare this fn to make your worker portal
+    async function myWorkerPortal() {
+      throw "todo"
+    }
+    ```
+- **load up your worker portals, and grab their endpoints**
+    ```ts
+    import {array} from "@e280/stz"
+
+    const portals = await Promise.all(
+      array(parallelism(), myWorkerPortal)
+    )
+
+    const endpoints = portals.map(p => p.messenger.remoteEndpoint)
+    ```
+- **now you create a cluster remote.**
+    ```ts
+    import {cluster} from "@e280/renraku"
+
+    const remote = cluster(endpoints)
+    ```
+    it's just like a normal remote. except each call goes to a different endpoint.
+    ```ts
+    await remote.hello()
+      // "world"
+    ```
+    concurrent work gets distributed. *imagine the possibilities.*
+    ```ts
+    await Promise.all([
+      remote.hello(),
+      remote.superComplexBigWorkload(123),
+      remote.megaGiantRenderTask({offscreenCanvas, hugeBuffer}),
+    ])
     ```
 
 

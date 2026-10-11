@@ -1,14 +1,14 @@
 
 import {disposer, ev} from "@e280/stz"
 import {Fns} from "../base/types.js"
-import {AutoTransfer, Port} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
+import {AutoTransfer, Port, Portal} from "./types.js"
 
 export function makePortal<RemoteFns extends Fns>(options: {
 		port: Port
 		messenger: Messenger<RemoteFns>
 		autoTransfer: AutoTransfer
-	}) {
+	}): Portal<RemoteFns> {
 
 	const {port, messenger, autoTransfer} = options
 	const dispose = disposer()
