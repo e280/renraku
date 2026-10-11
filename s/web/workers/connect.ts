@@ -1,13 +1,14 @@
 
 import {deadline, defaultTimeout} from "@e280/stz"
+import {acceptWorkerPort} from "./accept.js"
+import {Fns} from "../../core/base/types.js"
 import {autoTransfer} from "../auto-transfer.js"
 import {makePortal} from "../../core/portal/portal.js"
-import {acceptWorkerPort} from "./accept.js"
 import {Messenger} from "../../core/messenger/messenger.js"
 
-export async function connectWorker<M extends Messenger<any>>(options: {
+export async function connectWorker<RemoteFns extends Fns>(options: {
 		worker: Worker
-		messenger: M
+		messenger: Messenger<RemoteFns>
 		timeout?: number
 	}) {
 

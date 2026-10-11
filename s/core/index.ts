@@ -12,6 +12,7 @@ export * from "./portal/ports/basics/accepts.js"
 export * from "./portal/ports/basics/offer.js"
 export * from "./portal/ports/types.js"
 export * from "./portal/auto-transfer.js"
+export * from "./portal/cluster.js"
 export * from "./portal/portal.js"
 export * from "./portal/types.js"
 

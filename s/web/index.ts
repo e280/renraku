@@ -5,6 +5,7 @@ export * from "./windows/offer.js"
 
 export * from "./workers/accept.js"
 export * from "./workers/offer.js"
+export * from "./workers/parallelism.js"
 
 export * from "./auto-transfer.js"
 

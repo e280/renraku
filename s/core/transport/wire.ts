@@ -1,9 +1,10 @@
 
+import {Fns} from "../base/types.js"
 import {Connection} from "./connect.js"
 import {Messenger} from "../messenger/messenger.js"
 
-export function wire<M extends Messenger>(options: {
-		messenger: M
+export function wire<RemoteFns extends Fns>(options: {
+		messenger: Messenger<RemoteFns>
 		connection: Connection
 	}) {
 

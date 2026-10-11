@@ -1,11 +1,12 @@
 
 import {disposer, ev} from "@e280/stz"
+import {Fns} from "../base/types.js"
 import {AutoTransfer, Port} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
 
-export function makePortal<M extends Messenger<any>>(options: {
+export function makePortal<RemoteFns extends Fns>(options: {
 		port: Port
-		messenger: M
+		messenger: Messenger<RemoteFns>
 		autoTransfer: AutoTransfer
 	}) {
 

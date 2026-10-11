@@ -9,17 +9,17 @@ import {Request, Message, MessageKind, Response} from "./types.js"
 export class Messenger<RemoteFns extends Fns = any> {
 	#id = 0
 	#timeout
-	#endpoint
+	#localEndpoint
 	#pending = new Map<number, Deferred<Ret>>()
 
 	readonly onSend = sub<[Message]>()
 
-	constructor(endpoint?: Endpoint, timeout = defaultTimeout) {
-		this.#endpoint = endpoint ?? makeEndpoint({})
+	constructor(localEndpoint?: Endpoint, timeout = defaultTimeout) {
+		this.#localEndpoint = localEndpoint ?? makeEndpoint({})
 		this.#timeout = timeout
 	}
 
-	readonly remote = makeRemote<RemoteFns>(async call => {
+	readonly remoteEndpoint: Endpoint = async call => {
 		const id = this.#id++
 		const deferred = defer<Ret>()
 		this.#pending.set(id, deferred)
@@ -40,7 +40,9 @@ export class Messenger<RemoteFns extends Fns = any> {
 			deferred.resolve(err(errorString(error, "send failed")))
 		}
 		return deferred.promise
-	})
+	}
+
+	readonly remote = makeRemote<RemoteFns>(this.remoteEndpoint)
 
 	readonly recv = async(msg: Message) => {
 		switch (msg[0]) {
@@ -50,7 +52,7 @@ export class Messenger<RemoteFns extends Fns = any> {
 	}
 
 	async #recvCall([, id, call]: Request) {
-		const ret = await this.#endpoint(call)
+		const ret = await this.#localEndpoint(call)
 		this.onSend.publish([MessageKind.Response, id, ret])
 	}
 

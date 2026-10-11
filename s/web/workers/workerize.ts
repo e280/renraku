@@ -1,12 +1,13 @@
 
 import {deadline, defaultTimeout} from "@e280/stz"
-import {autoTransfer} from "../auto-transfer.js"
 import {offerWorkerPort} from "./offer.js"
+import {Fns} from "../../core/base/types.js"
+import {autoTransfer} from "../auto-transfer.js"
 import {makePortal} from "../../core/portal/portal.js"
 import {Messenger} from "../../core/messenger/messenger.js"
 
-export async function workerize<M extends Messenger<any>>(
-		messenger: M,
+export async function workerize<RemoteFns extends Fns>(
+		messenger: Messenger<RemoteFns>,
 		timeout = defaultTimeout
 	) {
 
