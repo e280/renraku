@@ -2,32 +2,30 @@
 # 連絡 <br/> ***R·E·N·R·A·K·U***
 > *elegant weapons, for a more civilized age.*
 
-> [!TIP]
-> *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
-
 📦 `npm install @e280/renraku@next`
 
 **renraku makes typescript functions callable across any boundary.**  
-*servers and clients. http and websockets. node and web workers. popups and iframes — you name it.*  
+*servers and clients. http and websockets. node and web workers. popups and iframes... carrier pigeons.*  
 
-have you ever found yourself making an api call by using `fetch`? or worse... `postMessage`?  
+have you ever found yourself making an api call by using `fetch`... or worse... `postMessage`?  
 *stop it. get some help.*  
 
-let's do better.  
+🍙 [renraku's sharp little primitives.](#primitives)  
+🥡 [renraku over http.](#http)  
+♨️ [renraku errors and security.](#errors)  
+📬 [renraku messengers.](#messengers)  
+🎏 [renraku over websockets.](#websockets)  
+🌀 [renraku portals.](#portals)  
+🐝 [renraku cluster.](#cluster)  
 
-🍙 [renraku gives you sharp little primitives.](#primitives)  
-🍥 [renraku over http.](#http) *(basic client+server)*  
-♨️ [renraku errors.](#errors)  
-📡 [renraku messengers.](#messengers) *(bidirectional primitive)*  
-🎏 [renraku over websockets.](#websockets) *(advanced client+server)*  
-🌀 [renraku portals.](#portals) *(web workers, popups, iframes)*  
-🐝 [renraku clustering.](#clustering) *(distributing workloads across cpu cores)*  
+> [!TIP]
+> *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
 
 
 
 <br/><a id="primitives"></a>
 
-## ⛩️ renraku gives you sharp little primitives.
+## ⛩️ renraku's sharp little primitives.
 > *it's a minimalist toolkit to help your async functions reach their fullest potential.*
 
 ### 🍙 renraku is about async fns.
@@ -102,7 +100,7 @@ await remote.nesty.is.besty()
 ## ⛩️ renraku over http.
 > *okay time for the stunt: let's put your functions on a server, and call 'em.*
 
-### 🍥 serverside (node).
+### 🥡 serverside (node).
 > *\*foop!\* — it's that easy, you blinked and your fns just became an api!*
 ```ts
 import {createServer} from "node:http"
@@ -113,7 +111,7 @@ createServer(httpListener(makeEndpoint(aliceFns)))
   .listen(8080)
 ```
 
-### 🍥 clientside (web, node).
+### 🥡 clientside (web, node).
 > *\*schwam!\* — now your website has a remote for calling the serverside fns!*
 ```ts
 import {httpRemote} from "@e280/renraku"
@@ -138,13 +136,13 @@ await remote.nesty.is.besty()
 
 <br/><a id="errors"></a>
 
-## ⛩️ renraku errors.
+## ⛩️ renraku errors and security.
 > *this advanced esoteric knowledge will serve you well.*
 
 ### ♨️ fns can throw errors.
-- **security precaution:** by default, renraku endpoints conceal error info from clients.
-  - they see a generic `RemoteError: an error occurred (details not exposed, renraku security precaution)`
-- renraku will expose error details from `ExposedError` instances:
+- **security precaution:** by default, renraku endpoints conceal error info from clients.  
+    they see a generic `RemoteError: an error occurred (details not exposed, renraku security precaution)`
+- renraku will expose error details from any *instanceof* `ExposedError`:
     ```ts
     import {ExposedError} from "@e280/renraku"
 
@@ -157,6 +155,9 @@ await remote.nesty.is.besty()
     makeEndpoint(aliceFns, {exposeAllErrors: true})
     ```
 
+### ♨️ renraku has no opinions about auth.
+- maybe you'll like authlocal for authentication and authorization: https://github.com/e280/authlocal
+
 
 
 <br/><a id="messengers"></a>
@@ -164,7 +165,7 @@ await remote.nesty.is.besty()
 ## ⛩️ renraku messengers.
 > *messengers are really flexible and powerful, we'll use them a lot in the next sections.*
 
-### 💌 messengers enable bidirectionality.
+### 📬 messengers enable bidirectionality.
 - **introducing... *bob.***
     ```ts
     type BobFns = typeof bobFns
@@ -233,8 +234,8 @@ createServer()
     // handle connection closed
     connection.onClose(() => console.log("closed"))
 
-    // close the connection yourself
-    connection.close()
+    // // close the connection whenever you want
+    // connection.close()
   }))
   .listen(8080)
 ```
@@ -417,9 +418,9 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 
 
 
-<br/>
+<br/><a id="cluster"></a>
 
-## ⛩️ renraku clustering.
+## ⛩️ renraku cluster.
 > *for distributing workloads across a pool of workers.*  
 > *yes, renraku can do that too.*  
 
