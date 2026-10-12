@@ -128,7 +128,7 @@ await remote.sum(1, 2)
 await remote.nesty.is.besty()
   // 0.103639826821733
 ```
-> *as far as the rest of your app's code is concerned, having `remote` is similar to directly having `aliceFns`.  
+> *as far as the rest of your app's code is concerned, having `remote` is similar to directly having `aliceFns`.*  
 > *okay, what you've now already learned about renraku will cover 80% of use-cases, so you could pack it up here...*  
 > *unless you're building something super cool.*  
 
@@ -283,7 +283,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
       // 123
     ```
     - `acceptWorkerPort`'s job is to do a postMessage connection handshake with the worker, and obtain a MessagePort.
-    - `autoTransfer` from renraku-web, auto-transfers web transferables like ArrayBuffer, OffscreenCanvas, stuff like that. [transferables on mdn.](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
+    - `autoTransfer` from renraku-web, auto-transfers [web transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) like ArrayBuffer, OffscreenCanvas, stuff like that. alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
 - **workerside.**
     ```ts
     import {makePortal, Messenger} from "@e280/renraku"
@@ -460,7 +460,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```ts
     import {cluster} from "@e280/renraku"
 
-    const remote = cluster(endpoints)
+    const remote = cluster<AliceFns>(endpoints)
     ```
     it's just like a normal remote. except each call goes to a different endpoint.
     ```ts
