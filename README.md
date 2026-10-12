@@ -283,7 +283,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
       // 123
     ```
     - `acceptWorkerPort`'s job is to do a postMessage connection handshake with the worker, and obtain a MessagePort.
-    - `autoTransfer` from renraku-web, auto-transfers [web transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) like ArrayBuffer, OffscreenCanvas, stuff like that. alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
+    - 🌟 `autoTransfer` from renraku-web, auto-transfers [web transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) like ArrayBuffer, OffscreenCanvas, stuff like that. alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
 - **workerside.**
     ```ts
     import {makePortal, Messenger} from "@e280/renraku"
@@ -439,11 +439,11 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 
 ### 🐝 cluster.
-- **follow the worker tutorial from above.**
+- **have a fn that prepares your worker portal.**
     ```ts
-    // you prepare this fn to make your worker portal
     async function myWorkerPortal() {
-      throw "todo"
+      // follow the worker tutorial from sections above.
+      return makePortal({messenger, port, autoTransfer})
     }
     ```
 - **load up your worker portals, and grab their endpoints.**
