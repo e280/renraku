@@ -1,5 +1,5 @@
 
-import {defaultTimeout, defer, Deferred, err, errorString, nap, sub} from "@e280/stz"
+import {defaultTimeout, defer, Deferred, err, errorString, nap, subby} from "@e280/stz"
 import {makeRemote} from "../base/remote.js"
 import {makeEndpoint} from "../base/endpoint.js"
 import {Endpoint, Fns, Ret} from "../base/types.js"
@@ -10,9 +10,8 @@ export class Messenger<RemoteFns extends Fns = any> {
 	#id = 0
 	#timeout
 	#localEndpoint
+	#onSend = subby<[Message]>()
 	#pending = new Map<number, Deferred<Ret>>()
-
-	readonly onSend = sub<[Message]>()
 
 	constructor(localEndpoint?: Endpoint, timeout = defaultTimeout) {
 		this.#localEndpoint = localEndpoint ?? makeEndpoint({})
@@ -33,7 +32,7 @@ export class Messenger<RemoteFns extends Fns = any> {
 				}
 			})
 		try {
-			this.onSend.publish([MessageKind.Request, id, call])
+			this.#onSend.publish([MessageKind.Request, id, call])
 		}
 		catch (error) {
 			this.#pending.delete(id)
@@ -44,6 +43,8 @@ export class Messenger<RemoteFns extends Fns = any> {
 
 	readonly remote = makeRemote<RemoteFns>(this.remoteEndpoint)
 
+	readonly onSend = this.#onSend.on
+
 	readonly recv = async(msg: Message) => {
 		switch (msg[0]) {
 			case MessageKind.Request: return this.#recvCall(msg)
@@ -53,7 +54,7 @@ export class Messenger<RemoteFns extends Fns = any> {
 
 	async #recvCall([, id, call]: Request) {
 		const ret = await this.#localEndpoint(call)
-		this.onSend.publish([MessageKind.Response, id, ret])
+		this.#onSend.publish([MessageKind.Response, id, ret])
 	}
 
 	async #recvRet([, id, ret]: Response) {

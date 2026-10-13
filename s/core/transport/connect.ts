@@ -1,5 +1,5 @@
 
-import {cycle, defer, disposer, Json, nap, once, pipe, sub} from "@e280/stz"
+import {cycle, defer, disposer, Json, nap, once, pipe, subby} from "@e280/stz"
 import {Websockety} from "./types.js"
 import {Pingpong} from "./utils/pingpong.js"
 import {CloseCode} from "./utils/close-code.js"
@@ -15,10 +15,10 @@ export async function connect(websocket: Websockety) {
 	const dispose = disposer()
 	const d = dispose.schedule
 
-	const onRecv = sub<[message: any]>()
-	const onClose = sub()
+	const onRecv = subby<[message: any]>()
+	const onClose = subby()
 
-	d(() => onRecv.clear())
+	d(() => onRecv.set.clear())
 
 	const kill = once((code = CloseCode.Normal, reason = "bye") => {
 		dispose()
@@ -89,7 +89,7 @@ export async function connect(websocket: Websockety) {
 		rtt: pingpong.rtt,
 		ping: pingpong.ping,
 
-		onClose,
+		onClose: onClose.on,
 		onRecv: (fn: (data: any) => (void | Promise<void>)) => {
 			const unsub = onRecv(fn)
 			registerFirstReciever()
