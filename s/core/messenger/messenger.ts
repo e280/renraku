@@ -1,5 +1,5 @@
 
-import {defaultTimeout, defer, Deferred, err, errorString, nap, subby} from "@e280/stz"
+import {defaultTimeout, defer, Deferred, err, errorString, subby} from "@e280/stz"
 import {makeRemote} from "../base/remote.js"
 import {makeEndpoint} from "../base/endpoint.js"
 import {Endpoint, Fns, Ret} from "../base/types.js"
@@ -11,7 +11,8 @@ export class Messenger<RemoteFns extends Fns = any> {
 	#timeout
 	#localEndpoint
 	#onSend = subby<[Message]>()
-	#pending = new Map<number, Deferred<Ret>>()
+	#pending = new Map<number, {timer: any, deferred: Deferred<Ret>}>()
+	#disposed = false
 
 	constructor(localEndpoint?: Endpoint, timeout = defaultTimeout) {
 		this.#localEndpoint = localEndpoint ?? makeEndpoint({})
@@ -19,23 +20,28 @@ export class Messenger<RemoteFns extends Fns = any> {
 	}
 
 	readonly remoteEndpoint: Endpoint = async call => {
+		if (this.#disposed) return err("messenger disposed")
 		const id = this.#id++
 		const deferred = defer<Ret>()
-		this.#pending.set(id, deferred)
+		const pend = {timer: <any>undefined, deferred}
+		this.#pending.set(id, pend)
 		const timeout = this.#timeout ?? defaultTimeout
-		if (timeout !== Infinity)
-			nap(timeout).then(() => {
-				const deferred = this.#pending.get(id)
-				if (deferred) {
+
+		if (timeout !== Infinity) {
+			pend.timer = setTimeout(() => {
+				const pending = this.#pending.get(id)
+				if (pending) {
 					this.#pending.delete(id)
-					deferred.resolve(err(`${call[0].join(".")} timed out after ${timeout} ms`))
+					pending.deferred.resolve(err(`${call[0].join(".")} timed out after ${timeout} ms`))
 				}
-			})
+			}, timeout)
+		}
 		try {
 			this.#onSend.publish([MessageKind.Request, id, call])
 		}
 		catch (error) {
 			this.#pending.delete(id)
+			clearTimeout(pend.timer)
 			deferred.resolve(err(errorString(error, "send failed")))
 		}
 		return deferred.promise
@@ -52,6 +58,15 @@ export class Messenger<RemoteFns extends Fns = any> {
 		}
 	}
 
+	readonly dispose = () => {
+		this.#disposed = true
+		for (const [id, pending] of this.#pending) {
+			this.#pending.delete(id)
+			clearTimeout(pending.timer)
+			pending.deferred.resolve(err("messenger disposed"))
+		}
+	}
+
 	async #recvCall([, id, call]: Request) {
 		const ret = await this.#localEndpoint(call)
 		this.#onSend.publish([MessageKind.Response, id, ret])
@@ -61,7 +76,8 @@ export class Messenger<RemoteFns extends Fns = any> {
 		const pending = this.#pending.get(id)
 		if (pending) {
 			this.#pending.delete(id)
-			pending.resolve(ret)
+			clearTimeout(pending.timer)
+			pending.deferred.resolve(ret)
 		}
 	}
 }
