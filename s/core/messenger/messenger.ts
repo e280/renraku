@@ -28,7 +28,7 @@ export class Messenger<RemoteFns extends Fns = any> {
 				const deferred = this.#pending.get(id)
 				if (deferred) {
 					this.#pending.delete(id)
-					deferred.resolve(err("timed out"))
+					deferred.resolve(err(`${call[0].join(".")} timed out after ${timeout} ms`))
 				}
 			})
 		try {
