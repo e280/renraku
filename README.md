@@ -345,7 +345,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
-      port: await acceptWindowPort({
+      ...await acceptWindowPort({
         topic: "example",
         from: iframe.contentWindow!,
         origin: "http://localhost:8080",
