@@ -214,11 +214,11 @@ await remote.nesty.is.besty()
 ```ts
 import {createServer} from "node:http"
 import {websockets} from "@e280/renraku/node"
-import {wire, connect, Messenger} from "@e280/renraku"
+import {wireConnection, connect, Messenger} from "@e280/renraku"
 
 createServer()
   .on("upgrade", websockets(async websocket => {
-    const {connection, messenger} = wire({
+    const {connection, messenger} = wireConnection({
       connection: await connect(websocket),
       messenger: new Messenger<BobFns>(aliceEndpoint),
     })
@@ -243,9 +243,9 @@ createServer()
 ### 🎏 bob's clientside (web, node).
 > *again with the messenger, see it?*
 ```ts
-import {wire, connect, Messenger} from "@e280/renraku"
+import {wireConnection, connect, Messenger} from "@e280/renraku"
 
-const {connection, messenger} = wire({
+const {connection, messenger} = wireConnection({
   messenger: new Messenger<AliceFns>(bobEndpoint),
   connection: await connect(new WebSocket("ws://localhost:8080")),
 })

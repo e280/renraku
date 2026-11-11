@@ -19,5 +19,5 @@ export * from "./portal/types.js"
 export * from "./transport/connect.js"
 export * from "./transport/http-remote.js"
 export * from "./transport/types.js"
-export * from "./transport/wire.js"
+export * from "./transport/wire-connection.js"
 

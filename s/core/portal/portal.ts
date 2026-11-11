@@ -11,12 +11,10 @@ export function makePortal<RemoteFns extends Fns>(options: {
 	}): Portal<RemoteFns> {
 
 	const {port, messenger, autoTransfer} = options
-	const dispose = disposer()
+	const {dispose, schedule} = disposer()
 
-	dispose.schedule(
-		messenger.onSend(x => port.postMessage(x, autoTransfer(x))),
-		ev(port, {message: event => messenger.recv(event.data)}),
-	)
+	schedule(messenger.onSend(x => port.postMessage(x, autoTransfer(x))))
+	schedule(ev(port, {message: event => messenger.recv(event.data)}))
 
 	port.start()
 
@@ -24,7 +22,7 @@ export function makePortal<RemoteFns extends Fns>(options: {
 		port,
 		messenger,
 		remote: messenger.remote,
-		dispose: () => dispose(),
+		dispose,
 	}
 }
 
