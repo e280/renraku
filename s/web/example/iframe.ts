@@ -7,12 +7,7 @@ import {Messenger} from "../../core/messenger/messenger.js"
 
 makePortal({
 	autoTransfer,
-	port: await offerWindowPort({
-		topic: "example",
-		to: window.parent,
-	}),
-	messenger: new Messenger(makeEndpoint({
-		hello: async() => "world",
-	})),
+	messenger: new Messenger(makeEndpoint({hello: async() => "world"})),
+	...await offerWindowPort({to: window.parent, topic: "example"}),
 })
 

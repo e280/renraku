@@ -1,15 +1,15 @@
 
+import {check} from "./utils.js"
 import {Port} from "../../core/portal/types.js"
 import {Accept} from "../../core/portal/ports/types.js"
+import {Topical, WindowAcceptOptions} from "./types.js"
 import {acceptPorts} from "../../core/portal/ports/basics/accepts.js"
-import {allowgate, goodTopic, Topical, WindowAcceptOptions} from "./utils.js"
 
 export function acceptWindowPorts(options: WindowAcceptOptions & {
-		onPort: (port: Port, origin: string) => void
+		onPort: (port: Port, event: MessageEvent) => void
 	}) {
 
-	const {topic, from, onPort, origin, allow = () => true} = options
-	const gate = allowgate(from, origin, allow)
+	const {topic, from, origin, onPort, allow = () => true} = options
 
 	return acceptPorts({
 		onPort,
@@ -21,8 +21,8 @@ export function acceptWindowPorts(options: WindowAcceptOptions & {
 
 		recv: fn => {
 			const listener = (event: MessageEvent) => {
-				if (goodTopic(event.data, topic) && gate(event))
-					fn(event.data.payload, event.origin)
+				if (check({event, topic, origin, source: from}) && allow(event))
+					fn(event.data.payload, event)
 			}
 			globalThis.addEventListener("message", listener)
 			return () => globalThis.removeEventListener("message", listener)

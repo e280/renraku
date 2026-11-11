@@ -10,7 +10,7 @@ const iframe = document.querySelector<HTMLIFrameElement>("iframe")!
 const {remote} = makePortal({
 	autoTransfer,
 	messenger: new Messenger<ExampleFns>(),
-	port: await acceptWindowPort({
+	...await acceptWindowPort({
 		topic: "example",
 		from: iframe.contentWindow!,
 		origin: "http://localhost:8080",

@@ -1,6 +1,7 @@
 
 export * from "./windows/accept.js"
 export * from "./windows/accepts.js"
+export * from "./windows/allowances.js"
 export * from "./windows/offer.js"
 
 export * from "./workers/accept.js"

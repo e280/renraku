@@ -1,41 +1,36 @@
 
 import {isObject, isString} from "@e280/stz"
+import {Topical} from "./types.js"
 
-export type WindowAcceptOptions = {
-	topic: string
-	from: Window | WindowProxy
-	origin: string
-	allow?: (event: MessageEvent) => boolean
+export function check(options: {
+		event: MessageEvent
+		topic: string
+		origin: string
+		source: Window | WindowProxy
+	}) {
+
+	const {event} = options
+
+	return (
+		isGoodTopic(event.data, options.topic) &&
+		assert(event.source === options.source, "bad message source") &&
+		(
+			options.origin === "*" ||
+			assert(event.origin === options.origin, `bad message origin "${event.origin}"`)
+		)
+	)
 }
 
-export type Topical<P> = {topic: string, payload: P}
-
-export const goodTopic = <P>(data: any, topic: string): data is Topical<P> => (
+const isGoodTopic = <P>(data: any, topic: string): data is Topical<P> => (
 	isObject(data)
 	&& isString(data.topic)
 	&& data.topic === topic
 )
 
-export function assert(x: any, err: string) {
-	if (!x) throw new Error(err)
-	else return x
-}
-
-export const allowgate = (
-		source: Window | WindowProxy,
-		origin: string,
-		allow: (event: MessageEvent) => boolean,
-	) => (event: MessageEvent) => {
-
-	try {
-		return (
-			assert(event.source === source, "bad message source") &&
-			assert(origin === "*" || event.origin === origin, "bad message origin") &&
-			assert(allow(event), "not allowed")
-		)
-	}
-	catch (error) {
-		console.warn(error)
+const assert = (x: any, failure: string) => {
+	if (x) return true
+	else {
+		console.warn(failure)
 		return false
 	}
 }

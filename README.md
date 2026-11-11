@@ -363,11 +363,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const {remote} = makePortal({
       autoTransfer,
       messenger: new Messenger<AliceFns>(bobEndpoint),
-      port: await offerWindowPort({
-        topic: "example",
-        to: window.parent,
-        origin: "http://localhost:8080",
-      }),
+      ...await offerWindowPort({topic: "example", to: window.parent}),
     })
 
     await remote.hello()
@@ -387,7 +383,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const {remote} = makePortal({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
-      port: await acceptWindowPort({
+      ...await acceptWindowPort({
         topic: "example",
         from: popup,
         origin: "http://localhost:8080",
@@ -405,11 +401,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const {remote} = makePortal({
       autoTransfer,
       messenger: new Messenger<AliceFns>(bobEndpoint),
-      port: await offerWindowPort({
-        topic: "example",
-        to: window.opener!,
-        origin: "http://localhost:8080",
-      }),
+      ...await offerWindowPort({topic: "example", to: window.opener!}),
     })
 
     await remote.hello()
