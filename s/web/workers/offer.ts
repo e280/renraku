@@ -1,5 +1,5 @@
 
-import {offerPort} from "../../core/portal/ports/basics/offer.js"
+import {offerPort} from "../../core/ports/offer.js"
 
 export async function offerWorkerPort() {
 	const {port} = await offerPort({

@@ -1,9 +1,9 @@
 
 import {check} from "./utils.js"
-import {Port} from "../../core/portal/types.js"
-import {Accept} from "../../core/portal/ports/types.js"
+import {Accept} from "../../core/ports/types.js"
+import {Port} from "../../core/transport/types.js"
+import {acceptPorts} from "../../core/ports/accepts.js"
 import {Topical, WindowAcceptOptions} from "./types.js"
-import {acceptPorts} from "../../core/portal/ports/basics/accepts.js"
 
 export function acceptWindowPorts(options: WindowAcceptOptions & {
 		onPort: (port: Port, event: MessageEvent) => void

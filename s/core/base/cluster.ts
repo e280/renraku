@@ -1,7 +1,7 @@
 
 import {defer, Deferred} from "@e280/stz"
-import {makeRemote} from "../base/remote.js"
-import {Endpoint, Fns} from "../base/types.js"
+import {makeRemote} from "./remote.js"
+import {Endpoint, Fns} from "./types.js"
 
 export function cluster<R extends Fns>(endpoints: Endpoint[]) {
 	if (!endpoints.length)

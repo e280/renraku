@@ -10,12 +10,12 @@
 have you ever found yourself making an api call by using `fetch`... or worse... `postMessage`?  
 *stop it. get some help.*  
 
-🍙 [renraku's sharp little primitives.](#primitives)  
+🍙 [renraku primitives.](#primitives)  
 🥡 [renraku over http.](#http)  
 ♨️ [renraku errors and security.](#errors)  
 📬 [renraku messengers.](#messengers)  
 🎏 [renraku over websockets.](#websockets)  
-🌀 [renraku portals.](#portals)  
+🌀 [renraku ports.](#ports)  
 🐝 [renraku cluster.](#cluster)  
 
 > [!TIP]
@@ -25,7 +25,7 @@ have you ever found yourself making an api call by using `fetch`... or worse... 
 
 <br/><a id="primitives"></a>
 
-## ⛩️ renraku's sharp little primitives.
+## ⛩️ renraku primitives.
 > *it's a minimalist toolkit to help your async functions reach their fullest potential.*
 
 ### 🍙 renraku is about async fns.
@@ -259,19 +259,19 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 
 
 
-<br/><a id="portals"></a>
+<br/><a id="ports"></a>
 
-## ⛩️ renraku portals.
-> *portals bond messengers to [message ports](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort).*
+## ⛩️ renraku ports.
+> *for in-browser rpc across tabs, workers, iframes, popups, etc.*
 
 ### 🌀 web workers.
 > *notice that we're importing some things from `@e280/renraku/web`.*
 - **hostside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {autoTransfer, acceptWorkerPort} from "@e280/renraku/web"
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
       port: await acceptWorkerPort(
@@ -286,10 +286,10 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     - 🌟 `autoTransfer` from renraku-web, auto-transfers [web transferables](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects) like ArrayBuffer, OffscreenCanvas, stuff like that. alternatively write your own transfer fn, or use `noTransfer` from renraku-core to opt-out of transfers.
 - **workerside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {autoTransfer, offerWorkerPort} from "@e280/renraku/web"
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer,
       port: await offerWorkerPort(),
       messenger: new Messenger<AliceFns>(bobEndpoint),
@@ -304,10 +304,10 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 - **hostside.**
     ```ts
     import {Worker} from "node:worker_threads"
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {nodeAutoTransfer, nodeAcceptWorkerPort} from "@e280/renraku/node"
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer: nodeAutoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
       port: await nodeAcceptWorkerPort(new Worker("./my-worker.js")),
@@ -318,10 +318,10 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 - **workerside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {nodeAutoTransfer, nodeOfferWorkerPort} from "@e280/renraku/node"
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer: nodeAutoTransfer,
       port: await nodeOfferWorkerPort(),
       messenger: new Messenger<AliceFns>(bobEndpoint),
@@ -335,14 +335,14 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 > *see how it's the same pattern as the workers, but what's different is how we get the `port`?*
 - **parentside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {autoTransfer, acceptWindowPort} from "@e280/renraku/web"
 
     const iframe = document.createElement("iframe")
     iframe.src = "http://localhost:8080/iframe"
     document.body.append(iframe)
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
       port: await acceptWindowPort({
@@ -357,10 +357,10 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 - **iframeside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {autoTransfer, offerWindowPort} from "@e280/renraku/web"
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<AliceFns>(bobEndpoint),
       ...await offerWindowPort({topic: "example", to: window.parent}),
@@ -374,13 +374,13 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 > *you may notice that the host side is always the offer accepter, whereas it's the worker/popup/iframe that is always the one sending the offer. that's because the offerer knows when it's done loading, so the offer isn't missed by the host side, which is already done loading.*
 - **openerside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {autoTransfer, acceptWindowPort} from "@e280/renraku/web"
 
     const popup = window.open("http://localhost:8080/popup")
     if (!popup) throw new Error("popup blocked")
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
       ...await acceptWindowPort({
@@ -395,10 +395,10 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 - **popupside.**
     ```ts
-    import {makePortal, Messenger} from "@e280/renraku"
+    import {wirePort, Messenger} from "@e280/renraku"
     import {autoTransfer, offerWindowPort} from "@e280/renraku/web"
 
-    const {remote} = makePortal({
+    const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<AliceFns>(bobEndpoint),
       ...await offerWindowPort({topic: "example", to: window.opener!}),
@@ -431,11 +431,11 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 
 ### 🐝 cluster.
-- **have a fn that prepares your worker portal.**
+- **have a fn that prepares your worker.**
     ```ts
     async function myWorkerPortal() {
       // follow the worker tutorial from sections above.
-      return makePortal({messenger, port, autoTransfer})
+      return wirePort({messenger, port, autoTransfer})
     }
     ```
 - **load up your worker portals, and grab their endpoints.**

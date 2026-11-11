@@ -1,9 +1,9 @@
 
 import {hex} from "@e280/stz"
-import {isAccept} from "../utils/is.js"
-import {offerKind} from "../utils/kinds.js"
-import {Channel, Port} from "../../types.js"
-import {Offer, Recv, Send} from "../types.js"
+import {isAccept} from "./utils/is.js"
+import {offerKind} from "./utils/kinds.js"
+import {Channel, Port} from "../transport/types.js"
+import {Offer, Recv, Send} from "./types.js"
 
 export async function offerPort<Meta = void>({send, recv, channel}: {
 		send: Send<Offer>

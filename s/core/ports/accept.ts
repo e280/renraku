@@ -1,7 +1,7 @@
 
-import {Port} from "../../types.js"
+import {Port} from "../transport/types.js"
 import {acceptPorts} from "./accepts.js"
-import {Accept, Recv, Send} from "../types.js"
+import {Accept, Recv, Send} from "./types.js"
 
 export async function acceptPort(options: {send: Send<Accept>, recv: Recv}) {
 	return new Promise<Port>(resolve => {

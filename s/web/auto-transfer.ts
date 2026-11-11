@@ -1,6 +1,6 @@
 
 import {isHappy, isObject} from "@e280/stz"
-import {makeAutoTransfer} from "../core/portal/auto-transfer.js"
+import {makeAutoTransfer} from "../core/transport/auto-transfer.js"
 
 export const autoTransfer = makeAutoTransfer(
 	(x: unknown) => isObject(x) && [

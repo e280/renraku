@@ -1,8 +1,8 @@
 
-import {Port} from "../../types.js"
-import {isOffer} from "../utils/is.js"
-import {acceptKind} from "../utils/kinds.js"
-import {Accept, Recv, Send} from "../types.js"
+import {Port} from "../transport/types.js"
+import {isOffer} from "./utils/is.js"
+import {acceptKind} from "./utils/kinds.js"
+import {Accept, Recv, Send} from "./types.js"
 
 export function acceptPorts<M>({send, recv, onPort}: {
 		send: Send<Accept>

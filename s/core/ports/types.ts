@@ -1,5 +1,5 @@
 
-import {Port} from "../types.js"
+import {Port} from "../transport/types.js"
 import {acceptKind, offerKind} from "./utils/kinds.js"
 
 export type Send<X> = (data: X, transfer: any[]) => void

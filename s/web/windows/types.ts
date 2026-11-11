@@ -1,5 +1,5 @@
 
-import {Port} from "../../core/portal/types.js"
+import {Port} from "../../core/transport/types.js"
 
 export type Topical<P> = {
 	topic: string

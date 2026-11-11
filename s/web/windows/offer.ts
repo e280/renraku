@@ -1,8 +1,8 @@
 
 import {check} from "./utils.js"
 import {PortResult, Topical} from "./types.js"
-import {Offer} from "../../core/portal/ports/types.js"
-import {offerPort} from "../../core/portal/ports/basics/offer.js"
+import {Offer} from "../../core/ports/types.js"
+import {offerPort} from "../../core/ports/offer.js"
 
 export async function offerWindowPort(options: {
 		topic: string
