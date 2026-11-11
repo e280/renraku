@@ -431,28 +431,24 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 
 ### 🐝 cluster.
-- **have a fn that prepares your worker.**
-    ```ts
-    async function myWorkerPortal() {
-      // follow the worker tutorial from sections above.
-      return wirePort({messenger, port, autoTransfer})
-    }
-    ```
 - **load up your worker portals, and grab their endpoints.**
     ```ts
     import {array} from "@e280/stz"
 
     const portals = await Promise.all(
-      array(parallelism(), myWorkerPortal)
+      array(parallelism()).map(() =>
+        wirePort({messenger, port, autoTransfer})
+      )
     )
 
     const endpoints = portals.map(p => p.messenger.remoteEndpoint)
     ```
-- 🌟 **now you create a cluster remote.**
+- 🌟 **create your cluster.**
     ```ts
-    import {cluster} from "@e280/renraku"
+    import {cluster, makeRemote} from "@e280/renraku"
 
-    const remote = cluster<AliceFns>(endpoints)
+    const endpoint = cluster(endpoints)
+    const remote = makeRemote<AliceFns>(endpoint)
     ```
     it's just like a normal remote. except each call goes to a different endpoint.
     ```ts

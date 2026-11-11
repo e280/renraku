@@ -1,9 +1,8 @@
 
 import {defer, Deferred} from "@e280/stz"
-import {makeRemote} from "./remote.js"
-import {Endpoint, Fns} from "./types.js"
+import {Endpoint} from "./types.js"
 
-export function cluster<R extends Fns>(endpoints: Endpoint[]) {
+export function cluster(endpoints: Endpoint[]): Endpoint {
 	if (!endpoints.length)
 		throw new Error("cluster needs endpoints")
 
@@ -19,7 +18,7 @@ export function cluster<R extends Fns>(endpoints: Endpoint[]) {
 		else free.add(endpoint)
 	}
 
-	return makeRemote<R>(async call => {
+	return async call => {
 		let endpoint = free.values().next().value
 
 		if (endpoint) free.delete(endpoint)
@@ -31,6 +30,6 @@ export function cluster<R extends Fns>(endpoints: Endpoint[]) {
 
 		try { return await endpoint(call) }
 		finally { freeOrPassToWaiting(endpoint) }
-	})
+	}
 }
 

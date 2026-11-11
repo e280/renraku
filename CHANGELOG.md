@@ -11,7 +11,10 @@
 ## v0.6
 
 ### v0.6.0
-- 🟥 total rewrite
+#### v0.6.0-25
+- 🟥 `cluster` now returns an endpoint, not a remote.
+#### v0.6.0-24
+- 🟥 total rewrite.
 
 
 
