@@ -17,6 +17,17 @@ export function makeRemote<F extends Fns>(endpoint: Endpoint) {
 					throw new RemoteError(result.error)
 				return result.value
 			},
+
+			getOwnPropertyDescriptor(_target, key): any {
+				if (typeof key !== "string" || key === "then")
+					return undefined
+				return {
+					configurable: true,
+					enumerable: true,
+					writable: true,
+					value: makeProxy(endpoint, [...path, key]),
+				}
+			},
 		})
 	}
 

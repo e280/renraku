@@ -13,6 +13,7 @@
 ### v0.6.0
 #### v0.6.0-25
 - 🟥 `cluster` now returns an endpoint, not a remote.
+- 🍏 `makeEndpoint` can now actually consume a remote.
 #### v0.6.0-24
 - 🟥 total rewrite.
 

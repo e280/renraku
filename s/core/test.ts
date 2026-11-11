@@ -20,6 +20,14 @@ export default science.suite({
 			expect(gotErr(await endpoint([["add"], 1, 2]))).ok()
 		}),
 
+		"not found deep": test(async() => {
+			const fns = {add: async(x: number, y: number) => (x + y), sub: {}}
+			const endpoint = makeEndpoint(fns)
+			expect(gotErr(await endpoint([["add", "lol"], 1, 2]))).ok()
+			expect(gotErr(await endpoint([["sub"], 1, 2]))).ok()
+			expect(gotErr(await endpoint([["sub", "lol"], 1, 2]))).ok()
+		}),
+
 		"error is concealed for security": test(async() => {
 			const fns = {hello: async() => { throw new Error("danger") }}
 			const endpoint = makeEndpoint(fns)
@@ -65,6 +73,16 @@ export default science.suite({
 			try { await remote.hello() }
 			catch (error) { caught = error }
 			expect(caught?.message).is("ExposedError: problem")
+		}),
+
+		"the circle of life": test(async() => {
+			const fns = {add: async(x: number, y: number) => (x + y)}
+			const endpoint = makeEndpoint(fns)
+			const remote = makeRemote<typeof fns>(endpoint)
+
+			const endpoint2 = makeEndpoint(remote)
+			const remote2 = makeRemote<typeof fns>(endpoint2)
+			expect(await remote2.add(1, 2)).is(3)
 		}),
 	},
 })
