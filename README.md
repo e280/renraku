@@ -416,17 +416,22 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 > *for distributing workloads across a pool of workers.*  
 > *yes, renraku can do that too.*  
 
-### 🐝 parallelism (your cpu count minus one).
+### 🐝 processors and parallelism.
 - **web parallelism.**
     ```ts
-    import {parallelism} from "@e280/renraku/web"
+    import {processors, parallelism} from "@e280/renraku/web"
+
+    processors() // 8
+      // the number of logical processors this hardware reports.
 
     parallelism() // 7
+      // processors minus 1 (to leave the main thread alone).
     ```
 - **node parallelism.**
     ```ts
-    import {nodeParallelism} from "@e280/renraku/node"
+    import {nodeProcessors, nodeParallelism} from "@e280/renraku/node"
 
+    nodeProcessors() // 8
     nodeParallelism() // 7
     ```
 
