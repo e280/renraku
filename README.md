@@ -262,7 +262,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 <br/><a id="ports"></a>
 
 ## ⛩️ renraku ports.
-> *for in-browser rpc across tabs, workers, iframes, popups, etc.*
+> *for rpc across workers, iframes, popups, etc.*
 
 ### 🌀 web workers.
 > *notice that we're importing some things from `@e280/renraku/web`.*
