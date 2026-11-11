@@ -1,5 +1,6 @@
 
 import {Fns} from "../base/types.js"
+import {Connection} from "./connect.js"
 import {Messenger} from "../messenger/messenger.js"
 import type {ReadyState} from "./utils/ready-state.js"
 
@@ -19,7 +20,24 @@ export type PortWiring<RemoteFns extends Fns = any> = {
 	port: Port
 	messenger: Messenger<RemoteFns>
 	remote: RemoteFns
+
+	/** detach the wiring. */
 	dispose: () => void
+
+	/** shutdown and dispose all parts. */
+	close: () => void
+}
+
+export type ConnectionWiring<RemoteFns extends Fns = any> = {
+	connection: Connection
+	messenger: Messenger<RemoteFns>
+	remote: RemoteFns
+
+	/** detach the wiring. */
+	dispose: () => void
+
+	/** shutdown and dispose all parts. */
+	close: () => void
 }
 
 /** agnostic shape compatible with web or node MessagePort */

@@ -23,6 +23,11 @@ export function wirePort<RemoteFns extends Fns>(options: {
 		messenger,
 		remote: messenger.remote,
 		dispose,
+		close: () => {
+			dispose()
+			messenger.dispose()
+			port.close()
+		},
 	}
 }
 
