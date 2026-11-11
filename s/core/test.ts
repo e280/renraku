@@ -39,6 +39,27 @@ export default science.suite({
 			const endpoint = makeEndpoint(fns)
 			expect(gotErr(await endpoint([["hello"]]))).is("ExposedError: safe error")
 		}),
+
+		"cannot crawl naughty properties": test(async() => {
+			const fns = {add: async(x: number, y: number) => (x + y)}
+			const endpoint = makeEndpoint(fns)
+			for (const key of ["toString", "__proto__", "constructor"]) {
+				expect(gotErr(await endpoint([[key]]))).ok()
+				expect(gotErr(await endpoint([["add", key]]))).ok()
+			}
+		}),
+
+		"cannot call inherited methods": test(async() => {
+			const fns = Object.assign(
+				Object.create({
+					secret: async() => "oops",
+				}),
+				{add: async() => 3},
+			)
+			const endpoint = makeEndpoint(fns)
+			expect(gotOk(await endpoint([["add"]]))).is(3)
+			expect(gotErr(await endpoint([["secret"]]))).ok()
+		}),
 	},
 
 	"remote": {
