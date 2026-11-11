@@ -5,20 +5,20 @@ import {offerKind} from "../utils/kinds.js"
 import {Channel, Port} from "../../types.js"
 import {Offer, Recv, Send} from "../types.js"
 
-export async function offerPort({send, recv, channel}: {
+export async function offerPort<Meta = void>({send, recv, channel}: {
 		send: Send<Offer>
-		recv: Recv
+		recv: Recv<Meta>
 		channel: Channel
 	}) {
 
 	const id = hex.random()
 	const {port1, port2} = channel
 
-	return new Promise<Port>(resolve => {
-		const stop = recv(data => {
+	return new Promise<{port: Port, meta: Meta}>(resolve => {
+		const stop = recv((data, meta) => {
 			if (isAccept(data, id)) {
 				stop()
-				resolve(port1)
+				resolve({port: port1, meta})
 			}
 		})
 		send({kind: offerKind, id, port: port2}, [port2])

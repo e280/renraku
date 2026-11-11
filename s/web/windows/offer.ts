@@ -13,7 +13,7 @@ export async function offerWindowPort(options: {
 	const {topic, to, allow = () => true, origin = "*"} = options
 	const gate = allowgate(to, origin, allow)
 
-	return offerPort({
+	const {port} = await offerPort({
 		channel: new MessageChannel(),
 
 		send: (offer, transfer) => {
@@ -30,5 +30,7 @@ export async function offerWindowPort(options: {
 			return () => self.removeEventListener("message", listener)
 		},
 	})
+
+	return port
 }
 

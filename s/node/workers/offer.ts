@@ -6,7 +6,7 @@ import {offerPort} from "../../core/portal/ports/basics/offer.js"
 export async function nodeOfferWorkerPort() {
 	const parent = got(parentPort)
 
-	return offerPort({
+	const {port} = await offerPort({
 		channel: new MessageChannel(),
 		send: (data, transfers) => parent.postMessage(data, transfers),
 		recv: fn => {
@@ -14,5 +14,7 @@ export async function nodeOfferWorkerPort() {
 			return () => parent.off("message", fn)
 		},
 	})
+
+	return port
 }
 

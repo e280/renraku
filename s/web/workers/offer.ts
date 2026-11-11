@@ -2,7 +2,7 @@
 import {offerPort} from "../../core/portal/ports/basics/offer.js"
 
 export async function offerWorkerPort() {
-	return offerPort({
+	const {port} = await offerPort({
 		channel: new MessageChannel(),
 		send: (data, transfer) => self.postMessage(data, transfer),
 		recv: fn => {
@@ -11,5 +11,6 @@ export async function offerWorkerPort() {
 			return () => self.removeEventListener("message", listener)
 		},
 	})
+	return port
 }
 
