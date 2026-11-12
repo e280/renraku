@@ -2,6 +2,7 @@
 export * from "./base/cluster.js"
 export * from "./base/endpoint.js"
 export * from "./base/errors.js"
+export * from "./base/mirror.js"
 export * from "./base/remote.js"
 export * from "./base/types.js"
 
