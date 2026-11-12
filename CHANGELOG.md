@@ -11,6 +11,10 @@
 ## v0.6
 
 ### v0.6.0
+#### v0.6.0-26
+- 🟥 rename wirePort/wireConnection `wiring.dispose()` to `wiring.detach()`.
+- 🟥 rename wirePort/wireConnection `wiring.close()` to `wiring.dispose()`.
+- 🍏 add `mirror` fn.
 #### v0.6.0-25
 - 🟥 `cluster` now returns an endpoint, not a remote.
 - 🍏 `makeEndpoint` can now actually consume a remote.
