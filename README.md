@@ -436,12 +436,12 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 
 ### 🐝 cluster.
-- **load up your worker portals, and grab their endpoints.**
+- **first, create your worker pool.**
     ```ts
     import {array} from "@e280/stz"
 
     // your fn to create a new web worker.
-    const makeWorker = () => wirePort({
+    const makeWorker = async() => wirePort({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
       port: await acceptWorkerPort(
@@ -450,8 +450,9 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     })
 
     // make a pool of workers.
-    const workers = array(parallelism)
-      .map(makeWorker)
+    const workers = await Promise.all(
+      array(parallelism).map(makeWorker)
+    )
 
     // grab the worker endpoints.
     const endpoints = portals.map(p => p.messenger.remoteEndpoint)
@@ -463,12 +464,12 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const endpoint = cluster(endpoints)
     const remote = makeRemote<AliceFns>(endpoint)
     ```
-    it's just like a normal remote -- but each call goes to a different endpoint!
+    it's just like a normal remote -- ***but each call goes to a different endpoint!***
     ```ts
     await remote.hello()
       // "world"
     ```
-    concurrent work gets distributed. *imagine the possibilities* 🌈
+    concurrent work is distributed, jobs are queued, etc. *imagine the possibilities* 🌈
     ```ts
     await Promise.all([
       remote.hello(),
