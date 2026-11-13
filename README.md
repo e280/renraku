@@ -443,7 +443,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     import {array} from "@e280/stz"
 
     // your fn creates a new web worker.
-    const makeWorker = () => wirePort({
+    const makeWorker = async() => wirePort({
       autoTransfer,
       messenger: new Messenger<BobFns>(aliceEndpoint),
       port: await acceptWorkerPort(
