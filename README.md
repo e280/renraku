@@ -4,10 +4,13 @@
 
 📦 `npm install @e280/renraku@next`
 
-**renraku makes typescript functions callable across any boundary.** *servers and clients. http and websockets. node and web workers. popups and iframes... carrier pigeons.*  
-
-have you ever found yourself making an api call by using `fetch`... or worse... `postMessage`?  
+have you ever found yourself making an api call by directly using `fetch`... or worse... `postMessage`?  
 *stop it. get some help.*  
+
+**renraku makes typescript functions callable across any boundary.** *servers and clients. http and websockets. node and web workers. popups and iframes... carrier pigeons...*  
+
+**renraku is designed for composability.**  
+there's an interesting design tension between simplicity and versatility. at some point, further simplification chips away at flexibility. after many iterations, i eventually learned that it's better to present a small set of composable primitives, without an additional porcelain layer on top... so you get a little more plumbing, a smaller api, and a lot more freedom.
 
 🍙 [renraku primitives.](#primitives)  
 🥡 [renraku over http.](#http)  
@@ -16,9 +19,6 @@ have you ever found yourself making an api call by using `fetch`... or worse... 
 🎏 [renraku over websockets.](#websockets)  
 🌀 [renraku ports.](#ports)  
 🐝 [renraku cluster.](#cluster)  
-
-**renraku is carefully designed.**  
-you know, i notice interesting tension arises when designing with any toolkit like renraku. on one hand, i want to give you simple function calls that shield you from all the complexities. but on the other hand, i want to give you something flexible and versatile enough for any scenario. these two ideals are in tension, because at some point, further simpification chips away at versatility. in this readme, you will see plumbing that seems like it could be abstracted behind easier opaque functions. but, after many iterations and much usage, i have found it's better to keep renraku's surface area small, the primitives as simple as possible, and teach you how to use the primitives yourself. then, you can do anything.
 
 > [!TIP]
 > *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
