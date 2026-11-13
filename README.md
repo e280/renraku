@@ -464,7 +464,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     import {cluster, makeRemote} from "@e280/renraku"
 
     const endpoint = cluster(endpoints)
-    const remote = makeRemote<AliceFns>(endpoint)
+    const remote = makeRemote<BobFns>(endpoint)
     ```
     it's just like a normal remote -- ***but each call goes to a different endpoint!***
     ```ts
