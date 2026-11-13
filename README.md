@@ -440,12 +440,20 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```ts
     import {array} from "@e280/stz"
 
-    const portals = await Promise.all(
-      array(parallelism()).map(() =>
-        wirePort({messenger, port, autoTransfer})
-      )
-    )
+    // your fn to create a new web worker.
+    const makeWorker = () => wirePort({
+      autoTransfer,
+      messenger: new Messenger<BobFns>(aliceEndpoint),
+      port: await acceptWorkerPort(
+        new Worker("./my-worker.bundle.min.js", {type: "module"})
+      ),
+    })
 
+    // make a pool of workers.
+    const workers = array(parallelism)
+      .map(makeWorker)
+
+    // grab the worker endpoints.
     const endpoints = portals.map(p => p.messenger.remoteEndpoint)
     ```
 - 🌟 **create your cluster.**
@@ -455,7 +463,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const endpoint = cluster(endpoints)
     const remote = makeRemote<AliceFns>(endpoint)
     ```
-    it's just like a normal remote. except each call goes to a different endpoint.
+    it's just like a normal remote -- but each call goes to a different endpoint!
     ```ts
     await remote.hello()
       // "world"
