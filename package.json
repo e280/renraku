@@ -23,7 +23,7 @@
 	},
 	"dependencies": {
 		"@e280/stz": "^0.4.18",
-		"ws": "^8.22.2"
+		"ws": "^8.23.0"
 	},
 	"devDependencies": {
 		"@e280/octo": "^0.1.7",
