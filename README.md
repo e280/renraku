@@ -2,9 +2,6 @@
 # 連絡 <br/> ***R·E·N·R·A·K·U***
 > *elegant weapons, for a more civilized age.*
 
-have you ever found yourself making an api call by directly using fetch, or worse, postMessage?  
-*stop it. get some help.*  
-
 **renraku makes typescript functions callable across any boundary.**  
 *servers and clients. http and websockets. node and web workers. popups and iframes. carrier pigeons.*  
 
@@ -26,7 +23,6 @@ have you ever found yourself making an api call by directly using fetch, or wors
 <br/><a id="http"></a>
 
 ## ⛩️ renraku http quickstart.
-> *let's make a node api*
 
 ### 🥡 you've got async functions.
 ```ts
