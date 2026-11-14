@@ -52,6 +52,7 @@ export class Messenger<RemoteFns extends Fns = any> {
 	readonly onSend = this.#onSend.on
 
 	readonly recv = async(msg: Message) => {
+		if (this.#disposed) return
 		switch (msg[0]) {
 			case MessageKind.Request: return this.#recvCall(msg)
 			case MessageKind.Response: return this.#recvRet(msg)
@@ -69,6 +70,7 @@ export class Messenger<RemoteFns extends Fns = any> {
 
 	async #recvCall([, id, call]: Request) {
 		const ret = await this.#localEndpoint(call)
+		if (this.#disposed) return
 		this.#onSend.publish([MessageKind.Response, id, ret])
 	}
 
