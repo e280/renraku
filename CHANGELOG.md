@@ -11,6 +11,8 @@
 ## v0.6
 
 ### v0.6.0
+#### v0.6.0-28
+- 🟥 rename wiring `detach()` to `unwire()`.
 #### v0.6.0-27
 - 🟥 require `origin` param for window ports.
 - 🍏 improve readme.
