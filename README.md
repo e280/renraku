@@ -202,7 +202,7 @@ import {wireConnection, connect, Messenger} from "@e280/renraku"
 
 createServer()
   .on("upgrade", websockets(async websocket => {
-    const {connection, messenger} = wireConnection({
+    const {connection, messenger, dispose} = wireConnection({
       connection: await connect(websocket),
       messenger: new Messenger<BobFns>(aliceEndpoint),
     })
@@ -216,7 +216,10 @@ createServer()
     connection.rtt.average // 84
 
     // handle connection closed
-    connection.onClose(() => console.log("closed"))
+    connection.onClose(() => {
+      dispose()
+      console.log("closed")
+    })
 
     // // close the connection whenever you want
     // connection.close()
