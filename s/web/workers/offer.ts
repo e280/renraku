@@ -1,8 +1,8 @@
 
-import {defaultPortTimeout} from "../../consts.js"
 import {offerPort} from "../../core/ports/offer.js"
+import {defaultRemoteTimeout} from "../../consts.js"
 
-export async function offerWorkerPort(timeout = defaultPortTimeout) {
+export async function offerWorkerPort(timeout = defaultRemoteTimeout) {
 	return (await offerPort({
 		timeout,
 		channel: new MessageChannel(),

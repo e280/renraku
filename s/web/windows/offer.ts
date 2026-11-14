@@ -3,6 +3,7 @@ import {check} from "./utils.js"
 import {PortResult, Topical} from "./types.js"
 import {Offer} from "../../core/ports/types.js"
 import {offerPort} from "../../core/ports/offer.js"
+import {defaultRemoteTimeout} from "../../consts.js"
 
 export async function offerWindowPort(options: {
 		topic: string
@@ -12,7 +13,7 @@ export async function offerWindowPort(options: {
 		allow?: (event: MessageEvent) => boolean
 	}): Promise<PortResult> {
 
-	const {topic, to, origin, timeout, allow = () => true} = options
+	const {topic, to, origin, timeout = defaultRemoteTimeout, allow = () => true} = options
 
 	const {port, meta} = await offerPort<MessageEvent>({
 		timeout,

@@ -1,7 +1,12 @@
 
+import {defaultRemoteTimeout} from "../../consts.js"
 import {acceptPort} from "../../core/ports/accept.js"
 
-export async function acceptWorkerPort(worker: Worker, timeout?: number) {
+export async function acceptWorkerPort(
+		worker: Worker,
+		timeout = defaultRemoteTimeout,
+	) {
+
 	return acceptPort({
 		timeout,
 		send: (data, transfer) => worker.postMessage(data, transfer),

@@ -1,10 +1,10 @@
 
 import {got} from "@e280/stz"
 import {MessageChannel, parentPort} from "node:worker_threads"
-import {defaultPortTimeout} from "../../consts.js"
 import {offerPort} from "../../core/ports/offer.js"
+import {defaultLocalTimeout} from "../../consts.js"
 
-export async function nodeOfferWorkerPort(timeout = defaultPortTimeout) {
+export async function nodeOfferWorkerPort(timeout = defaultLocalTimeout) {
 	const parent = got(parentPort)
 
 	const {port} = await offerPort({
