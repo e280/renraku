@@ -66,10 +66,8 @@ await remote.sum(1, 2)
 <br/><a id="primitives"></a>
 
 ## ⛩️ renraku primitives.
-> *renraku is a high-composability rpc toolkit.*
 
-### 🍙 renraku is about async fns.
-> *introducing alice.*
+### 🍙 introducing alice.
 ```ts
 const aliceFns = {
   async hello() {
@@ -129,7 +127,7 @@ createServer(httpListener(aliceEndpoint))
   .listen(8080)
 ```
 
-### 🍙 http remote can call an endpoint.
+### 🍙 http remote can call an endpoint over the network.
 
 ```ts
 import {httpRemote} from "@e280/renraku"
@@ -146,7 +144,7 @@ await remote.sum(1, 2)
 await remote.nesty.is.besty()
   // 0.103639826821733
 ```
-notice that the local remote, and this http remote, have the same shape of `AliceFns`. this allows your code to be decoupled and unaware of whether the fns are local or over the network. *now think of how juicy that is for testing.*
+notice that the local remote and this http remote both have the same shape of `AliceFns`. this allows your code to be decoupled and unaware of whether the fns are local or over the network. *now think of how juicy that is for testing.*
 
 
 
@@ -170,18 +168,15 @@ notice that the local remote, and this http remote, have the same shape of `Alic
     makeEndpoint(aliceFns, {exposeAllErrors: true})
     ```
 
-### ♨️ renraku doesn't do auth.
-- maybe you'll like authlocal for authentication and authorization: https://github.com/e280/authlocal
-
-### ♨️ renraku doesn't do input validation.
-- maybe you should use [zod](https://github.com/colinhacks/zod#readme) for validating incoming params.
+### ♨️ renraku doesn't do input validation or auth.
+- try [zod](https://github.com/colinhacks/zod) for validating incoming params.
+- try [authlocal](https://github.com/e280/authlocal) for authentication and authorization.
 
 
 
 <br/><a id="messengers"></a>
 
 ## ⛩️ renraku messengers.
-> *messengers are really flexible and powerful.*
 
 ### 📬 messengers enable bidirectionality.
 - **introducing... *bob.***
@@ -221,13 +216,15 @@ notice that the local remote, and this http remote, have the same shape of `Alic
     ```
     but again, this local example is just to aid your understanding.  
     the real power of messengers, is when they are talking across a boundary like websockets or postmessage.
+- **bidirectionality is optional.**  
+    the messenger endpoint param is optional, it's perfectly okay for only one side of the messenger pair to host an endpoint with fns.
 
 
 
 <br/><a id="websockets"></a>
 
 ## ⛩️ renraku over websockets.
-> *using messengers to go bidirectional.*
+> *wiring messengers across a websocket connection.*
 
 ### 🎏 alice's serverside (node).
 ```ts
@@ -280,7 +277,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 <br/><a id="ports"></a>
 
 ## ⛩️ renraku ports.
-> *messengers across workers, iframes, popups, etc.*
+> *wiring messengers across message ports for workers, iframes, popups, etc.*
 
 ### 🌀 web workers.
 > *notice that we're importing some things from `@e280/renraku/web`.*
@@ -432,7 +429,6 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 
 ## ⛩️ renraku cluster.
 > *for distributing workloads across a pool of workers.*  
-> *yes, renraku can do that too.*  
 
 ### 🐝 processors and parallelism.
 - **web parallelism.**
