@@ -5,16 +5,13 @@
 have you ever found yourself making an api call by directly using fetch, or worse, postMessage?  
 *stop it. get some help.*  
 
-📦 `npm install @e280/renraku@next`
-
 **renraku makes typescript functions callable across any boundary.**  
 *servers and clients. http and websockets. node and web workers. popups and iframes. carrier pigeons.*  
 
-**renraku is designed for composability.**  
-there's an interesting design tension between simplicity and versatility. at some point, further simplification chips away at flexibility. after many iterations, i eventually learned that it's better to present a small set of composable primitives, without an additional porcelain layer on top. so you get a little more plumbing, a smaller api, and a lot more freedom.
+📦 `npm install @e280/renraku@next`
 
+🥡 [renraku http quickstart.](#http)  
 🍙 [renraku primitives.](#primitives)  
-🥡 [renraku over http.](#http)  
 ♨️ [renraku errors and security.](#errors)  
 📬 [renraku messengers.](#messengers)  
 🎏 [renraku over websockets.](#websockets)  
@@ -26,16 +23,54 @@ there's an interesting design tension between simplicity and versatility. at som
 
 
 
+<br/><a id="http"></a>
+
+## ⛩️ renraku http quickstart.
+> *let's make a node api*
+
+### 🥡 you've got async functions.
+```ts
+const fns = {
+  async hello() {
+    return "world"
+  },
+  async sum(a: number, b: number) {
+    return a + b
+  },
+}
+```
+
+### 🥡 serve 'em up.
+```ts
+import {serve} from "@e280/renraku/node"
+
+await serve(8080, fns)
+```
+
+### 🥡 call them on your clientside.
+```ts
+import {httpRemote} from "@e280/renraku"
+
+const remote = httpRemote<typeof fns>("http://localhost:8080")
+```
+```ts
+await remote.hello()
+  // "world"
+
+await remote.sum(1, 2)
+  // 3
+```
+
+
+
 <br/><a id="primitives"></a>
 
 ## ⛩️ renraku primitives.
-> *it's a minimalist toolkit to help your async functions reach their fullest potential.*
+> *renraku is a high-composability rpc toolkit.*
 
 ### 🍙 renraku is about async fns.
-> *basic typescript, easy peasy.*
+> *introducing alice.*
 ```ts
-type AliceFns = typeof aliceFns
-
 const aliceFns = {
   async hello() {
     return "world"
@@ -55,6 +90,9 @@ const aliceFns = {
 }
 ```
 ```ts
+type AliceFns = typeof aliceFns
+```
+```ts
 await aliceFns.hello()
   // "world"
 
@@ -65,8 +103,7 @@ await aliceFns.nesty.is.besty()
   // 0.103639826821733
 ```
 
-### 🍙 endpoints make fns json-callable.
-> *renraku's most basic plumbing primitive.*
+### 🍙 endpoints make fns callable via json.
 ```ts
 import {makeEndpoint} from "@e280/renraku"
 
@@ -77,45 +114,23 @@ await aliceEndpoint([["sum"], 1, 2])
 ```
 
 ### 🌟 remotes make endpoints... *beautiful.*
-> *ah, the crown jewel of renraku.*  
-> *a remote for aliceFns looks and feels like the real deal...*  
-> *...even if alice is actually a million miles away. actually, let's do that next.*  
 ```ts
 import {makeRemote} from "@e280/renraku"
 
 const remote = makeRemote<AliceFns>(aliceEndpoint)
 ```
-```ts
-await remote.hello()
-  // "world"
 
-await remote.sum(1, 2)
-  // 3
-
-await remote.nesty.is.besty()
-  // 0.103639826821733
-```
-
-
-
-<br/><a id="http"></a>
-
-## ⛩️ renraku over http.
-> *okay time for the stunt: let's put your functions on a server, and call 'em.*
-
-### 🥡 serverside (node).
-> *\*foop!\* — it's that easy, you blinked and your fns just became an api!*
+### 🍙 a little node plumbing to serve an endpoint.
 ```ts
 import {createServer} from "node:http"
-import {makeEndpoint} from "@e280/renraku"
 import {httpListener} from "@e280/renraku/node"
 
-createServer(httpListener(makeEndpoint(aliceFns)))
+createServer(httpListener(aliceEndpoint))
   .listen(8080)
 ```
 
-### 🥡 clientside (web, node).
-> *\*schwam!\* — now your website has a remote for calling the serverside fns!*
+### 🍙 http remote can call an endpoint.
+
 ```ts
 import {httpRemote} from "@e280/renraku"
 
@@ -131,16 +146,13 @@ await remote.sum(1, 2)
 await remote.nesty.is.besty()
   // 0.103639826821733
 ```
-> *as far as the rest of your app's code is concerned, having `remote` is similar to directly having `aliceFns`.*  
-> *okay, what you've now already learned about renraku will cover 80% of use-cases, so you could pack it up here...*  
-> *unless you're building something super cool.*  
+notice that the local remote, and this http remote, have the same shape of `AliceFns`. this allows your code to be decoupled and unaware of whether the fns are local or over the network. *now think of how juicy that is for testing.*
 
 
 
 <br/><a id="errors"></a>
 
 ## ⛩️ renraku errors and security.
-> *this advanced esoteric knowledge will serve you well.*
 
 ### ♨️ fns can throw errors.
 - **security precaution:** by default, renraku endpoints conceal error info from clients.  
@@ -158,15 +170,18 @@ await remote.nesty.is.besty()
     makeEndpoint(aliceFns, {exposeAllErrors: true})
     ```
 
-### ♨️ renraku has no opinions about auth.
+### ♨️ renraku doesn't do auth.
 - maybe you'll like authlocal for authentication and authorization: https://github.com/e280/authlocal
+
+### ♨️ renraku doesn't do input validation.
+- maybe you should use [zod](https://github.com/colinhacks/zod#readme) for validating incoming params.
 
 
 
 <br/><a id="messengers"></a>
 
 ## ⛩️ renraku messengers.
-> *messengers are really flexible and powerful, we'll use them a lot in the next sections.*
+> *messengers are really flexible and powerful.*
 
 ### 📬 messengers enable bidirectionality.
 - **introducing... *bob.***
@@ -188,12 +203,13 @@ await remote.nesty.is.besty()
     const alice = new Messenger<BobFns>(aliceEndpoint)
     const bob = new Messenger<AliceFns>(bobEndpoint)
     ```
-- **to aid your understanding,** we *could* wire them together, crisscross-style, so they can call each other.
+- **the idea is that a pair of messengers talk to each other over the network.**  
+    but in this example, we'll wire them together locally crisscross-style, just to demonstrate that they are meant to be talking to each other.
     ```ts
     alice.onSend(bob.recv)
     bob.onSend(alice.recv)
     ```
-    then, alice and bob could call each other's fns.
+    thusly, alice and bob can call each other's fns.
     ```ts
     // alice talks to bob.
     await alice.remote.bingus()
@@ -203,17 +219,17 @@ await remote.nesty.is.besty()
     await bob.remote.hello()
       // "world"
     ```
-    but that's not really practical, we just wanted you to understand that two messengers are designed to talk to one another.
+    but again, this local example is just to aid your understanding.  
+    the real power of messengers, is when they are talking across a boundary like websockets or postmessage.
 
 
 
 <br/><a id="websockets"></a>
 
 ## ⛩️ renraku over websockets.
-> *we're going bidirectional, try not to go cross-eyed.*
+> *using messengers to go bidirectional.*
 
 ### 🎏 alice's serverside (node).
-> *okay there are some new primitives here, but what matters most is that you see the messenger coming in clutch.*
 ```ts
 import {createServer} from "node:http"
 import {websockets} from "@e280/renraku/node"
@@ -244,7 +260,6 @@ createServer()
 ```
 
 ### 🎏 bob's clientside (web, node).
-> *again with the messenger, see it?*
 ```ts
 import {wireConnection, connect, Messenger} from "@e280/renraku"
 
@@ -265,7 +280,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 <br/><a id="ports"></a>
 
 ## ⛩️ renraku ports.
-> *for rpc across workers, iframes, popups, etc.*
+> *messengers across workers, iframes, popups, etc.*
 
 ### 🌀 web workers.
 > *notice that we're importing some things from `@e280/renraku/web`.*
@@ -374,7 +389,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     ```
 
 ### 🌀 popups.
-> *you may notice that the host side is always the offer accepter, whereas it's the worker/popup/iframe that is always the one sending the offer. that's because the offerer knows when it's done loading, so the offer isn't missed by the host side, which is already done loading.*
+> *you may notice that the host side is always the accepter, whereas it's the worker/popup/iframe that is sending the offer. that's because the offerer knows when it's done loading, so the offer isn't missed by the host side, which is already done loading.*
 - **openerside.**
     ```ts
     import {wirePort, Messenger} from "@e280/renraku"
