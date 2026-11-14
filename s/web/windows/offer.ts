@@ -7,11 +7,11 @@ import {offerPort} from "../../core/ports/offer.js"
 export async function offerWindowPort(options: {
 		topic: string
 		to: Window | WindowProxy
-		origin?: string
+		origin: string
 		allow?: (event: MessageEvent) => boolean
 	}): Promise<PortResult> {
 
-	const {topic, to, origin = "*", allow = () => true} = options
+	const {topic, to, origin, allow = () => true} = options
 
 	const {port, meta} = await offerPort<MessageEvent>({
 		channel: new MessageChannel(),

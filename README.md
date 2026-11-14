@@ -346,7 +346,11 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<AliceFns>(bobEndpoint),
-      ...await offerWindowPort({topic: "example", to: window.parent}),
+      ...await offerWindowPort({
+        topic: "example",
+        to: window.parent,
+        origin: "*",
+      }),
     })
 
     await remote.hello()
@@ -384,7 +388,11 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const {remote} = wirePort({
       autoTransfer,
       messenger: new Messenger<AliceFns>(bobEndpoint),
-      ...await offerWindowPort({topic: "example", to: window.opener!}),
+      ...await offerWindowPort({
+        topic: "example",
+        to: window.opener!,
+        origin: "*",
+      }),
     })
 
     await remote.hello()
@@ -486,7 +494,7 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 - **validation:** try [zod](https://github.com/colinhacks/zod) for validating incoming params.
 - **auth:** try [authlocal](https://github.com/e280/authlocal) for authentication and authorization.
 - **http:** configure cors as needed, and be mindful of which network interfaces your server listens on.
-- **window ports:** explicitly provide the `origin` option when possible, and carefully consider which windows you trust.
+- **window ports:** carefully consider which windows and origins you trust.
 
 
 

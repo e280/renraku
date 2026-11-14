@@ -8,6 +8,10 @@ import {Messenger} from "../../core/messenger/messenger.js"
 wirePort({
 	autoTransfer,
 	messenger: new Messenger(makeEndpoint({hello: async() => "world"})),
-	...await offerWindowPort({to: window.parent, topic: "example"}),
+	...await offerWindowPort({
+		to: window.parent,
+		topic: "example",
+		origin: "*",
+	}),
 })
 
