@@ -207,7 +207,7 @@ createServer()
     const wiring = wireConnection({connection, messenger})
 
     connection.onClose(() => {
-      messengere.dispose()
+      messenger.dispose()
       wiring.dispose()
     })
 
