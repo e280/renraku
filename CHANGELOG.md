@@ -11,6 +11,9 @@
 ## v0.6
 
 ### v0.6.0
+#### v0.6.0-27
+- 🟥 require `origin` param for window ports.
+- 🍏 improve readme.
 #### v0.6.0-26
 - 🟥 rename wirePort/wireConnection `wiring.dispose()` to `wiring.detach()`.
 - 🟥 rename wirePort/wireConnection `wiring.close()` to `wiring.dispose()`.
