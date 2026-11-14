@@ -207,6 +207,12 @@ createServer()
       messenger: new Messenger<BobFns>(aliceEndpoint),
     })
 
+    // handle connection closed
+    connection.onClose(() => {
+      dispose()
+      console.log("closed")
+    })
+
     // we are alice-the-server, we can call bob-the-client's fns!
     await messenger.remote.bingus()
       // 123
@@ -214,12 +220,6 @@ createServer()
     // automatic ping time stats
     connection.rtt.latest // 81
     connection.rtt.average // 84
-
-    // handle connection closed
-    connection.onClose(() => {
-      dispose()
-      console.log("closed")
-    })
 
     // // close the connection whenever you want
     // connection.close()
