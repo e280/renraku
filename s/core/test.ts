@@ -60,6 +60,19 @@ export default science.suite({
 			expect(gotOk(await endpoint([["add"]]))).is(3)
 			expect(gotErr(await endpoint([["secret"]]))).ok()
 		}),
+
+		"preserve 'this'": test(async() => {
+			const fns = {
+				async hello() {
+					return "world"
+				},
+				async alias() {
+					return this.hello()
+				},
+			}
+			const endpoint = makeEndpoint(fns)
+			expect(gotOk(await endpoint([["alias"]]))).is("world")
+		}),
 	},
 
 	"remote": {

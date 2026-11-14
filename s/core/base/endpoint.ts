@@ -14,12 +14,12 @@ export function makeEndpoint<F extends Fns>(
 
 	return async([path, ...params]) => {
 		try {
-			const fn = resolveFn(fns, path)
+			const resolved = resolveFn(fns, path)
 
-			if (!fn)
+			if (!resolved)
 				return err(`method '${path.join(".")}' not found`)
 
-			return ok(await fn(...params))
+			return ok(await Reflect.apply(resolved.fn, resolved.parent, params))
 		}
 		catch (error) {
 			return (exposeAllErrors || error instanceof ExposedError)

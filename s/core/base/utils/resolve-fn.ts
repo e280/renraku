@@ -1,11 +1,12 @@
 
 import {Fn} from "../types.js"
 
-export function resolveFn(root: unknown, path: string[]): Fn | undefined {
+export function resolveFn(root: unknown, path: string[]) {
 	if (path.length === 0)
 		return undefined
 
 	let current: unknown = root
+	let parent: object | undefined
 
 	for (const key of path) {
 		if (
@@ -18,11 +19,12 @@ export function resolveFn(root: unknown, path: string[]): Fn | undefined {
 		if (!descriptor || !("value" in descriptor))
 			return undefined
 
+		parent = current
 		current = descriptor.value
 	}
 
 	return typeof current === "function"
-		? current as Fn
+		? {fn: current as Fn, parent: parent!}
 		: undefined
 }
 
