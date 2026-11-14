@@ -12,7 +12,7 @@
 
 ### v0.6.0
 #### v0.6.0-28
-- 🟥 rename wiring `detach()` to `unwire()`.
+- 🟥 rework wirePort/wireConnection, eliminating `detach`, and now there's only `dispose` which only unwires the wiring.
 #### v0.6.0-27
 - 🟥 require `origin` param for window ports.
 - 🍏 improve readme.

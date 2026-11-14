@@ -11,21 +11,17 @@ export function wireConnection<RemoteFns extends Fns>(options: {
 	}): ConnectionWiring<RemoteFns> {
 
 	const {messenger, connection} = options
-	const {schedule, dispose: unwire} = disposer()
+	const {schedule, dispose} = disposer()
 
 	schedule(messenger.onSend(x => connection.send(x)))
 	schedule(connection.onRecv(x => messenger.recv(x)))
+	schedule(connection.onClose(dispose))
 
 	return {
 		messenger,
 		connection,
 		remote: messenger.remote,
-		unwire,
-		dispose: () => {
-			unwire()
-			messenger.dispose()
-			connection.close()
-		},
+		dispose,
 	}
 }
 

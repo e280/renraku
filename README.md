@@ -202,26 +202,24 @@ import {wireConnection, connect, Messenger} from "@e280/renraku"
 
 createServer()
   .on("upgrade", websockets(async websocket => {
-    const {connection, messenger, dispose} = wireConnection({
-      connection: await connect(websocket),
-      messenger: new Messenger<BobFns>(aliceEndpoint),
-    })
+    const connection = await connect(websocket)
+    const messenger = new Messenger<BobFns>(aliceEndpoint)
+    const wiring = wireConnection({connection, messenger})
 
-    // handle connection closed
     connection.onClose(() => {
-      dispose()
-      console.log("closed")
+      messengere.dispose()
+      wiring.dispose()
     })
 
     // we are alice-the-server, we can call bob-the-client's fns!
     await messenger.remote.bingus()
       // 123
 
-    // automatic ping time stats
+    // ping time stats.
     connection.rtt.latest // 81
     connection.rtt.average // 84
 
-    // // close the connection whenever you want
+    // // you can close the connection whenever you want.
     // connection.close()
   }))
   .listen(8080)
@@ -229,17 +227,29 @@ createServer()
 
 ### 🎏 bob's clientside (web, node).
 ```ts
-import {wireConnection, connect, Messenger} from "@e280/renraku"
+import {connect, Messenger, wireConnection} from "@e280/renraku"
 
-const {connection, messenger} = wireConnection({
-  messenger: new Messenger<AliceFns>(bobEndpoint),
-  connection: await connect(new WebSocket("ws://localhost:8080")),
+const websocket = new WebSocket("ws://localhost:8080")
+const connection = await connect(websocket)
+const messenger = new Messenger<AliceFns>(bobEndpoint)
+const wiring = wireConnection({connection, messenger})
+
+connection.onClose(() => {
+  wiring.dispose()
+  messenger.dispose()
 })
 ```
-here we are as bob-the-client, calling alice-the-server's functions:
+here we are as bob-the-client, we can call alice-the-server's fns, etc.
 ```ts
 await messenger.remote.hello()
   // "world"
+
+// ping time stats.
+connection.rtt.latest // 81
+connection.rtt.average // 84
+
+// // you can close the connection whenever you want.
+// connection.close()
 ```
 and remember, it goes both ways: alice can now call bob's functions, too.
 

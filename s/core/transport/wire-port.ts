@@ -11,7 +11,7 @@ export function wirePort<RemoteFns extends Fns>(options: {
 	}): PortWiring<RemoteFns> {
 
 	const {port, messenger, autoTransfer} = options
-	const {schedule, dispose: unwire} = disposer()
+	const {schedule, dispose} = disposer()
 
 	schedule(messenger.onSend(x => port.postMessage(x, autoTransfer(x))))
 	schedule(ev(port, {message: event => messenger.recv(event.data)}))
@@ -22,12 +22,7 @@ export function wirePort<RemoteFns extends Fns>(options: {
 		port,
 		messenger,
 		remote: messenger.remote,
-		unwire,
-		dispose: () => {
-			unwire()
-			messenger.dispose()
-			port.close()
-		},
+		dispose,
 	}
 }
 

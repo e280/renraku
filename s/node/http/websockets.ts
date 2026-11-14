@@ -10,7 +10,7 @@ export function websockets(accept: (websocket: WebSocket) => Promise<void>) {
 		wss.handleUpgrade(request, socket, head, async websocket => {
 			await accept(websocket).catch(error => {
 				console.error(error)
-				websocket.terminate()
+				websocket.close()
 			})
 		})
 	}

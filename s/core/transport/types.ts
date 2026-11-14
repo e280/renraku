@@ -21,10 +21,7 @@ export type PortWiring<RemoteFns extends Fns = any> = {
 	messenger: Messenger<RemoteFns>
 	remote: RemoteFns
 
-	/** detach the wiring. */
-	unwire: () => void
-
-	/** destroy all parts and detach wiring (close the port, dispose the messenger). */
+	/** detach the wiring (without closing the port nor disposing the messenger). */
 	dispose: () => void
 }
 
@@ -33,10 +30,7 @@ export type ConnectionWiring<RemoteFns extends Fns = any> = {
 	messenger: Messenger<RemoteFns>
 	remote: RemoteFns
 
-	/** detach the wiring. */
-	unwire: () => void
-
-	/** destroy all parts and detach wiring (close the connection, dispose the messenger). */
+	/** detach the wiring (without closing the connection nor disposing the messenger). */
 	dispose: () => void
 }
 
