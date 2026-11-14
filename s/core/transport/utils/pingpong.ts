@@ -1,5 +1,6 @@
 
-import {deadline, defaultTimeout, defer, Deferred, hex, Json, Rollerstat} from "@e280/stz"
+import {cycle, deadline, defaultTimeout, defer, Deferred, hex, Json, nap, Rollerstat} from "@e280/stz"
+import {heartbeatInterval} from "../../../consts.js"
 
 type Ping = [kind: "ping", id: string]
 type Pong = [kind: "pong", id: string]
@@ -9,15 +10,15 @@ export class Pingpong<X extends Json = any> {
 	readonly rtt = new Rollerstat(10)
 
 	#send
-	#forward
+	#recvData
 	#pending = new Map<string, {time: number, deferred: Deferred<number>}>()
 
 	constructor(options: {
 			send: (message: Ping | Pong | Data<X>) => void
-			forward: (x: X) => (void | Promise<void>)
+			recvData: (x: X) => (void | Promise<void>)
 		}) {
 		this.#send = options.send
-		this.#forward = options.forward
+		this.#recvData = options.recvData
 	}
 
 	sendData = (x: X) => this.#send(["data", x])
@@ -59,9 +60,14 @@ export class Pingpong<X extends Json = any> {
 			}
 
 			case "data":
-				return this.#forward(data[1])
+				return this.#recvData(data[1])
 		}
 	}
+
+	heartbeat = (interval = heartbeatInterval) => cycle(async() => {
+		await this.ping().catch(() => {})
+		await nap(interval)
+	})
 
 	dispose = () => {
 		for (const {deferred} of this.#pending.values())

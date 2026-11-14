@@ -1,6 +1,6 @@
 
 import {Fns} from "../base/types.js"
-import {Connection} from "./connect.js"
+import {Connection} from "./websocket/connect.js"
 import {Messenger} from "../messenger/messenger.js"
 import type {ReadyState} from "./utils/ready-state.js"
 
@@ -12,6 +12,8 @@ export type Websockety = {
 	onerror: ((...p: any[]) => void) | null
 	onclose: ((e: any) => void) | null
 	onmessage: ((event: any) => void) | null
+	addEventListener(name: string, fn: (...a: any[]) => void): void
+	removeEventListener(name: string, fn: (...a: any[]) => void): void
 }
 
 export type AutoTransfer = (x: unknown) => (unknown[] | undefined)

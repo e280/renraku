@@ -1,7 +1,7 @@
 
 import {disposer} from "@e280/stz"
 import {Fns} from "../base/types.js"
-import {Connection} from "./connect.js"
+import {Connection} from "./websocket/connect.js"
 import {ConnectionWiring} from "./types.js"
 import {Messenger} from "../messenger/messenger.js"
 

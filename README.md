@@ -202,40 +202,44 @@ import {wireConnection, connect, Messenger} from "@e280/renraku"
 
 createServer()
   .on("upgrade", websockets(async websocket => {
-    const connection = await connect(websocket)
+    const connection = connect(websocket)
     const messenger = new Messenger<BobFns>(aliceEndpoint)
     const wiring = wireConnection({connection, messenger})
 
-    connection.onClose(() => {
-      messengere.dispose()
-      wiring.dispose()
+    void connection.ready.then(async() => {
+      // we are alice-the-server, we can call bob-the-client's fns!
+      await messenger.remote.bingus()
+        // 123
+
+      // ping time stats.
+      connection.rtt.latest // 81
+      connection.rtt.average // 84
+
+      // // you can close the connection whenever you want.
+      // connection.close()
     })
 
-    // we are alice-the-server, we can call bob-the-client's fns!
-    await messenger.remote.bingus()
-      // 123
-
-    // ping time stats.
-    connection.rtt.latest // 81
-    connection.rtt.average // 84
-
-    // // you can close the connection whenever you want.
-    // connection.close()
+    return () => {
+      messenger.dispose()
+      wiring.dispose() // uh oh.
+    }
   }))
   .listen(8080)
 ```
 
 ### 🎏 bob's clientside (web, node).
 ```ts
-import {connect, Messenger, wireConnection} from "@e280/renraku"
+import {connect, wireConnection, Messenger} from "@e280/renraku"
 
-const websocket = new WebSocket("ws://localhost:8080")
-const connection = await connect(websocket)
-const messenger = new Messenger<AliceFns>(bobEndpoint)
-const wiring = wireConnection({connection, messenger})
+const {connection, messenger, dispose} = wireConnection({
+  messenger: new Messenger<AliceFns>(bobEndpoint),
+  connection: await connect(new WebSocket("ws://localhost:8080")),
+})
+
+await connection.ready
 
 connection.onClose(() => {
-  wiring.dispose()
+  dispose()
   messenger.dispose()
 })
 ```
