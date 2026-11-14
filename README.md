@@ -9,11 +9,11 @@
 
 🥡 [renraku http quickstart.](#http)  
 🍙 [renraku primitives.](#primitives)  
-♨️ [renraku errors and security.](#errors)  
 📬 [renraku messengers.](#messengers)  
 🎏 [renraku over websockets.](#websockets)  
 🌀 [renraku ports.](#ports)  
 🐝 [renraku cluster.](#cluster)  
+♨️ [renraku errors and security.](#errors)  
 
 > [!TIP]
 > *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
@@ -43,7 +43,7 @@ import {serve} from "@e280/renraku/node"
 await serve(8080, fns)
 ```
 
-### 🥡 call them on your clientside.
+### 🥡 call them from anywhere.
 ```ts
 import {httpRemote} from "@e280/renraku"
 
@@ -124,7 +124,6 @@ createServer(httpListener(aliceEndpoint))
 ```
 
 ### 🍙 http remote can call an endpoint over the network.
-
 ```ts
 import {httpRemote} from "@e280/renraku"
 
@@ -141,32 +140,6 @@ await remote.nesty.is.besty()
   // 0.103639826821733
 ```
 notice that the local remote and this http remote both have the same shape of `AliceFns`. this allows your code to be decoupled and unaware of whether the fns are local or over the network. *now think of how juicy that is for testing.*
-
-
-
-<br/><a id="errors"></a>
-
-## ⛩️ renraku errors and security.
-
-### ♨️ fns can throw errors.
-- **security precaution:** by default, renraku endpoints conceal error info from clients.  
-    they see a generic `RemoteError: an error occurred (details not exposed, renraku security precaution)`
-- renraku will expose error details from any *instanceof* `ExposedError`:
-    ```ts
-    import {ExposedError} from "@e280/renraku"
-
-    throw new ExposedError("bingus")
-      // clients would see "RemoteError: ExposedError: bingus"
-    ```
-- `makeEndpoint` option `exposeAllErrors` exposes error info to the client.
-    ```ts
-    // danger mode, but great for debugging web workers.
-    makeEndpoint(aliceFns, {exposeAllErrors: true})
-    ```
-
-### ♨️ renraku doesn't do input validation or auth.
-- try [zod](https://github.com/colinhacks/zod) for validating incoming params.
-- try [authlocal](https://github.com/e280/authlocal) for authentication and authorization.
 
 
 
@@ -194,8 +167,8 @@ notice that the local remote and this http remote both have the same shape of `A
     const alice = new Messenger<BobFns>(aliceEndpoint)
     const bob = new Messenger<AliceFns>(bobEndpoint)
     ```
-- **the idea is that a pair of messengers talk to each other over the network.**  
-    but in this example, we'll wire them together locally crisscross-style, just to demonstrate that they are meant to be talking to each other.
+- **messengers work in pairs.**  
+    they're meant to talk over a network/worker boundary, but here's a simple local example.
     ```ts
     alice.onSend(bob.recv)
     bob.onSend(alice.recv)
@@ -210,10 +183,9 @@ notice that the local remote and this http remote both have the same shape of `A
     await bob.remote.hello()
       // "world"
     ```
-    but again, this local example is just to aid your understanding.  
-    the real power of messengers, is when they are talking across a boundary like websockets or postmessage.
 - **bidirectionality is optional.**  
-    the messenger endpoint param is optional, it's perfectly okay for only one side of the messenger pair to host an endpoint with fns.
+    the messenger endpoint param is optional.  
+    it's ok for only one messenger in a pair to host an endpoint.
 
 
 
@@ -487,6 +459,34 @@ and remember, it goes both ways: alice can now call bob's functions, too.
       remote.megaGiantRenderTask({offscreenCanvas, hugeBuffer}),
     ])
     ```
+
+
+
+<br/><a id="errors"></a>
+
+## ⛩️ renraku errors and security.
+
+### ♨️ fns can throw errors.
+- **security precaution:** by default, renraku endpoints conceal error info from clients.  
+    they see a generic `RemoteError: an error occurred (details not exposed, renraku security precaution)`
+- renraku will expose error details from any *instanceof* `ExposedError`:
+    ```ts
+    import {ExposedError} from "@e280/renraku"
+
+    throw new ExposedError("bingus")
+      // clients would see "RemoteError: ExposedError: bingus"
+    ```
+- `makeEndpoint` option `exposeAllErrors` exposes error info to the client.
+    ```ts
+    // danger mode, but great for debugging web workers.
+    makeEndpoint(aliceFns, {exposeAllErrors: true})
+    ```
+
+### ♨️ renraku is not a security framework.
+- **validation:** try [zod](https://github.com/colinhacks/zod) for validating incoming params.
+- **auth:** try [authlocal](https://github.com/e280/authlocal) for authentication and authorization.
+- **http:** configure cors as needed, and be mindful of which network interfaces your server listens on.
+- **window ports:** explicitly provide the `origin` option when possible, and carefully consider which windows you trust.
 
 
 
