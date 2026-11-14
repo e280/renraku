@@ -1,6 +1,6 @@
 
-import {Port} from "../transport/types.js"
 import {isOffer} from "./utils/is.js"
+import {Port} from "../transport/types.js"
 import {acceptKind} from "./utils/kinds.js"
 import {Accept, Recv, Send} from "./types.js"
 
@@ -12,8 +12,8 @@ export function acceptPorts<M>({send, recv, onPort}: {
 
 	return recv((data, meta) => {
 		if (isOffer(data)) {
-			onPort(data.port, meta)
 			send({kind: acceptKind, id: data.id}, [])
+			onPort(data.port, meta)
 		}
 	})
 }

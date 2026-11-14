@@ -8,12 +8,14 @@ export async function offerWindowPort(options: {
 		topic: string
 		to: Window | WindowProxy
 		origin: string
+		timeout?: number
 		allow?: (event: MessageEvent) => boolean
 	}): Promise<PortResult> {
 
-	const {topic, to, origin, allow = () => true} = options
+	const {topic, to, origin, timeout, allow = () => true} = options
 
 	const {port, meta} = await offerPort<MessageEvent>({
+		timeout,
 		channel: new MessageChannel(),
 
 		send: (offer, transfer) => to.postMessage(

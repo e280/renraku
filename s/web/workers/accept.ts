@@ -1,8 +1,9 @@
 
 import {acceptPort} from "../../core/ports/accept.js"
 
-export async function acceptWorkerPort(worker: Worker) {
+export async function acceptWorkerPort(worker: Worker, timeout?: number) {
 	return acceptPort({
+		timeout,
 		send: (data, transfer) => worker.postMessage(data, transfer),
 		recv: fn => {
 			const listener = (event: MessageEvent) => fn(event.data)

@@ -1,8 +1,10 @@
 
+import {defaultPortTimeout} from "../../consts.js"
 import {offerPort} from "../../core/ports/offer.js"
 
-export async function offerWorkerPort() {
+export async function offerWorkerPort(timeout = defaultPortTimeout) {
 	return (await offerPort({
+		timeout,
 		channel: new MessageChannel(),
 		send: (data, transfer) => self.postMessage(data, transfer),
 		recv: fn => {
