@@ -25,8 +25,9 @@ function auto_transfer_algo(
 			return
 		}
 
-		if (ArrayBuffer.isView(x) && shouldTransfer(x.buffer)) {
-			transfers.add(x.buffer as ArrayBuffer)
+		if (ArrayBuffer.isView(x)) {
+			if (shouldTransfer(x.buffer))
+				transfers.add(x.buffer as ArrayBuffer)
 			return
 		}
 
