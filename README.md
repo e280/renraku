@@ -2,6 +2,9 @@
 # 連絡 <br/> ***R·E·N·R·A·K·U***
 > *elegant weapons, for a more civilized age.*
 
+> [!TIP]
+> *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
+
 **renraku makes typescript functions callable across any boundary.**  
 *servers and clients. http and websockets. node and web workers. popups and iframes. carrier pigeons.*  
 
@@ -14,9 +17,6 @@
 🌀 [renraku ports.](#ports)  
 🐝 [renraku cluster.](#cluster)  
 ♨️ [renraku errors and security.](#errors)  
-
-> [!TIP]
-> *you are looking at wip docs for renraku@next `v0.6` — you may instead like to see the [v0.5 readme](https://github.com/e280/renraku/tree/ohfive#readme).*
 
 
 
@@ -97,7 +97,7 @@ await aliceFns.nesty.is.besty()
   // 0.103639826821733
 ```
 
-### 🍙 endpoints make fns callable via json.
+### 🍙 endpoints make fns json-callable.
 ```ts
 import {makeEndpoint} from "@e280/renraku"
 
@@ -114,7 +114,7 @@ import {makeRemote} from "@e280/renraku"
 const remote = makeRemote<AliceFns>(aliceEndpoint)
 ```
 
-### 🍙 a little node plumbing to serve an endpoint.
+### 🍙 real node plumbing to serve an endpoint.
 ```ts
 import {createServer} from "node:http"
 import {httpListener} from "@e280/renraku/node"
@@ -123,7 +123,7 @@ createServer(httpListener(aliceEndpoint))
   .listen(8080)
 ```
 
-### 🍙 http remote can call an endpoint over the network.
+### 🍙 http remotes call an endpoint over the network.
 ```ts
 import {httpRemote} from "@e280/renraku"
 
@@ -454,12 +454,12 @@ and remember, it goes both ways: alice can now call bob's functions, too.
     const endpoint = cluster(endpoints)
     const remote = makeRemote<BobFns>(endpoint)
     ```
-    it's just like a normal remote -- ***but each call goes to a different endpoint!***
+    each call goes to a different/available endpoint.
     ```ts
     await remote.bingus()
       // 123
     ```
-    concurrent work is distributed, jobs are queued, etc. *imagine the possibilities* 🌈
+    concurrent work is distributed. jobs are queued. *imagine the possibilities* 🌈
     ```ts
     await Promise.all([
       remote.bingus(),
@@ -493,7 +493,6 @@ and remember, it goes both ways: alice can now call bob's functions, too.
 ### ♨️ renraku is not a security framework.
 - **validation:** try [zod](https://github.com/colinhacks/zod) for validating incoming params.
 - **auth:** try [authlocal](https://github.com/e280/authlocal) for authentication and authorization.
-- **http:** configure cors as needed, and be mindful of which network interfaces your server listens on.
 - **window ports:** carefully consider which windows and origins you trust.
 
 
